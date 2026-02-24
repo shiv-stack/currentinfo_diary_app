@@ -35,6 +35,15 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_bloc: ^9.1.1
+  dio: ^5.9.1
+  dartz: ^0.10.1
+  get_it: ^9.2.1
+  equatable: ^2.0.8
+  carousel_slider_plus: ^7.1.1
+  webview_flutter: ^4.13.1
+  floating_bottom_navigation_bar: ^1.5.2
+  shared_preferences: ^2.5.4
+  fluttertoast: ^9.0.0
 
 dev_dependencies:
   flutter_test:
