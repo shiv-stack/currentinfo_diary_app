@@ -323,142 +323,108 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
 
                 if (school.todayThought != null)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).primaryColor.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(
-                          color: Theme.of(
-                            context,
-                          ).primaryColor.withValues(alpha: 0.1),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.cloud_outlined, size: 28, color: Colors.grey),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Thought of the day",
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Icon(Icons.cloud_outlined, size: 28, color: Colors.grey),
+                          ],
                         ),
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.format_quote_rounded,
-                              color: Colors.white,
-                              size: 24,
-                            ),
+                        const SizedBox(height: 16),
+                        Text(
+                          school.todayThought!,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Colors.blue.shade700,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            school.todayThought!,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  fontStyle: FontStyle.italic,
-                                  height: 1.6,
-                                  color: Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.8),
-                                ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   ),
-                const SizedBox(height: 32),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Services",
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).primaryColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          "Session: ${school.session ?? 'N/A'}",
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 const SizedBox(height: 20),
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 3,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  mainAxisSpacing: 20,
+                  mainAxisSpacing: 24,
                   crossAxisSpacing: 16,
-                  childAspectRatio: 0.85,
+                  childAspectRatio: 0.8,
                   children: [
                     _buildMenuItem(
                       context,
-                      Icons.calendar_today_rounded,
-                      "Attendance",
-                      Colors.blue,
-                      school.attendanceUrl,
+                      Icons.person_outline,
+                      "Staff Login",
+                      Colors.transparent,
+                      null,
+                      assetPath: 'assets/images/staff_login.png',
                     ),
                     _buildMenuItem(
                       context,
-                      Icons.table_chart_rounded,
-                      "Timetable",
-                      Colors.orange,
-                      school.timetableUrl,
+                      Icons.school_outlined,
+                      "Student Login",
+                      Colors.transparent,
+                      null,
+                      assetPath: 'assets/images/student_login.png',
                     ),
                     _buildMenuItem(
                       context,
-                      Icons.assignment_rounded,
-                      "Materials",
-                      Colors.purple,
-                      school.assignmentsUrl,
+                      Icons.room_service_outlined,
+                      "Reception",
+                      Colors.transparent,
+                      null,
+                      assetPath: 'assets/images/reception.png',
                     ),
                     _buildMenuItem(
                       context,
-                      Icons.photo_library_rounded,
-                      "Gallery",
-                      Colors.pink,
-                      school.galleryUrl,
+                      Icons.web_outlined,
+                      "Web Staff Login",
+                      Colors.transparent,
+                      null,
+                      assetPath: 'assets/images/web_staff_login.png',
                     ),
                     _buildMenuItem(
                       context,
-                      Icons.grade_rounded,
-                      "Report Card",
-                      Colors.teal,
-                      school.marksUrl,
+                      Icons.web_outlined,
+                      "Web Student Login",
+                      Colors.transparent,
+                      null,
+                      assetPath: 'assets/images/web_student_login.png',
                     ),
                     _buildMenuItem(
                       context,
-                      Icons.info_outline_rounded,
-                      "Admission",
-                      Colors.indigo,
-                      school.onlineAdmissionUrl,
+                      Icons.send_outlined,
+                      "Send Query",
+                      Colors.transparent,
+                      null,
+                      assetPath: 'assets/images/send_query.png',
+                    ),
+                    _buildMenuItem(
+                      context,
+                      Icons.format_list_bulleted_outlined,
+                      "Enquiry Form",
+                      Colors.transparent,
+                      null,
+                      assetPath: 'assets/images/reception.png',
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 40),
+
                 if (school.carouselImages.isNotEmpty) ...[
                   CarouselSlider(
                     options: CarouselOptions(
@@ -500,6 +466,32 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                   ),
                   const SizedBox(height: 32),
                 ],
+                const SizedBox(height: 32),
+                Center(
+                  child: Text(
+                    "Support : 9808166564",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      "Forgot Student Password , Click",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 120),
 
               ],
             ),
@@ -695,42 +687,39 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
     IconData icon,
     String title,
     Color color,
-    String? url,
-  ) {
+    String? url, {
+    String? assetPath,
+  }) {
     return InkWell(
       onTap: () => _openUrl(context, title, url),
       borderRadius: BorderRadius.circular(24),
-      child: Container(
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: color.withValues(alpha: 0.1)),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: assetPath != null
+                  ? Image.asset(assetPath, fit: BoxFit.contain)
+                  : Icon(icon, color: color, size: 32),
             ),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.8),
-              ),
-              textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
             ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
