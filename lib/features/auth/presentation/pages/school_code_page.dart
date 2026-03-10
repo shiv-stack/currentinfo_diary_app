@@ -320,47 +320,55 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (school.carouselImages.isNotEmpty) ...[
-                  CarouselSlider(
-                    options: CarouselOptions(
-                      height: 180.0,
-                      autoPlay: true,
-                      enlargeCenterPage: true,
-                      viewportFraction: 0.9,
-                      autoPlayInterval: const Duration(seconds: 5),
-                    ),
-                    items: school.carouselImages.map<Widget>((imageUrl) {
-                      return GestureDetector(
-                        onTap: () => _openUrl(
+
+                if (school.todayThought != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
                           context,
-                          "Admission",
-                          school.onlineAdmissionUrl,
+                        ).primaryColor.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withValues(alpha: 0.1),
                         ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
-                                blurRadius: 15,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: Image.network(
-                              imageUrl as String,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.format_quote_rounded,
+                              color: Colors.white,
+                              size: 24,
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                          const SizedBox(height: 16),
+                          Text(
+                            school.todayThought!,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  fontStyle: FontStyle.italic,
+                                  height: 1.6,
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.8),
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 32),
-                ],
+                const SizedBox(height: 32),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Row(
@@ -451,53 +459,48 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                   ],
                 ),
                 const SizedBox(height: 32),
-                if (school.todayThought != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).primaryColor.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(
-                          color: Theme.of(
-                            context,
-                          ).primaryColor.withValues(alpha: 0.1),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.format_quote_rounded,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            school.todayThought!,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  fontStyle: FontStyle.italic,
-                                  height: 1.6,
-                                  color: Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.8),
-                                ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
+                if (school.carouselImages.isNotEmpty) ...[
+                  CarouselSlider(
+                    options: CarouselOptions(
+                      height: 180.0,
+                      autoPlay: true,
+                      enlargeCenterPage: true,
+                      viewportFraction: 0.9,
+                      autoPlayInterval: const Duration(seconds: 5),
                     ),
+                    items: school.carouselImages.map<Widget>((imageUrl) {
+                      return GestureDetector(
+                        onTap: () => _openUrl(
+                          context,
+                          "Admission",
+                          school.onlineAdmissionUrl,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                                ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: Image.network(
+                              imageUrl as String,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
+                  const SizedBox(height: 32),
+                ],
+
               ],
             ),
           ),
