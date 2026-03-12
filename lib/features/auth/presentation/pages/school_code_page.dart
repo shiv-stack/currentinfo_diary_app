@@ -730,6 +730,11 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
       return;
     }
 
+    if (title == "Student Login") {
+      Navigator.pushNamed(context, AppRoutes.studentLogin);
+      return;
+    }
+
     if (url != null && url != "NA" && url.isNotEmpty) {
       Navigator.push(
         context,
