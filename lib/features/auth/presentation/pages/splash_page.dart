@@ -29,10 +29,7 @@ class _SplashPageState extends State<SplashPage> {
       },
       child: Scaffold(
         body: SizedBox.expand(
-          child: Image.asset(
-            'assets/images/splash.jpg',
-            fit: BoxFit.fill,
-          ),
+          child: Image.asset('assets/images/splash.jpg', fit: BoxFit.fill),
         ),
       ),
     );

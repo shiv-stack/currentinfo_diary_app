@@ -9,7 +9,7 @@ class AppColors {
   static const Color accent = Color(0xFF00C9FF); // Cyan Accent
 
   // Light Mode Palette
-  static const Color lightBackground = Color(0xFFF8FAFC);
+  static const Color lightBackground = Color(0xFFF5F5F5);
   static const Color lightSurface = Colors.white;
   static const Color lightTextPrimary = Color(0xFF1E293B);
   static const Color lightTextSecondary = Color(0xFF64748B);

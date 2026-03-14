@@ -12,6 +12,7 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.light,
     scaffoldBackgroundColor: AppColors.lightBackground,
+    unselectedWidgetColor: AppColors.lightTextSecondary,
     colorScheme: ColorScheme.light(
       primary: AppColors.primary,
       secondary: AppColors.secondary,
@@ -100,6 +101,7 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     scaffoldBackgroundColor: AppColors.darkBackground,
+    unselectedWidgetColor: AppColors.darkTextSecondary,
     colorScheme: ColorScheme.dark(
       primary: AppColors.primary,
       secondary: AppColors.secondary,

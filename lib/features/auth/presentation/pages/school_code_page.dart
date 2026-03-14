@@ -6,7 +6,6 @@ import 'package:current_diary_app/widgets/webview_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:current_diary_app/main.dart';
 import 'package:current_diary_app/routes/app_routes.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -21,7 +20,6 @@ class SchoolCodePage extends StatefulWidget {
 
 class _SchoolCodePageState extends State<SchoolCodePage> {
   final TextEditingController controller = TextEditingController();
-  int _currentIndex = 0;
   late FToast fToast;
 
   @override
@@ -89,11 +87,6 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthSuccess) {
-          if (state.message.contains("Connected")) {
-            setState(() {
-              _currentIndex = 0;
-            });
-          }
           _showFullWidthToast(state.message, Colors.green);
         } else if (state is AuthError) {
           _showFullWidthToast("Invalid School Code", AppColors.error);
@@ -104,28 +97,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
         final school = isConnected ? state.school : null;
 
         if (isConnected) {
-          return Scaffold(
-            extendBody: true,
-            body: Stack(
-              children: [
-                IndexedStack(
-                  index: _currentIndex,
-                  children: [
-                    _buildHomeSection(school!),
-                    const Center(child: Text("Notifications (Coming Soon)")),
-                    const Center(child: Text("Support (Coming Soon)")),
-                    _buildMeSection(school),
-                  ],
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: _buildCustomNavBar(),
-                ),
-              ],
-            ),
-          );
+          return _buildHomeSection(context, school!);
         }
 
         return Scaffold(
@@ -183,420 +155,316 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
     );
   }
 
-  Widget _buildHomeSection(dynamic school) {
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          expandedHeight: 200,
-          pinned: true,
-          stretch: true,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          flexibleSpace: FlexibleSpaceBar(
-            stretchModes: const [
-              StretchMode.zoomBackground,
-              StretchMode.blurBackground,
-            ],
-            titlePadding: EdgeInsets.zero,
-            centerTitle: false,
-            title: LayoutBuilder(
-              builder: (context, constraints) {
-                final double percentage =
-                    (constraints.maxHeight - kToolbarHeight) /
-                    (200 - kToolbarHeight);
-                final bool isCollapsed = percentage < 0.2;
-
-                return Container(
-                  padding: EdgeInsets.only(
-                    left: 20,
-                    bottom: isCollapsed ? 15 : 20,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (isCollapsed)
-                        Hero(
-                          tag: 'school_logo_mini',
-                          child: Container(
-                            height: 30,
-                            width: 30,
-                            margin: const EdgeInsets.only(right: 12),
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                            child: ClipOval(
-                              child: Image.network(
-                                school.schoolLogo ?? "",
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Icon(
-                                      Icons.school_rounded,
-                                      size: 20,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      Expanded(
-                        child: Text(
-                          school!.title?.toUpperCase() ?? "SCHOOL",
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontSize: isCollapsed ? 16 : 18,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.5,
-                            height: 1.2,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            background: Container(
+  Widget _buildHomeSection(BuildContext context, dynamic school) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Custom dynamically-sized Sticky Header instead of fixed-height AppBar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              // Optional subtle shadow to separate from background
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Theme.of(context).primaryColor.withValues(alpha: 0.15),
-                    Theme.of(context).scaffoldBackgroundColor,
-                  ],
-                ),
+                color: Theme.of(context).scaffoldBackgroundColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(
+                      context,
+                    ).shadowColor.withValues(alpha: 0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
               ),
-              child: Stack(
+              child: Row(
                 children: [
-                  Positioned(
-                    left: 20,
-                    top: 60,
-                    child: Hero(
-                      tag: 'school_logo_main',
-                      child: Container(
-                        height: 70,
-                        width: 70,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 20,
-                              spreadRadius: 5,
-                            ),
-                          ],
-                        ),
-                        child: ClipOval(
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Image.network(
-                              school.schoolLogo ?? "",
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Icon(
-                                    Icons.school_rounded,
-                                    size: 40,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
+                  Hero(
+                    tag: 'school_logo_main',
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).colorScheme.surface,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(
+                              context,
+                            ).shadowColor.withValues(alpha: 0.1),
+                            blurRadius: 10,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Image.network(
+                            school.schoolLogo ?? "",
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.school_rounded,
+                              size: 30,
+                              color: Theme.of(context).primaryColor,
                             ),
                           ),
                         ),
                       ),
                     ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      school.title?.toUpperCase() ?? "SCHOOL",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                        height: 1.3, // Slightly more space for readability
+                      ),
+                      // Allow up to 4 lines for huge names (approx 7-10 words) smoothly
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    onSelected: (value) {
+                      if (value == 'disconnect') {
+                        _showDisconnectDialog(context);
+                      }
+                    },
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<String>>[
+                          const PopupMenuItem<String>(
+                            value: 'disconnect',
+                            child: Text('Disconnect School'),
+                          ),
+                        ],
                   ),
                 ],
               ),
             ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 10, bottom: 120),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
 
-                if (school.todayThought != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.cloud_outlined, size: 28, color: Colors.grey),
-                            const SizedBox(width: 12),
-                            Text(
-                              "Thought of the day",
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Icon(Icons.cloud_outlined, size: 28, color: Colors.grey),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          school.todayThought!,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.blue.shade700,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
+            // Scrollable Content
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 120),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (school.todayThought != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 20,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                const SizedBox(height: 20),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 3,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  mainAxisSpacing: 24,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.8,
-                  children: [
-                    _buildMenuItem(
-                      context,
-                      Icons.person_outline,
-                      "Staff Login",
-                      Colors.transparent,
-                      null,
-                      assetPath: 'assets/images/staff_login.png',
-                    ),
-                    _buildMenuItem(
-                      context,
-                      Icons.school_outlined,
-                      "Student Login",
-                      Colors.transparent,
-                      null,
-                      assetPath: 'assets/images/student_login.png',
-                    ),
-                    _buildMenuItem(
-                      context,
-                      Icons.room_service_outlined,
-                      "Reception",
-                      Colors.transparent,
-                      null,
-                      assetPath: 'assets/images/reception.png',
-                    ),
-                    _buildMenuItem(
-                      context,
-                      Icons.web_outlined,
-                      "Web Staff Login",
-                      Colors.transparent,
-                      null,
-                      assetPath: 'assets/images/web_staff_login.png',
-                    ),
-                    _buildMenuItem(
-                      context,
-                      Icons.web_outlined,
-                      "Web Student Login",
-                      Colors.transparent,
-                      null,
-                      assetPath: 'assets/images/web_student_login.png',
-                    ),
-                    _buildMenuItem(
-                      context,
-                      Icons.send_outlined,
-                      "Send Query",
-                      Colors.transparent,
-                      null,
-                      assetPath: 'assets/images/send_query.png',
-                    ),
-                    _buildMenuItem(
-                      context,
-                      Icons.format_list_bulleted_outlined,
-                      "Enquiry Form",
-                      Colors.transparent,
-                      null,
-                      assetPath: 'assets/images/reception.png',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-
-                if (school.carouselImages.isNotEmpty) ...[
-                  CarouselSlider(
-                    options: CarouselOptions(
-                      height: 180.0,
-                      autoPlay: true,
-                      enlargeCenterPage: true,
-                      viewportFraction: 0.9,
-                      autoPlayInterval: const Duration(seconds: 5),
-                    ),
-                    items: school.carouselImages.map<Widget>((imageUrl) {
-                      return GestureDetector(
-                        onTap: () => _openUrl(
-                          context,
-                          "Admission",
-                          school.onlineAdmissionUrl,
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
-                                blurRadius: 15,
-                                offset: const Offset(0, 8),
-                                ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.cloud_outlined,
+                                    size: 28,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.5),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    "Thought of the day",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                        ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Icon(
+                                    Icons.cloud_outlined,
+                                    size: 28,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.5),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                school.todayThought!,
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
                             ],
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: Image.network(
-                              imageUrl as String,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                            ),
+                        ),
+                      const SizedBox(height: 20),
+                      GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 3,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        mainAxisSpacing: 20,
+                        crossAxisSpacing: 20,
+                        childAspectRatio: 0.9,
+                        children: [
+                          _buildMenuItem(
+                            context,
+                            Icons.person_outline,
+                            "Staff Login",
+                            Colors.transparent,
+                            null,
+                            assetPath: 'assets/images/staff_login.png',
+                          ),
+                          _buildMenuItem(
+                            context,
+                            Icons.school_outlined,
+                            "Student Login",
+                            Colors.transparent,
+                            null,
+                            assetPath: 'assets/images/student_login.png',
+                          ),
+                          _buildMenuItem(
+                            context,
+                            Icons.room_service_outlined,
+                            "Reception",
+                            Colors.transparent,
+                            null,
+                            assetPath: 'assets/images/reception.png',
+                          ),
+                          _buildMenuItem(
+                            context,
+                            Icons.web_outlined,
+                            "Web Staff Login",
+                            Colors.transparent,
+                            null,
+                            assetPath: 'assets/images/web_staff_login.png',
+                          ),
+                          _buildMenuItem(
+                            context,
+                            Icons.web_outlined,
+                            "Web Student Login",
+                            Colors.transparent,
+                            null,
+                            assetPath: 'assets/images/web_student_login.png',
+                          ),
+                          _buildMenuItem(
+                            context,
+                            Icons.send_outlined,
+                            "Send Query",
+                            Colors.transparent,
+                            null,
+                            assetPath: 'assets/images/send_query.png',
+                          ),
+                          _buildMenuItem(
+                            context,
+                            Icons.format_list_bulleted_outlined,
+                            "Enquiry Form",
+                            Colors.transparent,
+                            null,
+                            assetPath: 'assets/images/reception.png',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 40),
+
+                      if (school.carouselImages.isNotEmpty) ...[
+                        CarouselSlider(
+                          options: CarouselOptions(
+                            height: 180.0,
+                            autoPlay: true,
+                            enlargeCenterPage: true,
+                            viewportFraction: 0.9,
+                            autoPlayInterval: const Duration(seconds: 5),
+                          ),
+                          items: school.carouselImages.map<Widget>((imageUrl) {
+                            return GestureDetector(
+                              onTap: () => _openUrl(
+                                context,
+                                "Admission",
+                                school.onlineAdmissionUrl,
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Theme.of(
+                                        context,
+                                      ).shadowColor.withValues(alpha: 0.15),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: Image.network(
+                                    imageUrl as String,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 32),
+                      ],
+                      const SizedBox(height: 32),
+                      Center(
+                        child: Text(
+                          "Support : 9808166564",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 32),
-                ],
-                const SizedBox(height: 32),
-                Center(
-                  child: Text(
-                    "Support : 9808166564",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Center(
-                  child: TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      "Forgot Student Password , Click",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w600,
                       ),
-                    ),
+                      // const SizedBox(height: 16),
+                      // Center(
+                      //   child: TextButton(
+                      //     onPressed: () {},
+                      //     child: Text(
+                      //       "Forgot Student Password , Click",
+                      //       style: TextStyle(
+                      //         fontSize: 16,
+                      //         color: Theme.of(context).colorScheme.primary,
+                      //         fontWeight: FontWeight.w600,
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 120),
-
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMeSection(dynamic school) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          const SizedBox(height: 40),
-          Center(
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Theme.of(context).primaryColor,
-                  width: 2,
-                ),
-              ),
-              child: ClipOval(
-                child: Image.network(
-                  school.schoolLogo ?? "",
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.school_rounded,
-                    size: 60,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return const Center(child: CircularProgressIndicator());
-                  },
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            "School Profile",
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 40),
-          _buildSettingsTile(
-            icon: Icons.dark_mode_rounded,
-            title: "Dark Mode",
-            trailing: ValueListenableBuilder<ThemeMode>(
-              valueListenable: themeNotifier,
-              builder: (context, mode, _) {
-                return Switch(
-                  value: mode == ThemeMode.dark,
-                  onChanged: (val) {
-                    themeNotifier.value = val
-                        ? ThemeMode.dark
-                        : ThemeMode.light;
-                  },
-                );
-              },
-            ),
-          ),
-
-          _buildSettingsTile(
-            icon: Icons.help_outline_rounded,
-            title: "Help & Support",
-            onTap: () {},
-          ),
-          const SizedBox(height: 40),
-          PrimaryButton(
-            title: "DISCONNECT SCHOOL",
-            color: AppColors.error,
-            onPressed: () => _showDisconnectDialog(context),
-          ),
-          const SizedBox(height: 120),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettingsTile({
-    required IconData icon,
-    required String title,
-    Widget? trailing,
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(10),
+          ],
         ),
-        child: Icon(icon, color: Theme.of(context).primaryColor, size: 20),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-      trailing: trailing ?? const Icon(Icons.chevron_right_rounded),
-      onTap: onTap,
     );
   }
 
@@ -626,62 +494,6 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
     );
   }
 
-  Widget _buildCustomNavBar() {
-    final items = [
-      {'icon': Icons.home_rounded, 'title': 'Home'},
-      {'icon': Icons.notifications_rounded, 'title': 'Notice'},
-      {'icon': Icons.chat_bubble_rounded, 'title': 'Help'},
-      {'icon': Icons.person_rounded, 'title': 'Me'},
-    ];
-
-    return SafeArea(
-      child: Container(
-        height: 70,
-        margin: const EdgeInsets.fromLTRB(20, 0, 20, 15),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
-          borderRadius: BorderRadius.circular(40),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(items.length, (index) {
-            final isSelected = _currentIndex == index;
-            final item = items[index];
-            return GestureDetector(
-              onTap: () => setState(() => _currentIndex = index),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Icon(
-                  item['icon'] as IconData,
-                  color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Colors.white.withValues(alpha: 0.7),
-                  size: 26,
-                ),
-              ),
-            );
-          }),
-        ),
-      ),
-    );
-  }
-
   Widget _buildMenuItem(
     BuildContext context,
     IconData icon,
@@ -701,7 +513,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
               width: double.infinity,
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(24),
               ),
               child: assetPath != null
@@ -712,10 +524,10 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
           const SizedBox(height: 10),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             textAlign: TextAlign.center,
           ),

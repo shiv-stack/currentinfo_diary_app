@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/gallery_bloc.dart';
@@ -15,27 +14,27 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
 
-  // Load saved theme
-  final prefs = di.sl<SharedPreferences>();
-  final savedTheme = prefs.getString('theme_mode');
-  if (savedTheme != null) {
-    themeNotifier.value = savedTheme == 'dark'
-        ? ThemeMode.dark
-        : ThemeMode.light;
-  }
+  // Load saved theme (Disabled per user request)
+  // final prefs = di.sl<SharedPreferences>();
+  // final savedTheme = prefs.getString('theme_mode');
+  // if (savedTheme != null) {
+  //   themeNotifier.value = savedTheme == 'dark'
+  //       ? ThemeMode.dark
+  //       : ThemeMode.light;
+  // }
 
-  // Listen for changes and save
-  themeNotifier.addListener(() {
-    prefs.setString(
-      'theme_mode',
-      themeNotifier.value == ThemeMode.dark ? 'dark' : 'light',
-    );
-  });
+  // Listen for changes and save (Disabled)
+  // themeNotifier.addListener(() {
+  //   prefs.setString(
+  //     'theme_mode',
+  //     themeNotifier.value == ThemeMode.dark ? 'dark' : 'light',
+  //   );
+  // });
 
   runApp(const MyApp());
 }
 
-final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.system);
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -47,22 +46,18 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => di.sl<AuthBloc>()),
         BlocProvider(create: (_) => di.sl<GalleryBloc>()),
       ],
-      child: ValueListenableBuilder<ThemeMode>(
-        valueListenable: themeNotifier,
-        builder: (context, currentMode, _) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: currentMode,
-            initialRoute: AppRoutes.splash,
-            routes: {
-              AppRoutes.splash: (_) => const SplashPage(),
-              AppRoutes.schoolCode: (_) => const SchoolCodePage(),
-              AppRoutes.gallery: (_) => const GalleryPage(),
-              AppRoutes.studentLogin: (_) => const StudentLoginPage(),
-            },
-          );
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        // Disable dark theme support temporarily
+        // darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.light,
+        initialRoute: AppRoutes.splash,
+        routes: {
+          AppRoutes.splash: (_) => const SplashPage(),
+          AppRoutes.schoolCode: (_) => const SchoolCodePage(),
+          AppRoutes.gallery: (_) => const GalleryPage(),
+          AppRoutes.studentLogin: (_) => const StudentLoginPage(),
         },
       ),
     );

@@ -41,7 +41,6 @@ dependencies:
   equatable: ^2.0.8
   carousel_slider_plus: ^7.1.1
   webview_flutter: ^4.13.1
-  floating_bottom_navigation_bar: ^1.5.2
   shared_preferences: ^2.2.2
   fluttertoast: ^9.0.0
   flutter_launcher_icons: ^0.14.4
@@ -77,6 +76,7 @@ flutter:
     - assets/images/web_student_login.png
     - assets/images/send_query.png
     - assets/images/splash.jpg
+    - assets/icons/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

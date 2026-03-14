@@ -9,6 +9,11 @@ import 'features/auth/domain/usecases/get_gallery_usecase.dart';
 import 'features/auth/domain/usecases/get_school_info_usecase.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/gallery_bloc.dart';
+import 'features/student/presentation/bloc/student_bloc.dart';
+import 'features/student/domain/usecases/student_login_usecase.dart';
+import 'features/student/domain/repositories/student_repository.dart';
+import 'features/student/data/repositories/student_repository_impl.dart';
+import 'features/student/data/datasources/student_remote_data_source.dart';
 
 final sl = GetIt.instance;
 
@@ -23,14 +28,19 @@ Future<void> init() async {
     () => AuthBloc(getSchoolInfoUseCase: sl(), localDataSource: sl()),
   );
   sl.registerFactory(() => GalleryBloc(getGalleryUseCase: sl()));
+  sl.registerFactory(() => StudentBloc(studentLoginUseCase: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => GetSchoolInfoUseCase(sl()));
   sl.registerLazySingleton(() => GetGalleryUseCase(sl()));
+  sl.registerLazySingleton(() => StudentLoginUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton<StudentRepository>(
+    () => StudentRepositoryImpl(remoteDataSource: sl()),
   );
 
   // Data sources
@@ -39,5 +49,8 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<AuthLocalDataSource>(
     () => AuthLocalDataSourceImpl(sharedPreferences: sl()),
+  );
+  sl.registerLazySingleton<StudentRemoteDataSource>(
+    () => StudentRemoteDataSourceImpl(dio: sl()),
   );
 }
