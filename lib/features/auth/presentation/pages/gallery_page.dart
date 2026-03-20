@@ -237,15 +237,6 @@ class _GalleryPageState extends State<GalleryPage> {
                       onPressed: _loadGallery,
                       icon: const Icon(Icons.refresh_rounded),
                       label: const Text("Try Again"),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
                     ),
                   ],
                 ),

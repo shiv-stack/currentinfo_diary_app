@@ -13,28 +13,8 @@ import 'injection_container.dart' as di;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
-
-  // Load saved theme (Disabled per user request)
-  // final prefs = di.sl<SharedPreferences>();
-  // final savedTheme = prefs.getString('theme_mode');
-  // if (savedTheme != null) {
-  //   themeNotifier.value = savedTheme == 'dark'
-  //       ? ThemeMode.dark
-  //       : ThemeMode.light;
-  // }
-
-  // Listen for changes and save (Disabled)
-  // themeNotifier.addListener(() {
-  //   prefs.setString(
-  //     'theme_mode',
-  //     themeNotifier.value == ThemeMode.dark ? 'dark' : 'light',
-  //   );
-  // });
-
   runApp(const MyApp());
 }
-
-final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -48,8 +28,9 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        title: 'Current Diary',
         theme: AppTheme.lightTheme,
-        // Disable dark theme support temporarily
+        // Optional: Support dark theme if requested
         // darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.light,
         initialRoute: AppRoutes.splash,

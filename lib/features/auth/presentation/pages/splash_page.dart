@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -27,9 +28,16 @@ class _SplashPageState extends State<SplashPage> {
           Navigator.pushReplacementNamed(context, AppRoutes.schoolCode);
         }
       },
-      child: Scaffold(
-        body: SizedBox.expand(
-          child: Image.asset('assets/images/splash.jpg', fit: BoxFit.fill),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          body: SizedBox.expand(
+            child: Image.asset('assets/images/splash.jpg', fit: BoxFit.fill),
+          ),
         ),
       ),
     );

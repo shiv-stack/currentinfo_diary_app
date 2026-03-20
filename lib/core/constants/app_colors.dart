@@ -4,9 +4,9 @@ class AppColors {
   AppColors._();
 
   // Primary Branding - Modern & Premium
-  static const Color primary = Color(0xFF2D5AF0); // Modern Electric Blue
-  static const Color secondary = Color(0xFF6C63FF); // Modern Soft Purple
-  static const Color accent = Color(0xFF00C9FF); // Cyan Accent
+  static const Color primary = Color(0xFF00A389); // Modern Sea Green
+  static const Color secondary = Color(0xFF006D5B); // Darker Sea Green
+  static const Color accent = Color(0xFF3DDC84); // Refreshing Accent Green
 
   // Light Mode Palette
   static const Color lightBackground = Color(0xFFF5F5F5);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
 
 class AppTheme {
@@ -24,6 +25,11 @@ class AppTheme {
       onError: Colors.white,
     ),
     appBarTheme: const AppBarTheme(
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
       backgroundColor: Colors.transparent,
       foregroundColor: AppColors.lightTextPrimary,
       elevation: 0,
@@ -113,6 +119,11 @@ class AppTheme {
       onError: Colors.white,
     ),
     appBarTheme: const AppBarTheme(
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
       backgroundColor: Colors.transparent,
       foregroundColor: AppColors.darkTextPrimary,
       elevation: 0,
