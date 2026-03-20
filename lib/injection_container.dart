@@ -11,6 +11,8 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/gallery_bloc.dart';
 import 'features/student/presentation/bloc/student_bloc.dart';
 import 'features/student/domain/usecases/student_login_usecase.dart';
+import 'features/student/domain/usecases/get_class_notices_usecase.dart';
+import 'features/student/domain/usecases/get_attendance_usecase.dart';
 import 'features/student/domain/repositories/student_repository.dart';
 import 'features/student/data/repositories/student_repository_impl.dart';
 import 'features/student/data/datasources/student_remote_data_source.dart';
@@ -28,12 +30,21 @@ Future<void> init() async {
     () => AuthBloc(getSchoolInfoUseCase: sl(), localDataSource: sl()),
   );
   sl.registerFactory(() => GalleryBloc(getGalleryUseCase: sl()));
-  sl.registerFactory(() => StudentBloc(studentLoginUseCase: sl()));
+  sl.registerFactory(
+    () => StudentBloc(
+      studentLoginUseCase: sl(),
+      getClassNoticesUseCase: sl(),
+      getAttendanceUseCase: sl(),
+      authLocalDataSource: sl(),
+    ),
+  );
 
   // Use cases
   sl.registerLazySingleton(() => GetSchoolInfoUseCase(sl()));
   sl.registerLazySingleton(() => GetGalleryUseCase(sl()));
   sl.registerLazySingleton(() => StudentLoginUseCase(sl()));
+  sl.registerLazySingleton(() => GetClassNoticesUseCase(sl()));
+  sl.registerLazySingleton(() => GetAttendanceUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(

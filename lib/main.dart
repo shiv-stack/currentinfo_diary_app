@@ -3,8 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/gallery_bloc.dart';
+import 'features/student/presentation/bloc/student_bloc.dart';
 import 'features/auth/presentation/pages/gallery_page.dart';
 import 'features/auth/presentation/pages/notice_page.dart';
+import 'features/student/presentation/pages/class_notice_page.dart';
+import 'features/student/presentation/pages/attendance_page.dart';
+import 'features/student/data/models/student_model.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
 import 'features/auth/presentation/pages/school_code_page.dart';
 import 'features/auth/presentation/pages/student_login_page.dart';
@@ -26,6 +30,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => di.sl<AuthBloc>()),
         BlocProvider(create: (_) => di.sl<GalleryBloc>()),
+        BlocProvider(create: (_) => di.sl<StudentBloc>()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -41,6 +46,16 @@ class MyApp extends StatelessWidget {
           AppRoutes.gallery: (_) => const GalleryPage(),
           AppRoutes.studentLogin: (_) => const StudentLoginPage(),
           AppRoutes.notice: (_) => const NoticePage(),
+          AppRoutes.classNotice: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return ClassNoticePage(student: student);
+          },
+          AppRoutes.attendance: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return AttendancePage(student: student);
+          },
         },
       ),
     );

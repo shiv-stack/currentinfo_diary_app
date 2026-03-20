@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:current_diary_app/core/utils/app_toast.dart';
+import 'package:current_diary_app/routes/app_routes.dart';
 import '../../data/models/student_model.dart';
 
 class StudentDashboardPage extends StatelessWidget {
@@ -395,7 +396,21 @@ class StudentDashboardPage extends StatelessWidget {
         final item = actions[index];
         return InkWell(
           onTap: () {
-            AppToast.show(context, "${item['title']} is Coming Soon");
+            if (item['title'] == 'CLASS NOTICE') {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.classNotice,
+                arguments: student,
+              );
+            } else if (item['title'] == 'ATTENDANCE') {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.attendance,
+                arguments: student,
+              );
+            } else {
+              AppToast.show(context, "${item['title']} is Coming Soon");
+            }
           },
           borderRadius: BorderRadius.circular(24),
           child: Column(

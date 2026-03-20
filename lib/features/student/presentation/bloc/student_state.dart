@@ -27,3 +27,43 @@ class StudentLoginFailure extends StudentState {
   @override
   List<Object?> get props => [message];
 }
+
+class ClassNoticesLoading extends StudentState {}
+
+class ClassNoticesLoaded extends StudentState {
+  final List<dynamic> notices;
+
+  ClassNoticesLoaded(this.notices);
+
+  @override
+  List<Object?> get props => [notices];
+}
+
+class ClassNoticesFailure extends StudentState {
+  final String message;
+
+  ClassNoticesFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class AttendanceLoading extends StudentState {}
+
+class AttendanceLoaded extends StudentState {
+  final List<dynamic> attendance;
+
+  AttendanceLoaded(this.attendance);
+
+  @override
+  List<Object?> get props => [attendance];
+}
+
+class AttendanceFailure extends StudentState {
+  final String message;
+
+  AttendanceFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

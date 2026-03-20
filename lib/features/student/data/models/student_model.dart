@@ -6,6 +6,9 @@ class StudentModel {
   final String? className;
   final String? dob;
   final String? contactNumber;
+  final String? cdiaryId;
+  final String? section;
+  final String? session;
 
   StudentModel({
     this.studentImage,
@@ -15,6 +18,9 @@ class StudentModel {
     this.className,
     this.dob,
     this.contactNumber,
+    this.cdiaryId,
+    this.section,
+    this.session,
   });
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +32,9 @@ class StudentModel {
       className: json['Class'] as String?,
       dob: json['dob'] as String?,
       contactNumber: json['Contact number'] as String?,
+      cdiaryId: json['cdiaryid'] as String?,
+      section: json['Section'] as String?,
+      session: json['session'] as String?,
     );
   }
 
@@ -38,6 +47,9 @@ class StudentModel {
       'Class': className,
       'dob': dob,
       'Contact number': contactNumber,
+      'cdiaryid': cdiaryId,
+      'Section': section,
+      'session': session,
     };
   }
 }

@@ -7,6 +7,10 @@ abstract class AuthLocalDataSource {
   Future<String?> getCachedSchoolCode();
   Future<void> cacheSchoolInfo(SchoolModel school);
   Future<SchoolModel?> getCachedSchoolInfo();
+  Future<void> cacheStudentId(String studentId);
+  Future<String?> getCachedStudentId();
+  Future<void> cacheStudentCredentials(String schoolCode, String name, String password);
+  Future<Map<String, String>?> getCachedStudentCredentials(String schoolCode);
   Future<void> clearAuthData();
 }
 
@@ -17,6 +21,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   static const String _schoolCodeKey = 'cached_school_code';
   static const String _schoolInfoKey = 'cached_school_info';
+  static const String _studentIdKey = 'cached_student_id';
+  static const String _studentCredentialsKey = 'cached_student_credentials';
 
   @override
   Future<void> cacheSchoolCode(String code) async {
@@ -46,8 +52,50 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
+  Future<void> cacheStudentId(String studentId) async {
+    await sharedPreferences.setString(_studentIdKey, studentId);
+  }
+
+  @override
+  Future<String?> getCachedStudentId() async {
+    return sharedPreferences.getString(_studentIdKey);
+  }
+
+  @override
+  Future<void> cacheStudentCredentials(String schoolCode, String name, String password) async {
+    final existingData = sharedPreferences.getString(_studentCredentialsKey);
+    Map<String, dynamic> credentialsMap = {};
+    if (existingData != null) {
+      credentialsMap = jsonDecode(existingData);
+    }
+    credentialsMap[schoolCode] = {
+      'name': name,
+      'password': password,
+    };
+    await sharedPreferences.setString(_studentCredentialsKey, jsonEncode(credentialsMap));
+  }
+
+  @override
+  Future<Map<String, String>?> getCachedStudentCredentials(String schoolCode) async {
+    final data = sharedPreferences.getString(_studentCredentialsKey);
+    if (data != null) {
+      final Map<String, dynamic> fullMap = jsonDecode(data);
+      if (fullMap.containsKey(schoolCode)) {
+        final Map<String, dynamic> studentData = fullMap[schoolCode];
+        return {
+          'name': studentData['name'] as String,
+          'password': studentData['password'] as String,
+        };
+      }
+    }
+    return null;
+  }
+
+  @override
   Future<void> clearAuthData() async {
     await sharedPreferences.remove(_schoolCodeKey);
     await sharedPreferences.remove(_schoolInfoKey);
+    await sharedPreferences.remove(_studentIdKey);
+    await sharedPreferences.remove(_studentCredentialsKey);
   }
 }

@@ -8,4 +8,21 @@ abstract class StudentRepository {
     required String name,
     required String uniqueCode,
   });
+
+  Future<Either<Failure, List<dynamic>>> getClassNotices({
+    required String schoolCode,
+    required String cdiaryId,
+    required String password,
+    required String session,
+    required String className,
+    required String section,
+  });
+
+  Future<Either<Failure, List<dynamic>>> getAttendance({
+    required String schoolCode,
+    required String cdiaryId,
+    required String password,
+    required String session,
+    required String month,
+  });
 }

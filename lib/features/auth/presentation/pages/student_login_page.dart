@@ -59,201 +59,196 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
         statusBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light,
       ),
-      child: BlocProvider(
-        create: (context) => di.sl<StudentBloc>(),
-        child: BlocListener<StudentBloc, StudentState>(
-          listener: (context, state) {
-            if (state is StudentLoginSuccess) {
-              AppToast.show(context, "Login Successful");
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => StudentDashboardPage(student: state.student),
-                ),
-                (route) => false,
-              );
-            } else if (state is StudentLoginFailure) {
-              AppToast.show(
-                context,
-                "Invalid Student Name or Password",
-                isError: true,
-              );
-            }
-          },
-          child: Scaffold(
-            backgroundColor: Colors.white,
-            body: Stack(
-              children: [
-                // Background repeating pattern (PRESERVED)
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0.05,
-                    child: Image.asset(
-                      'assets/images/student_login.png',
-                      repeat: ImageRepeat.repeat,
-                      fit: BoxFit.none,
-                      scale: 3.0,
-                    ),
+      child: BlocListener<StudentBloc, StudentState>(
+        listener: (context, state) {
+          if (state is StudentLoginSuccess) {
+            AppToast.show(context, "Login Successful");
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StudentDashboardPage(student: state.student),
+              ),
+              (route) => false,
+            );
+          } else if (state is StudentLoginFailure) {
+            AppToast.show(
+              context,
+              "Invalid Student Name or Password",
+              isError: true,
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Stack(
+            children: [
+              // Background repeating pattern (PRESERVED)
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0.05,
+                  child: Image.asset(
+                    'assets/images/student_login.png',
+                    repeat: ImageRepeat.repeat,
+                    fit: BoxFit.none,
+                    scale: 3.0,
                   ),
                 ),
+              ),
 
-                SafeArea(
-                  child: Column(
-                    children: [
-                      // Header Row
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
+              SafeArea(
+                child: Column(
+                  children: [
+                    // Header Row
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            IconButton(
-                              onPressed: () => Navigator.pop(context),
-                              icon: const Icon(
-                                Icons.arrow_back_ios_new_rounded,
-                                size: 20,
+                            const SizedBox(height: 20),
+                            // Welcome Header
+                            Text(
+                              "Student Portal",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: Theme.of(context).primaryColor,
+                                letterSpacing: 1.5,
                               ),
                             ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              "Welcome Back!",
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF1A1C1E),
+                                letterSpacing: -1.0,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              "Please enter your credentials to access your diary.",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 48),
+
+                            // Login Form Card
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(28),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(
+                                      alpha: 0.04,
+                                    ),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  _buildTextField(
+                                    controller: _nameController,
+                                    label: "Student Name",
+                                    icon: Icons.person_rounded,
+                                    context: context,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  _buildTextField(
+                                    controller: _passwordController,
+                                    label: "Password",
+                                    icon: Icons.lock_rounded,
+                                    isPassword: true,
+                                    isVisible: _isPasswordVisible,
+                                    onToggleVisibility: () {
+                                      setState(() {
+                                        _isPasswordVisible =
+                                            !_isPasswordVisible;
+                                      });
+                                    },
+                                    context: context,
+                                  ),
+                                  const SizedBox(height: 32),
+
+                                  // Submit Button
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 60,
+                                    child: BlocBuilder<StudentBloc, StudentState>(
+                                      builder: (context, state) {
+                                        final isLoading =
+                                            state is StudentLoading;
+                                        return ElevatedButton(
+                                          onPressed: isLoading
+                                              ? null
+                                              : () => _onLoginPressed(context),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Theme.of(
+                                              context,
+                                            ).primaryColor,
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                            ),
+                                          ),
+                                          child: isLoading
+                                              ? const SizedBox(
+                                                  height: 24,
+                                                  width: 24,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    color: Colors.white,
+                                                    strokeWidth: 2,
+                                                  ),
+                                                )
+                                              : const Text(
+                                                  "SIGN IN",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w900,
+                                                    letterSpacing: 1.0,
+                                                  ),
+                                                ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 60),
                           ],
                         ),
                       ),
-
-                      Expanded(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 20),
-                              // Welcome Header
-                              Text(
-                                "Student Portal",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                  color: Theme.of(context).primaryColor,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                "Welcome Back!",
-                                style: TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFF1A1C1E),
-                                  letterSpacing: -1.0,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                "Please enter your credentials to access your diary.",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey.shade600,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 48),
-
-                              // Login Form Card
-                              Container(
-                                padding: const EdgeInsets.all(24),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(28),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.04,
-                                      ),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 10),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    _buildTextField(
-                                      controller: _nameController,
-                                      label: "Student Name",
-                                      icon: Icons.person_rounded,
-                                      context: context,
-                                    ),
-                                    const SizedBox(height: 20),
-                                    _buildTextField(
-                                      controller: _passwordController,
-                                      label: "Password",
-                                      icon: Icons.lock_rounded,
-                                      isPassword: true,
-                                      isVisible: _isPasswordVisible,
-                                      onToggleVisibility: () {
-                                        setState(() {
-                                          _isPasswordVisible =
-                                              !_isPasswordVisible;
-                                        });
-                                      },
-                                      context: context,
-                                    ),
-                                    const SizedBox(height: 32),
-
-                                    // Submit Button
-                                    SizedBox(
-                                      width: double.infinity,
-                                      height: 60,
-                                      child: BlocBuilder<StudentBloc, StudentState>(
-                                        builder: (context, state) {
-                                          final isLoading =
-                                              state is StudentLoading;
-                                          return ElevatedButton(
-                                            onPressed: isLoading
-                                                ? null
-                                                : () =>
-                                                      _onLoginPressed(context),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Theme.of(
-                                                context,
-                                              ).primaryColor,
-                                              foregroundColor: Colors.white,
-                                              elevation: 0,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                              ),
-                                            ),
-                                            child: isLoading
-                                                ? const SizedBox(
-                                                    height: 24,
-                                                    width: 24,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                          color: Colors.white,
-                                                          strokeWidth: 2,
-                                                        ),
-                                                  )
-                                                : const Text(
-                                                    "SIGN IN",
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w900,
-                                                      letterSpacing: 1.0,
-                                                    ),
-                                                  ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 60),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
