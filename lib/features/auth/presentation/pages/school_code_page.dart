@@ -40,7 +40,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
         final school = isConnected ? state.school : null;
 
         if (isConnected) {
-          return _buildHomeSection(context, school!);
+          return _buildHomeSection(context, school!, state.schoolCode ?? '');
         }
 
         return _buildSchoolCodeEntry(context, state);
@@ -217,7 +217,11 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
     );
   }
 
-  Widget _buildHomeSection(BuildContext context, dynamic school) {
+  Widget _buildHomeSection(
+    BuildContext context,
+    dynamic school,
+    String schoolCode,
+  ) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -233,7 +237,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
               children: [
                 // Premium School Header
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     children: [
                       Container(
@@ -275,8 +279,8 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                         child: Text(
                           school.title ?? 'School Name',
                           style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
                             color: Color(0xFF1A1C1E),
                             letterSpacing: -0.5,
                           ),
@@ -333,30 +337,53 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                 if (school.todayThought != null &&
                     school.todayThought!.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
                     child: _buildHomeThoughtBanner(
                       context,
+                      school.thoughtInfo ?? 'Thoughts',
                       school.todayThought!,
                     ),
                   ),
 
-                const SizedBox(height: 32),
-
-                // Grid Section
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    "School Portals",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF1A1C1E),
-                      letterSpacing: -0.5,
+                // Carousel Section (Moved to Bottom)
+                if (school.carouselImages.isNotEmpty) ...[
+                  CarouselSlider(
+                    options: CarouselOptions(
+                      height: 160.0,
+                      autoPlay: true,
+                      enlargeCenterPage: true,
+                      viewportFraction: 0.92,
+                      autoPlayInterval: const Duration(seconds: 4),
                     ),
+                    items: school.carouselImages.map<Widget>((imageUrl) {
+                      return Container(
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.12),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(28),
+                          child: Image.network(
+                            imageUrl as String,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                ),
-                const SizedBox(height: 16),
-
+                  const SizedBox(height: 18),
+                ],
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: GridView.count(
@@ -391,7 +418,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                       _buildHomeMenuItem(
                         context,
                         'Admission',
-                        'assets/images/reception.png',
+                        'assets/images/admission.png',
                         const Color(0xffF2E6FF),
                         null,
                         url: school.onlineAdmissionUrl,
@@ -405,53 +432,58 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                       ),
                       _buildHomeMenuItem(
                         context,
-                        'Enquiry',
-                        'assets/images/reception.png',
+                        'Notice',
+                        'assets/images/notice.png',
+                        const Color(0xffE6EEFF),
+                        AppRoutes.notice,
+                        arguments: schoolCode,
+                      ),
+                      // _buildHomeMenuItem(
+                      //   context,
+                      //   'Enquiry',
+                      //   'assets/images/enquiry.png',
+                      //   const Color(0xffE6FFEF),
+                      //   null,
+                      // ),
+                      _buildHomeMenuItem(
+                        context,
+                        'Web Staff',
+                        'assets/images/web_staff_login.png',
+                        const Color(0xffE6EEFF),
+                        null,
+                        url:
+                            "https://currentdiary.com/app-for-school/staff-login/",
+                      ),
+                      _buildHomeMenuItem(
+                        context,
+                        'Web Student',
+                        'assets/images/web_student_login.png',
+                        const Color(0xffF2E6FF),
+                        null,
+                        url:
+                            "https://www.currentdiary.com/student-account/?schoolcodevalue=$schoolCode",
+                      ),
+                      _buildHomeMenuItem(
+                        context,
+                        'Pay Online',
+                        'assets/images/pay_fee.png',
                         const Color(0xffE6FFEF),
+                        null,
+                        url:
+                            "https://www.currentdiary.com/student-fee-payment/pay-fee-online/$schoolCode",
+                      ),
+                      _buildHomeMenuItem(
+                        context,
+                        'Web Visitor',
+                        'assets/images/visitor.png',
+                        const Color(0xffF2F2F2),
                         null,
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 48),
-
-                // Carousel Section (Moved to Bottom)
-                if (school.carouselImages.isNotEmpty) ...[
-                  CarouselSlider(
-                    options: CarouselOptions(
-                      height: 200.0,
-                      autoPlay: true,
-                      enlargeCenterPage: true,
-                      viewportFraction: 0.92,
-                      autoPlayInterval: const Duration(seconds: 4),
-                    ),
-                    items: school.carouselImages.map<Widget>((imageUrl) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(28),
-                          child: Image.network(
-                            imageUrl as String,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 48),
-                ],
+                const SizedBox(height: 18),
 
                 // Footer Support
                 Center(
@@ -492,7 +524,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              "9808166564",
+                              school.contactNo ?? "Support",
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w900,
@@ -514,7 +546,13 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
     );
   }
 
-  Widget _buildHomeThoughtBanner(BuildContext context, String thought) {
+  // _buildNoticeList and _fetchNotices are removed as per instruction.
+
+  Widget _buildHomeThoughtBanner(
+    BuildContext context,
+    String title,
+    String thought,
+  ) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -528,55 +566,40 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 20,
-            right: 20,
-            child: Icon(
-              Icons.format_quote_rounded,
-              size: 24,
-              color: Colors.white.withValues(alpha: 0.3),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    "Thoughts",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                title.toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.0,
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  thought,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    height: 1.5,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(
+              thought,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -588,11 +611,12 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
     Color color,
     String? route, {
     String? url,
+    Object? arguments,
   }) {
     return InkWell(
       onTap: () {
         if (route != null) {
-          Navigator.pushNamed(context, route);
+          Navigator.pushNamed(context, route, arguments: arguments);
         } else if (url != null) {
           _openUrl(context, title, url);
         } else {
@@ -671,6 +695,11 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
 
     if (title == "Student Login") {
       Navigator.pushNamed(context, AppRoutes.studentLogin);
+      return;
+    }
+
+    if (title == "Notice") {
+      Navigator.pushNamed(context, AppRoutes.notice);
       return;
     }
 

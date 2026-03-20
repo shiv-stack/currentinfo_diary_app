@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:current_diary_app/core/utils/app_toast.dart';
 import '../../data/models/student_model.dart';
 
@@ -169,11 +170,25 @@ class StudentDashboardPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    _buildInfoRow(Icons.cake_rounded, student.dob ?? 'N/A'),
+                    _buildInfoRow(
+                      context,
+                      Icons.cake_rounded,
+                      student.dob ?? 'N/A',
+                    ),
                     const SizedBox(height: 6),
                     _buildInfoRow(
+                      context,
                       Icons.call_rounded,
                       student.contactNumber ?? 'N/A',
+                      onTap: () async {
+                        if (student.contactNumber != null &&
+                            student.contactNumber!.isNotEmpty) {
+                          final uri = Uri.parse("tel:${student.contactNumber}");
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri);
+                          }
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -185,20 +200,32 @@ class StudentDashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: Colors.grey.shade400),
-        const SizedBox(width: 8),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w600,
+  Widget _buildInfoRow(
+    BuildContext context,
+    IconData icon,
+    String text, {
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.grey.shade400),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              color: onTap != null
+                  ? Theme.of(context).primaryColor
+                  : Colors.grey.shade600,
+              fontWeight: FontWeight.w600,
+              decoration: onTap != null ? TextDecoration.underline : null,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -252,7 +279,7 @@ class StudentDashboardPage extends StatelessWidget {
             ),
             // Main Content
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -275,22 +302,22 @@ class StudentDashboardPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   Text(
                     student.thoughtTitle ?? "Stay Inspired",
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 22,
+                      fontSize: 18,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 6),
                   Text(
                     student.thoughtMessage ?? '',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 14,
+                      fontSize: 13,
                       height: 1.6,
                       fontWeight: FontWeight.w600,
                     ),

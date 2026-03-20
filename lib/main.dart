@@ -4,6 +4,7 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/gallery_bloc.dart';
 import 'features/auth/presentation/pages/gallery_page.dart';
+import 'features/auth/presentation/pages/notice_page.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
 import 'features/auth/presentation/pages/school_code_page.dart';
 import 'features/auth/presentation/pages/student_login_page.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
           AppRoutes.schoolCode: (_) => const SchoolCodePage(),
           AppRoutes.gallery: (_) => const GalleryPage(),
           AppRoutes.studentLogin: (_) => const StudentLoginPage(),
+          AppRoutes.notice: (_) => const NoticePage(),
         },
       ),
     );

@@ -15,11 +15,12 @@ class AuthLoading extends AuthState {}
 class AuthSuccess extends AuthState {
   final String message;
   final SchoolModel? school;
+  final String? schoolCode;
 
-  AuthSuccess({this.message = "Success", this.school});
+  AuthSuccess({this.message = "Success", this.school, this.schoolCode});
 
   @override
-  List<Object?> get props => [message, school];
+  List<Object?> get props => [message, school, schoolCode];
 }
 
 class AuthError extends AuthState {

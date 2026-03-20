@@ -4,6 +4,7 @@ class SchoolModel extends Equatable {
   final String? title;
   final String? schoolLogo;
   final String? todayThought;
+  final String? thoughtInfo;
   final String? schoolAddress;
   final String? contactNo;
   final String? schoolEmail;
@@ -23,6 +24,7 @@ class SchoolModel extends Equatable {
     this.title,
     this.schoolLogo,
     this.todayThought,
+    this.thoughtInfo,
     this.schoolAddress,
     this.contactNo,
     this.schoolEmail,
@@ -53,6 +55,7 @@ class SchoolModel extends Equatable {
       title: json['title'] as String?,
       schoolLogo: json['schoollogo'] as String?,
       todayThought: json['today-thought'] as String?,
+      thoughtInfo: json['thoughtinfo'] as String?,
       schoolAddress: json['schooladdress'] as String?,
       contactNo: json['supportnumber'] as String?,
       schoolEmail: json['email'] as String?,
@@ -75,6 +78,7 @@ class SchoolModel extends Equatable {
       'title': title,
       'schoollogo': schoolLogo,
       'today-thought': todayThought,
+      'thoughtinfo': thoughtInfo,
       'schooladdress': schoolAddress,
       'supportnumber': contactNo,
       'email': schoolEmail,
@@ -97,6 +101,7 @@ class SchoolModel extends Equatable {
     title,
     schoolLogo,
     todayThought,
+    thoughtInfo,
     schoolAddress,
     contactNo,
     schoolEmail,

@@ -44,6 +44,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         AuthSuccess(
           message: "Welcome back to ${cachedSchool.title}",
           school: cachedSchool,
+          schoolCode: storedCode,
         ),
       );
     } else {
@@ -62,7 +63,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       },
       (school) async {
         await localDataSource.cacheSchoolInfo(school);
-        emit(AuthSuccess(message: "Data Updated", school: school));
+        emit(AuthSuccess(message: "Data Updated", school: school, schoolCode: storedCode));
       },
     );
   }
@@ -89,6 +90,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         AuthSuccess(
           message: "Connected to ${school.title ?? 'School'}",
           school: school,
+          schoolCode: event.code,
         ),
       );
     });
