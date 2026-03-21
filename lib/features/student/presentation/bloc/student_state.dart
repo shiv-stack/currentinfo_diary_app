@@ -186,3 +186,21 @@ class MarkDetailsFailure extends StudentState {
   @override
   List<Object?> get props => [message];
 }
+
+class PasswordUpdateSaving extends StudentState {}
+
+class PasswordUpdateSuccess extends StudentState {
+  final String message;
+  PasswordUpdateSuccess(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class PasswordUpdateFailure extends StudentState {
+  final String message;
+  PasswordUpdateFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

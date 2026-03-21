@@ -20,6 +20,7 @@ abstract class StudentRemoteDataSource {
     required String session,
     required String className,
     required String section,
+    String display = "classnot",
   });
 
   Future<List<dynamic>> getAttendance({
@@ -85,6 +86,13 @@ abstract class StudentRemoteDataSource {
     required String toDate,
     required String reason,
   });
+
+  Future<String> updatePassword({
+    required String schoolCode,
+    required String studentId,
+    required String currentPassword,
+    required String newPassword,
+  });
 }
 
 class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
@@ -122,7 +130,32 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         }
 
         if (data.isNotEmpty) {
-          return StudentModel.fromJson(data[0]);
+          final student = StudentModel.fromJson(data[0]);
+
+          // Check if cdiaryId is present, if not, it's an invalid login
+          if (student.cdiaryId == null || student.cdiaryId!.isEmpty) {
+            throw Exception("Invalid credentials or student not found");
+          }
+
+          // Inject schoolCode manually as it's not in the student object from API usually
+          return StudentModel(
+            studentImage: student.studentImage,
+            thoughtTitle: student.thoughtTitle,
+            thoughtMessage: student.thoughtMessage,
+            name: student.name,
+            className: student.className,
+            dob: student.dob,
+            contactNumber: student.contactNumber,
+            cdiaryId: student.cdiaryId,
+            section: student.section,
+            session: student.session,
+            schoolName: student.schoolName,
+            address: student.address,
+            email: student.email,
+            fatherName: student.fatherName,
+            motherName: student.motherName,
+            schoolCode: schoolCode,
+          );
         }
       }
       throw Exception("Invalid credentials or student not found");
@@ -142,6 +175,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
     required String session,
     required String className,
     required String section,
+    String display = "classnot",
   }) async {
     try {
       final sectionValue =
@@ -158,7 +192,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         'session': session,
         'to': className,
         'section': sectionValue,
-        'display': 'classnot',
+        'display': display,
       });
 
       final response = await dio.post(
@@ -482,6 +516,37 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
 
       final response = await dio.post(
         AppUrls.getMultitask(schoolCode),
+        data: formData,
+        options: Options(responseType: ResponseType.plain),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data.toString().trim();
+      }
+      throw Exception("Server Error: ${response.statusCode}");
+    } on DioException catch (e) {
+      throw Exception(e.message ?? "Connection Error");
+    }
+  }
+
+  @override
+  Future<String> updatePassword({
+    required String schoolCode,
+    required String studentId,
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'cdiaryid': studentId,
+        'unique': newPassword,
+        'modify': 'modify',
+        'login': 'student_modify_pass',
+        'pass': currentPassword,
+      });
+
+      final response = await dio.post(
+        AppUrls.updatePassword(schoolCode),
         data: formData,
         options: Options(responseType: ResponseType.plain),
       );

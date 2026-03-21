@@ -8,6 +8,7 @@ import '../../domain/usecases/get_leaves_usecase.dart';
 import '../../domain/usecases/apply_leave_usecase.dart';
 import '../../domain/usecases/get_exams_usecase.dart';
 import '../../domain/usecases/get_mark_details_usecase.dart';
+import '../../domain/usecases/update_password_usecase.dart';
 import '../../../auth/data/datasources/auth_local_data_source.dart';
 import '../../data/datasources/student_local_data_source.dart';
 import '../../domain/entities/saved_student.dart';
@@ -24,6 +25,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
   final GetMarkDetailsUseCase getMarkDetailsUseCase;
   final GetLeavesUseCase getLeavesUseCase;
   final ApplyLeaveUseCase applyLeaveUseCase;
+  final UpdatePasswordUseCase updatePasswordUseCase;
   final AuthLocalDataSource authLocalDataSource;
   final StudentLocalDataSource studentLocalDataSource;
 
@@ -37,6 +39,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     required this.getMarkDetailsUseCase,
     required this.getLeavesUseCase,
     required this.applyLeaveUseCase,
+    required this.updatePasswordUseCase,
     required this.authLocalDataSource,
     required this.studentLocalDataSource,
   }) : super(StudentInitial()) {
@@ -51,6 +54,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     on<GetMarkDetails>(_onGetMarkDetails);
     on<GetLeaves>(_onGetLeaves);
     on<ApplyLeave>(_onApplyLeave);
+    on<UpdatePassword>(_onUpdatePassword);
   }
 
   Future<void> _onLoginSubmitted(
@@ -85,12 +89,15 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
         );
 
         // EXTRA: Save to Hive for multi-account switching
-        await studentLocalDataSource.saveStudent(SavedStudent(
-          schoolCode: event.schoolCode,
-          name: event.name,
-          uniqueCode: event.uniqueCode,
-          studentClass: student.className,
-        ));
+        await studentLocalDataSource.saveStudent(
+          SavedStudent(
+            schoolCode: event.schoolCode,
+            name: event.name,
+            uniqueCode: event.uniqueCode,
+            studentClass: student.className,
+            profileImage: student.studentImage,
+          ),
+        );
 
         emit(StudentLoginSuccess(student));
       },
@@ -110,6 +117,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
       session: event.session,
       className: event.className,
       section: event.section,
+      display: event.display,
     );
 
     result.fold(
@@ -179,10 +187,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     );
   }
 
-  Future<void> _onGetFees(
-    GetFees event,
-    Emitter<StudentState> emit,
-  ) async {
+  Future<void> _onGetFees(GetFees event, Emitter<StudentState> emit) async {
     emit(FeesLoading());
 
     final result = await getFeesUseCase(
@@ -199,10 +204,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     );
   }
 
-  Future<void> _onGetLeaves(
-    GetLeaves event,
-    Emitter<StudentState> emit,
-  ) async {
+  Future<void> _onGetLeaves(GetLeaves event, Emitter<StudentState> emit) async {
     emit(LeavesLoading());
 
     final result = await getLeavesUseCase(
@@ -217,10 +219,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     );
   }
 
-  Future<void> _onGetExams(
-    GetExams event,
-    Emitter<StudentState> emit,
-  ) async {
+  Future<void> _onGetExams(GetExams event, Emitter<StudentState> emit) async {
     emit(ExamsLoading());
 
     final result = await getExamsUseCase(
@@ -280,6 +279,32 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     result.fold(
       (failure) => emit(LeaveApplyFailure(failure.message)),
       (message) => emit(LeaveApplySuccess(message)),
+    );
+  }
+
+  Future<void> _onUpdatePassword(
+    UpdatePassword event,
+    Emitter<StudentState> emit,
+  ) async {
+    emit(PasswordUpdateSaving());
+
+    final result = await updatePasswordUseCase(
+      schoolCode: event.schoolCode,
+      studentId: event.studentId,
+      currentPassword: event.currentPassword,
+      newPassword: event.newPassword,
+    );
+
+    await result.fold(
+      (failure) async => emit(PasswordUpdateFailure(failure.message)),
+      (message) async {
+        // Clear local storage for this student
+        await studentLocalDataSource.removeStudent(event.currentPassword);
+        // Also clear active session if it matches
+        await authLocalDataSource.clearActiveStudentSession();
+
+        emit(PasswordUpdateSuccess(message));
+      },
     );
   }
 }

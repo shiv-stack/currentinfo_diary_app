@@ -13,4 +13,9 @@ class AppRoutes {
   static const webView = '/web-view';
   static const calendar = '/calendar';
   static const query = '/query';
+  static const holidayHw = '/holiday-hw';
+  static const syllabus = '/syllabus';
+  static const timetable = '/timetable';
+  static const datesheet = '/datesheet';
+  static const profile = '/profile';
 }

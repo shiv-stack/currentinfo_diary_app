@@ -14,6 +14,7 @@ class GetClassNoticesUseCase {
     required String session,
     required String className,
     required String section,
+    String display = "classnot",
   }) {
     return repository.getClassNotices(
       schoolCode: schoolCode,
@@ -22,6 +23,7 @@ class GetClassNoticesUseCase {
       session: session,
       className: className,
       section: section,
+      display: display,
     );
   }
 }

@@ -9,6 +9,12 @@ class StudentModel {
   final String? cdiaryId;
   final String? section;
   final String? session;
+  final String? schoolName;
+  final String? address;
+  final String? email;
+  final String? fatherName;
+  final String? motherName;
+  final String? schoolCode;
 
   StudentModel({
     this.studentImage,
@@ -21,6 +27,12 @@ class StudentModel {
     this.cdiaryId,
     this.section,
     this.session,
+    this.schoolName,
+    this.address,
+    this.email,
+    this.fatherName,
+    this.motherName,
+    this.schoolCode,
   });
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +47,12 @@ class StudentModel {
       cdiaryId: json['cdiaryid'] as String?,
       section: json['Section'] as String?,
       session: json['session'] as String?,
+      schoolName: json['SchoolName'] as String?,
+      address: json['Address'] as String?,
+      email: json['Email'] as String?,
+      fatherName: json['FatherName'] as String?,
+      motherName: json['MotherName'] as String?,
+      schoolCode: json['school_code'] as String?,
     );
   }
 
@@ -50,6 +68,12 @@ class StudentModel {
       'cdiaryid': cdiaryId,
       'Section': section,
       'session': session,
+      'SchoolName': schoolName,
+      'Address': address,
+      'Email': email,
+      'FatherName': fatherName,
+      'MotherName': motherName,
+      'school_code': schoolCode,
     };
   }
 }

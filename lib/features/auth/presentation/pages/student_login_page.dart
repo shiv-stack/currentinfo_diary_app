@@ -335,64 +335,118 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
               ),
               const SizedBox(height: 16),
               SizedBox(
-                height: 100,
+                height: 120, // Increased height for better card layout
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
                   itemCount: filteredStudents.length,
                   itemBuilder: (context, index) {
                     final student = filteredStudents[index];
-                    return Container(
-                      width: 80,
-                      margin: const EdgeInsets.only(right: 16),
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 16),
                       child: Column(
                         children: [
-                          InkWell(
-                            onTap: () {
-                              _nameController.text = student.name;
-                              _passwordController.text = student.uniqueCode;
-                              _onLoginPressed(
-                                context,
-                                name: student.name,
-                                password: student.uniqueCode,
-                                schoolCode: student.schoolCode,
-                              );
-                            },
-                            onLongPress: () {
-                              _showDeleteConfirmDialog(student.uniqueCode);
-                            },
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              height: 60,
-                              width: 50,
-                              decoration: BoxDecoration(
-                                color: Theme.of(
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              InkWell(
+                                onTap: () => _onLoginPressed(
                                   context,
-                                ).primaryColor.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Theme.of(
-                                    context,
-                                  ).primaryColor.withValues(alpha: 0.2),
-                                  width: 2,
+                                  name: student.name,
+                                  password: student.uniqueCode,
+                                  schoolCode: student.schoolCode,
+                                ),
+                                borderRadius: BorderRadius.circular(24),
+                                child: Container(
+                                  height: 80,
+                                  width: 80,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Theme.of(
+                                          context,
+                                        ).primaryColor.withValues(alpha: 0.15),
+                                        Theme.of(
+                                          context,
+                                        ).primaryColor.withValues(alpha: 0.05),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: Theme.of(
+                                        context,
+                                      ).primaryColor.withValues(alpha: 0.1),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child:
+                                      student.profileImage != null &&
+                                          student.profileImage!.isNotEmpty
+                                      ? ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            24,
+                                          ),
+                                          child: Image.network(
+                                            student.profileImage!,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    _buildInitials(
+                                                      student.name,
+                                                    ),
+                                          ),
+                                        )
+                                      : _buildInitials(student.name),
                                 ),
                               ),
-                              child: Icon(
-                                Icons.person_rounded,
-                                color: Theme.of(context).primaryColor,
-                                size: 24,
+                              Positioned(
+                                top: -6,
+                                right: -6,
+                                child: InkWell(
+                                  onTap: () => _showDeleteConfirmDialog(
+                                    student.uniqueCode,
+                                  ),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.close_rounded,
+                                      color: Colors.red,
+                                      size: 14,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            student.name,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1A1C1E),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: 80,
+                            child: Text(
+                              student.name,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF1A1C1E),
+                                height: 1.2,
+                                letterSpacing: -0.2,
+                              ),
                             ),
                           ),
                         ],
@@ -500,6 +554,25 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildInitials(String name) {
+    return Center(
+      child: Text(
+        (() {
+          final names = name.trim().split(RegExp(r'\s+'));
+          if (names.isEmpty) return "?";
+          if (names.length == 1) return names[0][0].toUpperCase();
+          return (names[0][0] + names[1][0]).toUpperCase();
+        })(),
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w900,
+          color: Theme.of(context).primaryColor,
+          letterSpacing: -1,
+        ),
+      ),
     );
   }
 }

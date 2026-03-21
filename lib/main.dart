@@ -12,6 +12,11 @@ import 'features/student/presentation/pages/assignment_page.dart';
 import 'features/student/presentation/pages/fee_page.dart';
 import 'features/student/presentation/pages/leave_page.dart';
 import 'features/student/presentation/pages/marks_page.dart';
+import 'features/student/presentation/pages/holiday_hw_page.dart';
+import 'features/student/presentation/pages/syllabus_page.dart';
+import 'features/student/presentation/pages/timetable_page.dart';
+import 'features/student/presentation/pages/datesheet_page.dart';
+import 'features/student/presentation/pages/student_profile_page.dart';
 import 'widgets/webview_page.dart';
 import 'features/student/data/models/student_model.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
@@ -109,6 +114,31 @@ class MyApp extends StatelessWidget {
                 schoolCode: args['schoolCode'] as String,
               ),
             );
+          },
+          AppRoutes.holidayHw: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return HolidayHwPage(student: student);
+          },
+          AppRoutes.syllabus: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return SyllabusPage(student: student);
+          },
+          AppRoutes.timetable: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return TimetablePage(student: student);
+          },
+          AppRoutes.datesheet: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return DatesheetPage(student: student);
+          },
+          AppRoutes.profile: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return StudentProfilePage(student: student);
           },
         },
       ),

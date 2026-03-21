@@ -19,6 +19,7 @@ abstract class StudentRepository {
     required String session,
     required String className,
     required String section,
+    String display = "classnot",
   });
 
   Future<Either<Failure, List<dynamic>>> getAttendance({
@@ -83,5 +84,12 @@ abstract class StudentRepository {
     required String fromDate,
     required String toDate,
     required String reason,
+  });
+
+  Future<Either<Failure, String>> updatePassword({
+    required String schoolCode,
+    required String studentId,
+    required String currentPassword,
+    required String newPassword,
   });
 }

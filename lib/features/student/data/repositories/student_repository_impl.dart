@@ -38,6 +38,7 @@ class StudentRepositoryImpl implements StudentRepository {
     required String session,
     required String className,
     required String section,
+    String display = "classnot",
   }) async {
     try {
       final notices = await remoteDataSource.getClassNotices(
@@ -47,6 +48,7 @@ class StudentRepositoryImpl implements StudentRepository {
         session: session,
         className: className,
         section: section,
+        display: display,
       );
       return Right(notices);
     } catch (e) {
@@ -217,6 +219,26 @@ class StudentRepositoryImpl implements StudentRepository {
         fromDate: fromDate,
         toDate: toDate,
         reason: reason,
+      );
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> updatePassword({
+    required String schoolCode,
+    required String studentId,
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final result = await remoteDataSource.updatePassword(
+        schoolCode: schoolCode,
+        studentId: studentId,
+        currentPassword: currentPassword,
+        newPassword: newPassword,
       );
       return Right(result);
     } catch (e) {

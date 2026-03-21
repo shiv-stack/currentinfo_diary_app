@@ -599,34 +599,73 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
-                                blurRadius: 10,
-                              ),
-                            ],
+                            border: Border.all(color: Colors.grey.shade100),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.support_agent_rounded,
+                                Icons.phone_rounded,
+                                size: 16,
                                 color: Theme.of(context).primaryColor,
-                                size: 20,
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 8),
                               Text(
-                                school.contactNo ?? "Support",
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFF1A1C1E),
+                                school.contactNo ?? "N/A",
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14,
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      if (school.schoolEmail != null &&
+                          school.schoolEmail!.isNotEmpty)
+                        InkWell(
+                          onTap: () async {
+                            final Uri mail = Uri.parse(
+                              'mailto:${school.schoolEmail}',
+                            );
+                            if (await canLaunchUrl(mail)) {
+                              await launchUrl(mail);
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.grey.shade100),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.alternate_email_rounded,
+                                  size: 16,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  school.schoolEmail!,
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -796,6 +835,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
     String? route, {
     String? url,
     Object? arguments,
+    IconData? icon,
   }) {
     return InkWell(
       onTap: () {
@@ -825,7 +865,34 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                 ],
               ),
               padding: const EdgeInsets.all(14),
-              child: Image.asset(image, fit: BoxFit.contain),
+              child: icon != null
+                  ? Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(12),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Icon(
+                              icon,
+                              color: Colors.grey.shade400,
+                              size: 28,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Image.asset(image, fit: BoxFit.contain),
             ),
           ),
           const SizedBox(height: 10),

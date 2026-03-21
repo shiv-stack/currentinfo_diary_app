@@ -28,6 +28,7 @@ class GetClassNotices extends StudentEvent {
   final String session;
   final String className;
   final String section;
+  final String display;
 
   GetClassNotices({
     required this.schoolCode,
@@ -36,6 +37,7 @@ class GetClassNotices extends StudentEvent {
     required this.session,
     required this.className,
     required this.section,
+    this.display = 'classnot',
   });
 
   @override
@@ -46,6 +48,7 @@ class GetClassNotices extends StudentEvent {
         session,
         className,
         section,
+        display,
       ];
 }
 
@@ -246,4 +249,21 @@ class GetMarkDetails extends StudentEvent {
         marksYear,
         marksExam,
       ];
+}
+
+class UpdatePassword extends StudentEvent {
+  final String schoolCode;
+  final String studentId;
+  final String currentPassword;
+  final String newPassword;
+
+  UpdatePassword({
+    required this.schoolCode,
+    required this.studentId,
+    required this.currentPassword,
+    required this.newPassword,
+  });
+
+  @override
+  List<Object?> get props => [schoolCode, studentId, currentPassword, newPassword];
 }

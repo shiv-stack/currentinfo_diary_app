@@ -37,4 +37,7 @@ class AppUrls {
 
   static String sendQuery(String schoolCode) =>
       "$baseUrl/contact-to-school/sent-message-to-school/$schoolCode/";
+
+  static String updatePassword(String schoolCode) =>
+      "$baseUrl/student-info/update-record-school/$schoolCode/";
 }

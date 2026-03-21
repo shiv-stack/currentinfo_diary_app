@@ -360,11 +360,11 @@ class StudentDashboardPage extends StatelessWidget {
             'imagePath': 'assets/icons/attendance.png',
             'color': const Color(0xffFFF1E6),
           },
-          {
-            'title': 'MESSAGE',
-            'imagePath': 'assets/icons/message.png',
-            'color': const Color(0xffE6EEFF),
-          },
+          // {
+          //   'title': 'MESSAGE',
+          //   'imagePath': 'assets/icons/message.png',
+          //   'color': const Color(0xffE6EEFF),
+          // },
           {
             'title': 'HOMEWORK',
             'imagePath': 'assets/icons/homework.png',
@@ -386,9 +386,29 @@ class StudentDashboardPage extends StatelessWidget {
             'color': const Color(0xffFFFFE6),
           },
           {
-            'title': 'TIMETABLE IMAGE',
-            'imagePath': 'assets/icons/timetable.png',
-            'color': const Color(0xffF7F7F7),
+            'title': 'SYLLABUS',
+            'imagePath': 'assets/icons/syllabus.png',
+            'color': const Color(0xffE6F7FF),
+          },
+          {
+            'title': 'TIMETABLE',
+            'imagePath': 'assets/icons/timetable_new.png',
+            'color': const Color(0xffF2F2F2),
+          },
+          {
+            'title': 'DATESHEET',
+            'imagePath': 'assets/icons/datesheet.png',
+            'color': const Color(0xffFFE6F7),
+          },
+          {
+            'title': 'HOLIDAY HOME WORK',
+            'imagePath': 'assets/icons/homework.png',
+            'color': const Color(0xffFFF9E6),
+          },
+          {
+            'title': 'PROFILE',
+            'imagePath': 'assets/icons/profile.png',
+            'color': const Color(0xffF3E5F5),
           },
         ];
 
@@ -459,6 +479,36 @@ class StudentDashboardPage extends StatelessWidget {
                     AppRoutes.marks,
                     arguments: student,
                   );
+                } else if (item['title'] == 'HOLIDAY HOME WORK') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.holidayHw,
+                    arguments: student,
+                  );
+                } else if (item['title'] == 'SYLLABUS') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.syllabus,
+                    arguments: student,
+                  );
+                } else if (item['title'] == 'TIMETABLE') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.timetable,
+                    arguments: student,
+                  );
+                } else if (item['title'] == 'DATESHEET') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.datesheet,
+                    arguments: student,
+                  );
+                } else if (item['title'] == 'PROFILE') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.profile,
+                    arguments: student,
+                  );
                 } else {
                   AppToast.show(context, "${item['title']} is Coming Soon");
                 }
@@ -474,10 +524,16 @@ class StudentDashboardPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                       ),
                       padding: const EdgeInsets.all(16),
-                      child: Image.asset(
-                        item['imagePath'] as String,
-                        fit: BoxFit.contain,
-                      ),
+                      child: item.containsKey('icon')
+                          ? Icon(
+                              item['icon'] as IconData,
+                              size: 44,
+                              color: item['iconColor'] as Color,
+                            )
+                          : Image.asset(
+                              item['imagePath'] as String,
+                              fit: BoxFit.contain,
+                            ),
                     ),
                   ),
                   const SizedBox(height: 10),

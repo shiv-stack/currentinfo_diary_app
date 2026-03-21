@@ -21,6 +21,7 @@ import 'features/student/domain/usecases/get_leaves_usecase.dart';
 import 'features/student/domain/usecases/apply_leave_usecase.dart';
 import 'features/student/domain/usecases/get_exams_usecase.dart';
 import 'features/student/domain/usecases/get_mark_details_usecase.dart';
+import 'features/student/domain/usecases/update_password_usecase.dart';
 import 'features/student/domain/repositories/student_repository.dart';
 import 'features/student/data/repositories/student_repository_impl.dart';
 import 'features/student/data/datasources/student_remote_data_source.dart';
@@ -55,6 +56,7 @@ Future<void> init() async {
       getMarkDetailsUseCase: sl(),
       getLeavesUseCase: sl(),
       applyLeaveUseCase: sl(),
+      updatePasswordUseCase: sl(),
       authLocalDataSource: sl(),
       studentLocalDataSource: sl(),
     ),
@@ -73,6 +75,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetMarkDetailsUseCase(sl()));
   sl.registerLazySingleton(() => GetLeavesUseCase(sl()));
   sl.registerLazySingleton(() => ApplyLeaveUseCase(sl()));
+  sl.registerLazySingleton(() => UpdatePasswordUseCase(repository: sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(
