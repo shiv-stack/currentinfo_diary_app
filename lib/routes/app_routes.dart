@@ -12,4 +12,5 @@ class AppRoutes {
   static const marks = '/marks';
   static const webView = '/web-view';
   static const calendar = '/calendar';
+  static const query = '/query';
 }

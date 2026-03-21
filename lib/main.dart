@@ -18,6 +18,9 @@ import 'features/auth/presentation/pages/splash_page.dart';
 import 'features/auth/presentation/pages/school_code_page.dart';
 import 'features/auth/presentation/pages/student_login_page.dart';
 import 'features/auth/presentation/pages/school_calendar_page.dart';
+import 'features/auth/presentation/pages/query_page.dart';
+import 'features/auth/presentation/bloc/query_bloc.dart';
+import 'features/auth/data/models/school_model.dart';
 import 'routes/app_routes.dart';
 import 'injection_container.dart' as di;
 
@@ -95,6 +98,18 @@ class MyApp extends StatelessWidget {
             );
           },
           AppRoutes.calendar: (_) => const SchoolCalendarPage(),
+          AppRoutes.query: (context) {
+            final args =
+                ModalRoute.of(context)!.settings.arguments
+                    as Map<String, dynamic>;
+            return BlocProvider(
+              create: (context) => di.sl<QueryBloc>(),
+              child: QueryPage(
+                school: args['school'] as SchoolModel,
+                schoolCode: args['schoolCode'] as String,
+              ),
+            );
+          },
         },
       ),
     );

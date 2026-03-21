@@ -56,17 +56,15 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
       ];
       final currentMonth = months[now.month - 1];
 
+      final formData = FormData.fromMap({
+        'login': 'general',
+        'month': currentMonth,
+      });
+
       final dio = di.sl<Dio>();
       final response = await dio.post(
         AppUrls.getCalendar(schoolCode),
-        data: {
-          'login': 'general',
-          'month': currentMonth,
-          'school_code': schoolCode,
-        },
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-        ),
+        data: formData,
       );
 
       if (response.statusCode == 200) {
@@ -498,7 +496,8 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                         'Send Query',
                         'assets/images/send_query.png',
                         const Color(0xffFFE6E6),
-                        null,
+                        AppRoutes.query,
+                        arguments: {'school': school, 'schoolCode': schoolCode},
                       ),
                       _buildHomeMenuItem(
                         context,

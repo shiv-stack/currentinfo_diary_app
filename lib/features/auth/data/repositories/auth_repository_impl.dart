@@ -29,4 +29,26 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> sendQuery({
+    required String schoolCode,
+    required String title,
+    required String name,
+    required String mobile,
+    required String message,
+  }) async {
+    try {
+      await remoteDataSource.sendQuery(
+        schoolCode: schoolCode,
+        title: title,
+        name: name,
+        mobile: mobile,
+        message: message,
+      );
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

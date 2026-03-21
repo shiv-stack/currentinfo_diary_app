@@ -7,6 +7,13 @@ import '../models/school_model.dart';
 abstract class AuthRemoteDataSource {
   Future<SchoolModel> getSchoolInfo(String code);
   Future<List<GalleryModel>> getGallery(String code);
+  Future<void> sendQuery({
+    required String schoolCode,
+    required String title,
+    required String name,
+    required String mobile,
+    required String message,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -58,6 +65,35 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         return [];
       } else {
         throw Exception("Server Error: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      throw Exception(e.message ?? "Connection Error");
+    }
+  }
+
+  @override
+  Future<void> sendQuery({
+    required String schoolCode,
+    required String title,
+    required String name,
+    required String mobile,
+    required String message,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'title': title,
+        'name': name,
+        'mobile': mobile,
+        'message': message,
+      });
+
+      final response = await dio.post(
+        AppUrls.sendQuery(schoolCode),
+        data: formData,
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception("Failed to send query");
       }
     } on DioException catch (e) {
       throw Exception(e.message ?? "Connection Error");

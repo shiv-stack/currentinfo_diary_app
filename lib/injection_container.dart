@@ -9,6 +9,8 @@ import 'features/auth/domain/usecases/get_gallery_usecase.dart';
 import 'features/auth/domain/usecases/get_school_info_usecase.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/gallery_bloc.dart';
+import 'features/auth/presentation/bloc/query_bloc.dart';
+import 'features/auth/domain/usecases/send_query_usecase.dart';
 import 'features/student/presentation/bloc/student_bloc.dart';
 import 'features/student/domain/usecases/student_login_usecase.dart';
 import 'features/student/domain/usecases/get_class_notices_usecase.dart';
@@ -41,6 +43,7 @@ Future<void> init() async {
     ),
   );
   sl.registerFactory(() => GalleryBloc(getGalleryUseCase: sl()));
+  sl.registerFactory(() => QueryBloc(sendQueryUseCase: sl()));
   sl.registerFactory(
     () => StudentBloc(
       studentLoginUseCase: sl(),
@@ -60,6 +63,7 @@ Future<void> init() async {
   // Use cases
   sl.registerLazySingleton(() => GetSchoolInfoUseCase(sl()));
   sl.registerLazySingleton(() => GetGalleryUseCase(sl()));
+  sl.registerLazySingleton(() => SendQueryUseCase(sl()));
   sl.registerLazySingleton(() => StudentLoginUseCase(sl()));
   sl.registerLazySingleton(() => GetClassNoticesUseCase(sl()));
   sl.registerLazySingleton(() => GetAttendanceUseCase(sl()));

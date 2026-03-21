@@ -34,4 +34,7 @@ class AppUrls {
 
   static String getMarks(String schoolCode) =>
       "$baseUrl/marks-record/marks-school-all/$schoolCode/";
+
+  static String sendQuery(String schoolCode) =>
+      "$baseUrl/contact-to-school/sent-message-to-school/$schoolCode/";
 }
