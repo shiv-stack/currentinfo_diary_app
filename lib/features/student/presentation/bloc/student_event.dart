@@ -142,6 +142,60 @@ class GetFees extends StudentEvent {
     cdiaryId,
     password,
     session,
-    studentFeeSoftware,
   ];
+}
+
+class GetLeaves extends StudentEvent {
+  final String schoolCode;
+  final String studentId;
+  final String password;
+
+  GetLeaves({
+    required this.schoolCode,
+    required this.studentId,
+    required this.password,
+  });
+
+  @override
+  List<Object?> get props => [schoolCode, studentId, password];
+}
+
+class ApplyLeave extends StudentEvent {
+  final String schoolCode;
+  final String studentId;
+  final String password;
+  final String studentName;
+  final String studentClass;
+  final String admissionRollNo;
+  final String session;
+  final String fromDate;
+  final String toDate;
+  final String reason;
+
+  ApplyLeave({
+    required this.schoolCode,
+    required this.studentId,
+    required this.password,
+    required this.studentName,
+    required this.studentClass,
+    required this.admissionRollNo,
+    required this.session,
+    required this.fromDate,
+    required this.toDate,
+    required this.reason,
+  });
+
+  @override
+  List<Object?> get props => [
+        schoolCode,
+        studentId,
+        password,
+        studentName,
+        studentClass,
+        admissionRollNo,
+        session,
+        fromDate,
+        toDate,
+        reason,
+      ];
 }

@@ -15,6 +15,8 @@ import 'features/student/domain/usecases/get_class_notices_usecase.dart';
 import 'features/student/domain/usecases/get_attendance_usecase.dart';
 import 'features/student/domain/usecases/get_assignments_usecase.dart';
 import 'features/student/domain/usecases/get_fees_usecase.dart';
+import 'features/student/domain/usecases/get_leaves_usecase.dart';
+import 'features/student/domain/usecases/apply_leave_usecase.dart';
 import 'features/student/domain/repositories/student_repository.dart';
 import 'features/student/data/repositories/student_repository_impl.dart';
 import 'features/student/data/datasources/student_remote_data_source.dart';
@@ -44,6 +46,8 @@ Future<void> init() async {
       getAttendanceUseCase: sl(),
       getAssignmentsUseCase: sl(),
       getFeesUseCase: sl(),
+      getLeavesUseCase: sl(),
+      applyLeaveUseCase: sl(),
       authLocalDataSource: sl(),
       studentLocalDataSource: sl(),
     ),
@@ -57,6 +61,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetAttendanceUseCase(sl()));
   sl.registerLazySingleton(() => GetAssignmentsUseCase(sl()));
   sl.registerLazySingleton(() => GetFeesUseCase(sl()));
+  sl.registerLazySingleton(() => GetLeavesUseCase(sl()));
+  sl.registerLazySingleton(() => ApplyLeaveUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(

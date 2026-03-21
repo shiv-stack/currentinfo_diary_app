@@ -8,5 +8,6 @@ class AppRoutes {
   static const attendance = '/attendance';
   static const homework = '/homework';
   static const fees = '/fees';
+  static const leave = '/leave';
   static const webView = '/web-view';
 }

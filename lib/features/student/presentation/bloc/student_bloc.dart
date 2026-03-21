@@ -4,6 +4,8 @@ import '../../domain/usecases/get_class_notices_usecase.dart';
 import '../../domain/usecases/get_attendance_usecase.dart';
 import '../../domain/usecases/get_assignments_usecase.dart';
 import '../../domain/usecases/get_fees_usecase.dart';
+import '../../domain/usecases/get_leaves_usecase.dart';
+import '../../domain/usecases/apply_leave_usecase.dart';
 import '../../../auth/data/datasources/auth_local_data_source.dart';
 import '../../data/datasources/student_local_data_source.dart';
 import '../../domain/entities/saved_student.dart';
@@ -16,6 +18,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
   final GetAttendanceUseCase getAttendanceUseCase;
   final GetAssignmentsUseCase getAssignmentsUseCase;
   final GetFeesUseCase getFeesUseCase;
+  final GetLeavesUseCase getLeavesUseCase;
+  final ApplyLeaveUseCase applyLeaveUseCase;
   final AuthLocalDataSource authLocalDataSource;
   final StudentLocalDataSource studentLocalDataSource;
 
@@ -25,6 +29,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     required this.getAttendanceUseCase,
     required this.getAssignmentsUseCase,
     required this.getFeesUseCase,
+    required this.getLeavesUseCase,
+    required this.applyLeaveUseCase,
     required this.authLocalDataSource,
     required this.studentLocalDataSource,
   }) : super(StudentInitial()) {
@@ -35,6 +41,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     on<DeleteSavedStudent>(_onDeleteSavedStudent);
     on<GetAssignments>(_onGetAssignments);
     on<GetFees>(_onGetFees);
+    on<GetLeaves>(_onGetLeaves);
+    on<ApplyLeave>(_onApplyLeave);
   }
 
   Future<void> _onLoginSubmitted(
@@ -180,6 +188,49 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     result.fold(
       (failure) => emit(FeesFailure(failure.message)),
       (fees) => emit(FeesLoaded(fees)),
+    );
+  }
+
+  Future<void> _onGetLeaves(
+    GetLeaves event,
+    Emitter<StudentState> emit,
+  ) async {
+    emit(LeavesLoading());
+
+    final result = await getLeavesUseCase(
+      schoolCode: event.schoolCode,
+      studentId: event.studentId,
+      password: event.password,
+    );
+
+    result.fold(
+      (failure) => emit(LeavesFailure(failure.message)),
+      (leaves) => emit(LeavesLoaded(leaves)),
+    );
+  }
+
+  Future<void> _onApplyLeave(
+    ApplyLeave event,
+    Emitter<StudentState> emit,
+  ) async {
+    emit(LeaveApplying());
+
+    final result = await applyLeaveUseCase(
+      schoolCode: event.schoolCode,
+      studentId: event.studentId,
+      password: event.password,
+      studentName: event.studentName,
+      studentClass: event.studentClass,
+      admissionRollNo: event.admissionRollNo,
+      session: event.session,
+      fromDate: event.fromDate,
+      toDate: event.toDate,
+      reason: event.reason,
+    );
+
+    result.fold(
+      (failure) => emit(LeaveApplyFailure(failure.message)),
+      (message) => emit(LeaveApplySuccess(message)),
     );
   }
 }

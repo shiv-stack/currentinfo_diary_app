@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:linkify/linkify.dart';
 import '../../../../core/presentation/widgets/app_loading_indicator.dart';
 
 class NoticePage extends StatelessWidget {
@@ -23,7 +22,10 @@ class NoticePage extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1A1C1E)),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Color(0xFF1A1C1E),
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           title: const Text(
@@ -43,15 +45,14 @@ class NoticePage extends StatelessWidget {
   }
 
   Widget _buildNoticeList(BuildContext context) {
-    final schoolCode = (ModalRoute.of(context)?.settings.arguments as String?) ?? "20";
+    final schoolCode =
+        (ModalRoute.of(context)?.settings.arguments as String?) ?? "20";
 
     return FutureBuilder<List<dynamic>>(
       future: _fetchNotices(schoolCode),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: const AppLoadingIndicator(),
-          );
+          return const Center(child: const AppLoadingIndicator());
         } else if (snapshot.hasError) {
           return const Center(child: Text("Error loading notices"));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -65,8 +66,10 @@ class NoticePage extends StatelessWidget {
           itemBuilder: (context, index) {
             final notice = notices[index];
             final fileUrl = notice['fileee'] as String? ?? "";
-            
-            final isImage = fileUrl.toLowerCase().contains(RegExp(r'\.(jpg|jpeg|png|gif|webp)'));
+
+            final isImage = fileUrl.toLowerCase().contains(
+              RegExp(r'\.(jpg|jpeg|png|gif|webp)'),
+            );
             final hasFile = fileUrl.isNotEmpty && !fileUrl.contains("/None");
 
             return Container(
@@ -115,7 +118,7 @@ class NoticePage extends StatelessWidget {
                           ),
                         ),
                       ),
-                    
+
                     const SizedBox(height: 16),
                     // Title (Centered)
                     Padding(
@@ -141,7 +144,10 @@ class NoticePage extends StatelessWidget {
                           onOpen: (link) async {
                             try {
                               final uri = Uri.parse(link.url);
-                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              await launchUrl(
+                                uri,
+                                mode: LaunchMode.externalApplication,
+                              );
                             } catch (e) {
                               debugPrint("Link opening error: $e");
                             }
@@ -149,7 +155,9 @@ class NoticePage extends StatelessWidget {
                           text: notice['description'] ?? '',
                           style: TextStyle(
                             fontSize: 16,
-                            color: const Color(0xFF1A1C1E).withValues(alpha: 0.8),
+                            color: const Color(
+                              0xFF1A1C1E,
+                            ).withValues(alpha: 0.8),
                             height: 1.5,
                             fontWeight: FontWeight.w500,
                           ),
@@ -168,7 +176,11 @@ class NoticePage extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: TextButton.icon(
                           onPressed: () => _handleFileDownload(fileUrl),
-                          icon: Icon(Icons.attachment_rounded, color: Theme.of(context).primaryColor, size: 20),
+                          icon: Icon(
+                            Icons.attachment_rounded,
+                            color: Theme.of(context).primaryColor,
+                            size: 20,
+                          ),
                           label: Text(
                             "View Attachment",
                             style: TextStyle(
@@ -192,7 +204,9 @@ class NoticePage extends StatelessWidget {
   Future<List<dynamic>> _fetchNotices(String schoolCode) async {
     try {
       final dio = Dio();
-      final response = await dio.get("https://www.currentdiary.com/school-notice/api-school-info-detail-school/$schoolCode/");
+      final response = await dio.get(
+        "https://www.currentdiary.com/school-notice/api-school-info-detail-school/$schoolCode/",
+      );
       if (response.statusCode == 200) {
         return response.data as List<dynamic>;
       }

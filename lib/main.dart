@@ -10,6 +10,7 @@ import 'features/student/presentation/pages/class_notice_page.dart';
 import 'features/student/presentation/pages/attendance_page.dart';
 import 'features/student/presentation/pages/assignment_page.dart';
 import 'features/student/presentation/pages/fee_page.dart';
+import 'features/student/presentation/pages/leave_page.dart';
 import 'widgets/webview_page.dart';
 import 'features/student/data/models/student_model.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
@@ -71,6 +72,11 @@ class MyApp extends StatelessWidget {
             final student =
                 ModalRoute.of(context)!.settings.arguments as StudentModel;
             return FeePage(student: student);
+          },
+          AppRoutes.leave: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return LeavePage(student: student);
           },
           AppRoutes.webView: (context) {
             final args =

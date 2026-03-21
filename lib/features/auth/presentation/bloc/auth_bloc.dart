@@ -123,6 +123,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (school.feeSoftware != null) {
           await localDataSource.cacheFeeSoftware(school.feeSoftware!);
         }
+        if (school.leaveOptionInApp != null) {
+          await localDataSource.cacheLeaveOption(school.leaveOptionInApp!);
+        }
         emit(AuthSuccess(
             message: "Data Updated", school: school, schoolCode: storedCode));
       },
@@ -155,6 +158,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
       if (school.feeSoftware != null) {
         await localDataSource.cacheFeeSoftware(school.feeSoftware!);
+      }
+      if (school.leaveOptionInApp != null) {
+        await localDataSource.cacheLeaveOption(school.leaveOptionInApp!);
       }
       emit(
         AuthSuccess(

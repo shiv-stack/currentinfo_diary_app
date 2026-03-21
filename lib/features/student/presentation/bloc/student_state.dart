@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../data/models/student_model.dart';
+import '../../data/models/leave_model.dart';
 
 abstract class StudentState extends Equatable {
   @override
@@ -9,7 +10,7 @@ abstract class StudentState extends Equatable {
 class StudentInitial extends StudentState {}
 
 class StudentLoading extends StudentState {}
-
+// ... existing states ...
 class StudentLoginSuccess extends StudentState {
   final StudentModel student;
 
@@ -107,6 +108,42 @@ class FeesLoaded extends StudentState {
 class FeesFailure extends StudentState {
   final String message;
   FeesFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class LeavesLoading extends StudentState {}
+
+class LeavesLoaded extends StudentState {
+  final List<LeaveModel> leaves;
+  LeavesLoaded(this.leaves);
+
+  @override
+  List<Object?> get props => [leaves];
+}
+
+class LeavesFailure extends StudentState {
+  final String message;
+  LeavesFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class LeaveApplying extends StudentState {}
+
+class LeaveApplySuccess extends StudentState {
+  final String message;
+  LeaveApplySuccess(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class LeaveApplyFailure extends StudentState {
+  final String message;
+  LeaveApplyFailure(this.message);
 
   @override
   List<Object?> get props => [message];

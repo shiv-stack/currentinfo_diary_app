@@ -340,10 +340,14 @@ class StudentDashboardPage extends StatelessWidget {
   }
 
   Widget _buildActionGrid(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: sl<AuthLocalDataSource>().isOnlineFeeSubmitEnabled(),
+    return FutureBuilder<List<bool>>(
+      future: Future.wait([
+        sl<AuthLocalDataSource>().isOnlineFeeSubmitEnabled(),
+        sl<AuthLocalDataSource>().isLeaveOptionEnabled(),
+      ]),
       builder: (context, snapshot) {
-        final bool isFeesEnabled = snapshot.data ?? false;
+        final bool isFeesEnabled = snapshot.data?[0] ?? false;
+        final bool isLeaveEnabled = snapshot.data?[1] ?? false;
 
         final actions = [
           {
@@ -435,6 +439,20 @@ class StudentDashboardPage extends StatelessWidget {
                     AppRoutes.fees,
                     arguments: student,
                   );
+                } else if (item['title'] == 'APPLY LEAVE') {
+                  if (isLeaveEnabled) {
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.leave,
+                      arguments: student,
+                    );
+                  } else {
+                    AppToast.show(
+                      context,
+                      "This option is not active for your school",
+                      isError: true,
+                    );
+                  }
                 } else {
                   AppToast.show(context, "${item['title']} is Coming Soon");
                 }

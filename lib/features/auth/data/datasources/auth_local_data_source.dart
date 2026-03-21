@@ -23,6 +23,8 @@ abstract class AuthLocalDataSource {
   Future<bool> isOnlineFeeSubmitEnabled();
   Future<void> cacheFeeSoftware(String value);
   Future<String?> getCachedFeeSoftware();
+  Future<void> cacheLeaveOption(String value);
+  Future<bool> isLeaveOptionEnabled();
   Future<void> clearActiveStudentSession();
   Future<void> clearAuthData();
 }
@@ -40,6 +42,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   static const String _sessionKey = 'cached_session';
   static const String _feeSubmitKey = 'fee_submit_enabled';
   static const String _feeSoftwareKey = 'fee_software_type';
+  static const String _leaveOptionKey = 'leave_option_enabled';
 
   @override
   Future<void> cacheSchoolCode(String code) async {
@@ -168,6 +171,17 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
+  Future<void> cacheLeaveOption(String value) async {
+    await sharedPreferences.setString(_leaveOptionKey, value);
+  }
+
+  @override
+  Future<bool> isLeaveOptionEnabled() async {
+    final val = sharedPreferences.getString(_leaveOptionKey);
+    return val == "Active";
+  }
+
+  @override
   Future<void> clearActiveStudentSession() async {
     await sharedPreferences.remove(_activeStudentKey);
   }
@@ -182,5 +196,6 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     await sharedPreferences.remove(_sessionKey);
     await sharedPreferences.remove(_feeSubmitKey);
     await sharedPreferences.remove(_feeSoftwareKey);
+    await sharedPreferences.remove(_leaveOptionKey);
   }
 }

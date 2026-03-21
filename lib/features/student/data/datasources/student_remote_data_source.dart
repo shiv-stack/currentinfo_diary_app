@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import '../../../../core/constants/app_urls.dart';
 import '../models/student_model.dart';
+import '../models/leave_model.dart';
 
 abstract class StudentRemoteDataSource {
   Future<StudentModel> login({
@@ -45,6 +46,25 @@ abstract class StudentRemoteDataSource {
     required String password,
     required String session,
     required String studentFeeSoftware,
+  });
+
+  Future<List<LeaveModel>> getLeaves({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+  });
+
+  Future<String> applyLeave({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+    required String studentName,
+    required String studentClass,
+    required String admissionRollNo,
+    required String session,
+    required String fromDate,
+    required String toDate,
+    required String reason,
   });
 }
 
@@ -241,6 +261,101 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         return response.data as List<dynamic>;
       }
       return [];
+    } on DioException catch (e) {
+      throw Exception(e.message ?? "Connection Error");
+    }
+  }
+
+  @override
+  Future<List<LeaveModel>> getLeaves({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'task': 'leaveapply',
+        'modify': 'show',
+        'login': studentId,
+        'password': password,
+        'studentc': 'Student',
+        'teacherid': studentId,
+      });
+
+      final response = await dio.post(
+        AppUrls.getMultitask(schoolCode),
+        data: formData,
+      );
+
+      if (response.statusCode == 200) {
+        final dynamic rawData = response.data;
+        List<dynamic> dataList = [];
+
+        if (rawData is List) {
+          dataList = rawData;
+        } else if (rawData is String && rawData.trim().isNotEmpty) {
+          try {
+            final dynamic decoded = jsonDecode(rawData.trim());
+            if (decoded is List) {
+              dataList = decoded;
+            }
+          } catch (e) {
+            // Not a JSON list, return empty
+            return [];
+          }
+        }
+
+        return dataList.map((json) => LeaveModel.fromJson(json)).toList();
+      }
+      return [];
+    } on DioException catch (e) {
+      throw Exception(e.message ?? "Connection Error");
+    }
+  }
+
+  @override
+  Future<String> applyLeave({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+    required String studentName,
+    required String studentClass,
+    required String admissionRollNo,
+    required String session,
+    required String fromDate,
+    required String toDate,
+    required String reason,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'task': 'leaveapply',
+        'login': studentId,
+        'password': password,
+        'studentc': 'Student',
+        'modify': 'create',
+        'teacherid': studentId,
+        'teachername': studentName,
+        'teacherclass': studentClass,
+        'admissionrollno': admissionRollNo,
+        'sessionvalue': session,
+        'transportvalue': 'NA',
+        'fromdate': fromDate,
+        'todate': toDate,
+        'halfdayvalue': 'NA',
+        'halfdayvalue2': 'NA',
+        'reasonsforleave': reason,
+      });
+
+      final response = await dio.post(
+        AppUrls.getMultitask(schoolCode),
+        data: formData,
+        options: Options(responseType: ResponseType.plain),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data.toString().trim();
+      }
+      throw Exception("Server Error: ${response.statusCode}");
     } on DioException catch (e) {
       throw Exception(e.message ?? "Connection Error");
     }

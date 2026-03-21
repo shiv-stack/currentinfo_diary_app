@@ -3,6 +3,7 @@ import '../../../../core/error/failures.dart';
 import '../../domain/repositories/student_repository.dart';
 import '../datasources/student_remote_data_source.dart';
 import '../models/student_model.dart';
+import '../models/leave_model.dart';
 
 class StudentRepositoryImpl implements StudentRepository {
   final StudentRemoteDataSource remoteDataSource;
@@ -120,6 +121,56 @@ class StudentRepositoryImpl implements StudentRepository {
         studentFeeSoftware: studentFeeSoftware,
       );
       return Right(fees);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<LeaveModel>>> getLeaves({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+  }) async {
+    try {
+      final leaves = await remoteDataSource.getLeaves(
+        schoolCode: schoolCode,
+        studentId: studentId,
+        password: password,
+      );
+      return Right(leaves);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> applyLeave({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+    required String studentName,
+    required String studentClass,
+    required String admissionRollNo,
+    required String session,
+    required String fromDate,
+    required String toDate,
+    required String reason,
+  }) async {
+    try {
+      final result = await remoteDataSource.applyLeave(
+        schoolCode: schoolCode,
+        studentId: studentId,
+        password: password,
+        studentName: studentName,
+        studentClass: studentClass,
+        admissionRollNo: admissionRollNo,
+        session: session,
+        fromDate: fromDate,
+        toDate: toDate,
+        reason: reason,
+      );
+      return Right(result);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
