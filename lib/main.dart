@@ -11,11 +11,13 @@ import 'features/student/presentation/pages/attendance_page.dart';
 import 'features/student/presentation/pages/assignment_page.dart';
 import 'features/student/presentation/pages/fee_page.dart';
 import 'features/student/presentation/pages/leave_page.dart';
+import 'features/student/presentation/pages/marks_page.dart';
 import 'widgets/webview_page.dart';
 import 'features/student/data/models/student_model.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
 import 'features/auth/presentation/pages/school_code_page.dart';
 import 'features/auth/presentation/pages/student_login_page.dart';
+import 'features/auth/presentation/pages/school_calendar_page.dart';
 import 'routes/app_routes.dart';
 import 'injection_container.dart' as di;
 
@@ -78,6 +80,11 @@ class MyApp extends StatelessWidget {
                 ModalRoute.of(context)!.settings.arguments as StudentModel;
             return LeavePage(student: student);
           },
+          AppRoutes.marks: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return MarksPage(student: student);
+          },
           AppRoutes.webView: (context) {
             final args =
                 ModalRoute.of(context)!.settings.arguments
@@ -87,6 +94,7 @@ class MyApp extends StatelessWidget {
               url: args['url'] as String,
             );
           },
+          AppRoutes.calendar: (_) => const SchoolCalendarPage(),
         },
       ),
     );

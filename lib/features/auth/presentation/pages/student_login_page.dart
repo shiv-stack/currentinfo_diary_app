@@ -22,10 +22,22 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
   bool _isPasswordVisible = false;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  String? _currentSchoolCode;
+
   @override
   void initState() {
     super.initState();
-    context.read<StudentBloc>().add(GetSavedStudents());
+    _loadSchoolCodeAndSavedStudents();
+  }
+
+  void _loadSchoolCodeAndSavedStudents() async {
+    final code = await di.sl<AuthLocalDataSource>().getCachedSchoolCode();
+    if (mounted) {
+      setState(() {
+        _currentSchoolCode = code;
+      });
+      context.read<StudentBloc>().add(GetSavedStudents());
+    }
   }
 
   void _onLoginPressed(
@@ -220,45 +232,50 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                                   SizedBox(
                                     width: double.infinity,
                                     height: 60,
-                                    child: BlocBuilder<StudentBloc, StudentState>(
-                                      builder: (context, state) {
-                                        final isLoading =
-                                            state is StudentLoading;
-                                        return ElevatedButton(
-                                          onPressed: isLoading
-                                              ? null
-                                              : () => _onLoginPressed(context),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Theme.of(
-                                              context,
-                                            ).primaryColor,
-                                            foregroundColor: Colors.white,
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                            ),
-                                          ),
-                                          child: isLoading
-                                              ? const SizedBox(
-                                                  height: 24,
-                                                  width: 24,
-                                                  child: AppLoadingIndicator(
-                                                    centered: false,
-                                                    color: Colors.white,
-                                                    strokeWidth: 2,
-                                                  ),
-                                                )
-                                              : const Text(
-                                                  "SIGN IN",
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.w900,
-                                                    letterSpacing: 1.0,
-                                                  ),
+                                    child:
+                                        BlocBuilder<StudentBloc, StudentState>(
+                                          builder: (context, state) {
+                                            final isLoading =
+                                                state is StudentLoading;
+                                            return ElevatedButton(
+                                              onPressed: isLoading
+                                                  ? null
+                                                  : () => _onLoginPressed(
+                                                      context,
+                                                    ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Theme.of(
+                                                  context,
+                                                ).primaryColor,
+                                                foregroundColor: Colors.white,
+                                                elevation: 0,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
                                                 ),
-                                        );
-                                      },
-                                    ),
+                                              ),
+                                              child: isLoading
+                                                  ? const SizedBox(
+                                                      height: 24,
+                                                      width: 24,
+                                                      child:
+                                                          AppLoadingIndicator(
+                                                            centered: false,
+                                                            color: Colors.white,
+                                                            strokeWidth: 2,
+                                                          ),
+                                                    )
+                                                  : const Text(
+                                                      "SIGN IN",
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        letterSpacing: 1.0,
+                                                      ),
+                                                    ),
+                                            );
+                                          },
+                                        ),
                                   ),
                                 ],
                               ),
@@ -285,6 +302,12 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
       buildWhen: (previous, current) => current is SavedStudentsLoaded,
       builder: (context, state) {
         if (state is SavedStudentsLoaded && state.savedStudents.isNotEmpty) {
+          final filteredStudents = state.savedStudents
+              .where((s) => s.schoolCode == _currentSchoolCode)
+              .toList();
+
+          if (filteredStudents.isEmpty) return const SizedBox.shrink();
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -301,7 +324,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                     ),
                   ),
                   Text(
-                    "${state.savedStudents.length}/5",
+                    "${filteredStudents.length}/5",
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
@@ -315,9 +338,9 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                 height: 100,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: state.savedStudents.length,
+                  itemCount: filteredStudents.length,
                   itemBuilder: (context, index) {
-                    final student = state.savedStudents[index];
+                    final student = filteredStudents[index];
                     return Container(
                       width: 80,
                       margin: const EdgeInsets.only(right: 16),

@@ -59,19 +59,35 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: Color(0xFF1A1C1E)),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: const Text(
-            "Class Notices",
-            style: TextStyle(
-              color: Color(0xFF1A1C1E),
-              fontWeight: FontWeight.w900,
-              fontSize: 20,
-              letterSpacing: -0.5,
+          toolbarHeight: 70,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1A1C1E), size: 20),
+              onPressed: () => Navigator.pop(context),
             ),
+          ),
+          title: const Column(
+            children: [
+              Text(
+                "Class Update",
+                style: TextStyle(
+                  color: Color(0xFF1A1C1E),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 22,
+                  letterSpacing: -0.8,
+                ),
+              ),
+              Text(
+                "Direct messages from your teachers",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
           ),
           centerTitle: true,
         ),
@@ -80,144 +96,184 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
             if (state is ClassNoticesLoading) {
               return const AppLoadingIndicator();
             } else if (state is ClassNoticesFailure) {
-              return Center(child: Text(state.message));
+              return Center(child: Text(state.message, style: const TextStyle(fontWeight: FontWeight.w700)));
             } else if (state is ClassNoticesLoaded) {
               if (state.notices.isEmpty) {
-                return const Center(child: Text("No class notices available"));
+                return _buildEmptyState();
               }
               return ListView.builder(
                 itemCount: state.notices.length,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                 itemBuilder: (context, index) {
-                  final notice = state.notices[index];
-                  final fileUrl = notice['fileee'] as String? ?? "";
-                  final isImage = fileUrl
-                      .toLowerCase()
-                      .contains(RegExp(r'\.(jpg|jpeg|png|gif|webp)'));
-                  final hasFile =
-                      fileUrl.isNotEmpty && !fileUrl.contains("/None");
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 15,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Text(
-                              notice['time'] ?? '',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1A1C1E),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          if (isImage && hasFile)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Image.network(
-                                  fileUrl,
-                                  width: double.infinity,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (c, e, s) =>
-                                      const SizedBox.shrink(),
-                                ),
-                              ),
-                            ),
-                          const SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Text(
-                              notice['title'] ?? 'Notice',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF1A1C1E),
-                                letterSpacing: -0.3,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Linkify(
-                                onOpen: (link) async {
-                                  try {
-                                    final uri = Uri.parse(link.url);
-                                    await launchUrl(uri,
-                                        mode: LaunchMode.externalApplication);
-                                  } catch (e) {
-                                    debugPrint("Link opening error: $e");
-                                  }
-                                },
-                                text: notice['description'] ?? '',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: const Color(0xFF1A1C1E)
-                                      .withValues(alpha: 0.8),
-                                  height: 1.5,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                linkStyle: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.w700,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          ),
-                          if (hasFile && !isImage) ...[
-                            const SizedBox(height: 12),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              child: TextButton.icon(
-                                onPressed: () => _handleFileDownload(fileUrl),
-                                icon: Icon(Icons.attachment_rounded,
-                                    color: Theme.of(context).primaryColor,
-                                    size: 20),
-                                label: Text(
-                                  "View Attachment",
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  );
+                  return _buildNoticeCard(context, state.notices[index]);
                 },
               );
             }
             return const SizedBox.shrink();
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildNoticeCard(BuildContext context, dynamic notice) {
+    final fileUrl = notice['fileee'] as String? ?? "";
+    final isImage = fileUrl.toLowerCase().contains(RegExp(r'\.(jpg|jpeg|png|gif|webp)'));
+    final hasFile = fileUrl.isNotEmpty && !fileUrl.contains("/None");
+    final Color primaryColor = Theme.of(context).primaryColor;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 22),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.04),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(color: primaryColor, shape: BoxShape.circle),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      notice['time']?.toString().toUpperCase() ?? 'CLASS UPDATE',
+                      style: TextStyle(
+                        color: primaryColor.withValues(alpha: 0.8),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+                if (hasFile && !isImage)
+                  InkWell(
+                    onTap: () => _handleFileDownload(fileUrl),
+                    child: Row(
+                      children: [
+                        Text(
+                          "VIEW",
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 11,
+                            letterSpacing: 0.5,
+                      ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.arrow_right_alt_rounded, color: primaryColor, size: 16),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (isImage && hasFile)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.network(
+                  fileUrl,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (c, e, s) => const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  notice['title'] ?? 'Section Update',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF1A1C1E),
+                    letterSpacing: -0.6,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Linkify(
+                  onOpen: (link) async {
+                    try {
+                      final uri = Uri.parse(link.url);
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    } catch (e) {
+                      debugPrint("Link opening error: $e");
+                    }
+                  },
+                  text: notice['description'] ?? '',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: const Color(0xFF1A1C1E).withValues(alpha: 0.65),
+                    height: 1.7,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  linkStyle: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.w800,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(30),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 30, offset: const Offset(0, 10)),
+              ],
+            ),
+            child: Icon(Icons.notifications_none_rounded, size: 70, color: Colors.grey.shade300),
+          ),
+          const SizedBox(height: 30),
+          const Text(
+            "No active notices",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF1A1C1E), letterSpacing: -0.5),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "Stay tuned for messages from your school.",
+            style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+        ],
       ),
     );
   }
@@ -235,4 +291,3 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
     }
   }
 }
-

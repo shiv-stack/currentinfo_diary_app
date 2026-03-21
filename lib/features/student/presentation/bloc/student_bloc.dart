@@ -6,6 +6,8 @@ import '../../domain/usecases/get_assignments_usecase.dart';
 import '../../domain/usecases/get_fees_usecase.dart';
 import '../../domain/usecases/get_leaves_usecase.dart';
 import '../../domain/usecases/apply_leave_usecase.dart';
+import '../../domain/usecases/get_exams_usecase.dart';
+import '../../domain/usecases/get_mark_details_usecase.dart';
 import '../../../auth/data/datasources/auth_local_data_source.dart';
 import '../../data/datasources/student_local_data_source.dart';
 import '../../domain/entities/saved_student.dart';
@@ -18,6 +20,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
   final GetAttendanceUseCase getAttendanceUseCase;
   final GetAssignmentsUseCase getAssignmentsUseCase;
   final GetFeesUseCase getFeesUseCase;
+  final GetExamsUseCase getExamsUseCase;
+  final GetMarkDetailsUseCase getMarkDetailsUseCase;
   final GetLeavesUseCase getLeavesUseCase;
   final ApplyLeaveUseCase applyLeaveUseCase;
   final AuthLocalDataSource authLocalDataSource;
@@ -29,6 +33,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     required this.getAttendanceUseCase,
     required this.getAssignmentsUseCase,
     required this.getFeesUseCase,
+    required this.getExamsUseCase,
+    required this.getMarkDetailsUseCase,
     required this.getLeavesUseCase,
     required this.applyLeaveUseCase,
     required this.authLocalDataSource,
@@ -41,6 +47,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     on<DeleteSavedStudent>(_onDeleteSavedStudent);
     on<GetAssignments>(_onGetAssignments);
     on<GetFees>(_onGetFees);
+    on<GetExams>(_onGetExams);
+    on<GetMarkDetails>(_onGetMarkDetails);
     on<GetLeaves>(_onGetLeaves);
     on<ApplyLeave>(_onApplyLeave);
   }
@@ -206,6 +214,47 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     result.fold(
       (failure) => emit(LeavesFailure(failure.message)),
       (leaves) => emit(LeavesLoaded(leaves)),
+    );
+  }
+
+  Future<void> _onGetExams(
+    GetExams event,
+    Emitter<StudentState> emit,
+  ) async {
+    emit(ExamsLoading());
+
+    final result = await getExamsUseCase(
+      schoolCode: event.schoolCode,
+      studentId: event.studentId,
+      password: event.password,
+      session: event.session,
+    );
+
+    result.fold(
+      (failure) => emit(ExamsFailure(failure.message)),
+      (exams) => emit(ExamsLoaded(exams)),
+    );
+  }
+
+  Future<void> _onGetMarkDetails(
+    GetMarkDetails event,
+    Emitter<StudentState> emit,
+  ) async {
+    emit(MarkDetailsLoading());
+
+    final result = await getMarkDetailsUseCase(
+      schoolCode: event.schoolCode,
+      studentId: event.studentId,
+      password: event.password,
+      session: event.session,
+      marksClass: event.marksClass,
+      marksYear: event.marksYear,
+      marksExam: event.marksExam,
+    );
+
+    result.fold(
+      (failure) => emit(MarkDetailsFailure(failure.message)),
+      (details) => emit(MarkDetailsLoaded(details)),
     );
   }
 

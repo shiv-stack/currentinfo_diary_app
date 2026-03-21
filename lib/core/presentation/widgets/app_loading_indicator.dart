@@ -16,11 +16,17 @@ class AppLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final indicator = CircularProgressIndicator.adaptive(
-      value: value,
-      valueColor: color != null ? AlwaysStoppedAnimation<Color>(color!) : null,
-      strokeWidth: strokeWidth,
-    );
+    final indicator = value != null
+        ? CircularProgressIndicator(
+            value: value,
+            valueColor: color != null ? AlwaysStoppedAnimation<Color>(color!) : null,
+            strokeWidth: strokeWidth,
+            backgroundColor: color?.withValues(alpha: 0.2),
+          )
+        : CircularProgressIndicator.adaptive(
+            valueColor: color != null ? AlwaysStoppedAnimation<Color>(color!) : null,
+            strokeWidth: strokeWidth,
+          );
 
     if (centered) {
       return Center(child: indicator);

@@ -199,3 +199,51 @@ class ApplyLeave extends StudentEvent {
         reason,
       ];
 }
+
+class GetExams extends StudentEvent {
+  final String schoolCode;
+  final String studentId;
+  final String password;
+  final String session;
+
+  GetExams({
+    required this.schoolCode,
+    required this.studentId,
+    required this.password,
+    required this.session,
+  });
+
+  @override
+  List<Object?> get props => [schoolCode, studentId, password, session];
+}
+
+class GetMarkDetails extends StudentEvent {
+  final String schoolCode;
+  final String studentId;
+  final String password;
+  final String session;
+  final String marksClass;
+  final String marksYear;
+  final String marksExam;
+
+  GetMarkDetails({
+    required this.schoolCode,
+    required this.studentId,
+    required this.password,
+    required this.session,
+    required this.marksClass,
+    required this.marksYear,
+    required this.marksExam,
+  });
+
+  @override
+  List<Object?> get props => [
+        schoolCode,
+        studentId,
+        password,
+        session,
+        marksClass,
+        marksYear,
+        marksExam,
+      ];
+}

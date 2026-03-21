@@ -21,21 +21,39 @@ class NoticePage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Color(0xFF1A1C1E),
+          toolbarHeight: 70,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Color(0xFF1A1C1E),
+                size: 20,
+              ),
+              onPressed: () => Navigator.pop(context),
             ),
-            onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
-            "School Notices",
-            style: TextStyle(
-              color: Color(0xFF1A1C1E),
-              fontWeight: FontWeight.w900,
-              fontSize: 20,
-              letterSpacing: -0.5,
-            ),
+          title: const Column(
+            children: [
+              Text(
+                "School Notices",
+                style: TextStyle(
+                  color: Color(0xFF1A1C1E),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 22,
+                  letterSpacing: -0.8,
+                ),
+              ),
+              Text(
+                "Official Updates & Announcements",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
           ),
           centerTitle: true,
         ),
@@ -45,159 +63,202 @@ class NoticePage extends StatelessWidget {
   }
 
   Widget _buildNoticeList(BuildContext context) {
-    final schoolCode =
-        (ModalRoute.of(context)?.settings.arguments as String?) ?? "20";
+    final schoolCode = (ModalRoute.of(context)?.settings.arguments as String?) ?? "20";
 
     return FutureBuilder<List<dynamic>>(
       future: _fetchNotices(schoolCode),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: const AppLoadingIndicator());
+          return const Center(child: AppLoadingIndicator());
         } else if (snapshot.hasError) {
-          return const Center(child: Text("Error loading notices"));
+          return _buildErrorState("Error loading notices");
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text("No notices available"));
+          return _buildEmptyState();
         }
 
         final notices = snapshot.data!;
         return ListView.builder(
           itemCount: notices.length,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           itemBuilder: (context, index) {
-            final notice = notices[index];
-            final fileUrl = notice['fileee'] as String? ?? "";
-
-            final isImage = fileUrl.toLowerCase().contains(
-              RegExp(r'\.(jpg|jpeg|png|gif|webp)'),
-            );
-            final hasFile = fileUrl.isNotEmpty && !fileUrl.contains("/None");
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 15,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Header Date & Time (Centered)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        notice['time'] ?? '',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1A1C1E),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Image Section (Full image, natural height)
-                    if (isImage && hasFile)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.network(
-                            fileUrl,
-                            width: double.infinity,
-                            fit: BoxFit.contain,
-                            errorBuilder: (c, e, s) => const SizedBox.shrink(),
-                          ),
-                        ),
-                      ),
-
-                    const SizedBox(height: 16),
-                    // Title (Centered)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Text(
-                        notice['title'] ?? 'Notice',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF1A1C1E),
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Description (Left Aligned)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Linkify(
-                          onOpen: (link) async {
-                            try {
-                              final uri = Uri.parse(link.url);
-                              await launchUrl(
-                                uri,
-                                mode: LaunchMode.externalApplication,
-                              );
-                            } catch (e) {
-                              debugPrint("Link opening error: $e");
-                            }
-                          },
-                          text: notice['description'] ?? '',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: const Color(
-                              0xFF1A1C1E,
-                            ).withValues(alpha: 0.8),
-                            height: 1.5,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          linkStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.w700,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ),
-                    // TextButton for Attachments (If any)
-                    if (hasFile && !isImage) ...[
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: TextButton.icon(
-                          onPressed: () => _handleFileDownload(fileUrl),
-                          icon: Icon(
-                            Icons.attachment_rounded,
-                            color: Theme.of(context).primaryColor,
-                            size: 20,
-                          ),
-                          label: Text(
-                            "View Attachment",
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            );
+            return _buildNoticeCard(context, notices[index]);
           },
         );
       },
+    );
+  }
+
+  Widget _buildNoticeCard(BuildContext context, dynamic notice) {
+    final fileUrl = notice['fileee'] as String? ?? "";
+    final isImage = fileUrl.toLowerCase().contains(RegExp(r'\.(jpg|jpeg|png|gif|webp)'));
+    final hasFile = fileUrl.isNotEmpty && !fileUrl.contains("/None");
+    final Color primaryColor = Theme.of(context).primaryColor;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 22),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Modern Header
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.04),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      notice['time']?.toString().toUpperCase() ?? 'RECENT',
+                      style: TextStyle(
+                        color: primaryColor.withValues(alpha: 0.8),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+                if (hasFile && !isImage)
+                  InkWell(
+                    onTap: () => _handleFileDownload(fileUrl),
+                    child: Row(
+                      children: [
+                        Text(
+                          "VIEW",
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 11,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.arrow_right_alt_rounded, color: primaryColor, size: 16),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          if (isImage && hasFile)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.network(
+                  fileUrl,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (c, e, s) => const SizedBox.shrink(),
+                ),
+              ),
+            ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  notice['title'] ?? 'Important Notice',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF1A1C1E),
+                    letterSpacing: -0.6,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Linkify(
+                  onOpen: (link) async {
+                    try {
+                      final uri = Uri.parse(link.url);
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    } catch (e) {
+                      debugPrint("Link opening error: $e");
+                    }
+                  },
+                  text: notice['description'] ?? '',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: const Color(0xFF1A1C1E).withValues(alpha: 0.65),
+                    height: 1.7,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  linkStyle: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.w800,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(30),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 30, offset: const Offset(0, 10)),
+              ],
+            ),
+            child: Icon(Icons.notifications_none_rounded, size: 70, color: Colors.grey.shade300),
+          ),
+          const SizedBox(height: 30),
+          const Text(
+            "No active notices",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF1A1C1E), letterSpacing: -0.5),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "Everything is up to date.",
+            style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Text(message, style: const TextStyle(fontWeight: FontWeight.w700)),
     );
   }
 

@@ -4,6 +4,8 @@ import '../../domain/repositories/student_repository.dart';
 import '../datasources/student_remote_data_source.dart';
 import '../models/student_model.dart';
 import '../models/leave_model.dart';
+import '../models/exam_model.dart';
+import '../models/mark_detail_model.dart';
 
 class StudentRepositoryImpl implements StudentRepository {
   final StudentRemoteDataSource remoteDataSource;
@@ -121,6 +123,52 @@ class StudentRepositoryImpl implements StudentRepository {
         studentFeeSoftware: studentFeeSoftware,
       );
       return Right(fees);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ExamModel>>> getExams({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+    required String session,
+  }) async {
+    try {
+      final exams = await remoteDataSource.getExams(
+        schoolCode: schoolCode,
+        studentId: studentId,
+        password: password,
+        session: session,
+      );
+      return Right(exams);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<MarkDetailModel>>> getMarkDetails({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+    required String session,
+    required String marksClass,
+    required String marksYear,
+    required String marksExam,
+  }) async {
+    try {
+      final details = await remoteDataSource.getMarkDetails(
+        schoolCode: schoolCode,
+        studentId: studentId,
+        password: password,
+        session: session,
+        marksClass: marksClass,
+        marksYear: marksYear,
+        marksExam: marksExam,
+      );
+      return Right(details);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

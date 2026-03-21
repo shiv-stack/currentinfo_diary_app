@@ -2,6 +2,8 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../data/models/student_model.dart';
 import '../../data/models/leave_model.dart';
+import '../../data/models/exam_model.dart';
+import '../../data/models/mark_detail_model.dart';
 
 abstract class StudentRepository {
   Future<Either<Failure, StudentModel>> login({
@@ -45,6 +47,23 @@ abstract class StudentRepository {
     required String password,
     required String session,
     required String studentFeeSoftware,
+  });
+
+  Future<Either<Failure, List<ExamModel>>> getExams({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+    required String session,
+  });
+
+  Future<Either<Failure, List<MarkDetailModel>>> getMarkDetails({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+    required String session,
+    required String marksClass,
+    required String marksYear,
+    required String marksExam,
   });
 
   Future<Either<Failure, List<LeaveModel>>> getLeaves({

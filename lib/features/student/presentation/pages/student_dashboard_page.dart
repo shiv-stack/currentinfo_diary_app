@@ -453,6 +453,12 @@ class StudentDashboardPage extends StatelessWidget {
                       isError: true,
                     );
                   }
+                } else if (item['title'] == 'MARKS') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.marks,
+                    arguments: student,
+                  );
                 } else {
                   AppToast.show(context, "${item['title']} is Coming Soon");
                 }

@@ -10,7 +10,11 @@ import 'package:current_diary_app/widgets/webview_page.dart';
 import 'package:current_diary_app/routes/app_routes.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
+import 'package:dio/dio.dart';
+import '../../../../core/constants/app_urls.dart';
 import '../bloc/auth_state.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../../injection_container.dart' as di;
 
 class SchoolCodePage extends StatefulWidget {
   const SchoolCodePage({super.key});
@@ -21,9 +25,71 @@ class SchoolCodePage extends StatefulWidget {
 
 class _SchoolCodePageState extends State<SchoolCodePage> {
   final TextEditingController controller = TextEditingController();
+  List<dynamic> _calendarData = [];
+  bool _isCalendarLoading = false;
+  String? _loadedCalendarSchoolCode;
+
   @override
   void initState() {
     super.initState();
+  }
+
+  Future<void> _fetchCalendarData(String schoolCode) async {
+    if (_isCalendarLoading || _loadedCalendarSchoolCode == schoolCode) return;
+
+    setState(() => _isCalendarLoading = true);
+    try {
+      final now = DateTime.now();
+      final months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      final currentMonth = months[now.month - 1];
+
+      final dio = di.sl<Dio>();
+      final response = await dio.post(
+        AppUrls.getCalendar(schoolCode),
+        data: {
+          'login': 'general',
+          'month': currentMonth,
+          'school_code': schoolCode,
+        },
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final dynamic data = response.data;
+        List<dynamic> list = [];
+        if (data is List) {
+          list = data;
+        } else if (data is Map && data.containsKey('data')) {
+          list = data['data'] as List;
+        }
+
+        if (mounted) {
+          setState(() {
+            _calendarData = list;
+            _loadedCalendarSchoolCode = schoolCode;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Calendar Fetch Error: $e");
+    } finally {
+      if (mounted) setState(() => _isCalendarLoading = false);
+    }
   }
 
   @override
@@ -32,6 +98,9 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
       listener: (context, state) {
         if (state is AuthSuccess) {
           AppToast.show(context, state.message);
+          if (state.schoolCode != null) {
+            _fetchCalendarData(state.schoolCode!);
+          }
         } else if (state is AuthError) {
           AppToast.show(context, "Invalid School Code", isError: true);
         }
@@ -302,15 +371,15 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                               children: [
                                 Icon(
                                   Icons.link_off_rounded,
-                                  color: Colors.redAccent,
+                                  color: AppColors.primary,
                                   size: 20,
                                 ),
                                 SizedBox(width: 12),
                                 Text(
-                                  "Disconnect",
+                                  "Change School",
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.redAccent,
+                                    color: AppColors.primary,
                                   ),
                                 ),
                               ],
@@ -475,6 +544,14 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                       ),
                       _buildHomeMenuItem(
                         context,
+                        'Calendar',
+                        'assets/images/calendar.png',
+                        const Color(0xffDCF8EF),
+                        AppRoutes.calendar,
+                        arguments: schoolCode,
+                      ),
+                      _buildHomeMenuItem(
+                        context,
                         'Web Visitor',
                         'assets/images/visitor.png',
                         const Color(0xffF2F2F2),
@@ -483,6 +560,8 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                     ],
                   ),
                 ),
+
+                _buildCalendarSection(),
 
                 const SizedBox(height: 18),
 
@@ -500,39 +579,53 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.03),
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.support_agent_rounded,
-                              color: Theme.of(context).primaryColor,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              school.contactNo ?? "Support",
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF1A1C1E),
+                      InkWell(
+                        onTap: () async {
+                          if (school.contactNo != null &&
+                              school.contactNo!.isNotEmpty) {
+                            final Uri tel = Uri.parse(
+                              'tel:${school.contactNo}',
+                            );
+                            if (await canLaunchUrl(tel)) {
+                              await launchUrl(tel);
+                            }
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.03),
+                                blurRadius: 10,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.support_agent_rounded,
+                                color: Theme.of(context).primaryColor,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                school.contactNo ?? "Support",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF1A1C1E),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -548,6 +641,97 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
   }
 
   // _buildNoticeList and _fetchNotices are removed as per instruction.
+
+  Widget _buildCalendarSection() {
+    if (_isCalendarLoading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Center(child: AppLoadingIndicator()),
+      );
+    }
+
+    if (_calendarData.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Text(
+            "School Calendar".toUpperCase(),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
+              letterSpacing: 1.0,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 110,
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            itemCount: _calendarData.length,
+            itemBuilder: (context, index) {
+              final item = _calendarData[index];
+              return Container(
+                width: 160,
+                margin: const EdgeInsets.only(right: 12, bottom: 8, top: 4),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item['holidays-name']?.toString() ?? 'Holiday',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: Color(0xFF1A1C1E),
+                        height: 1.2,
+                      ),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_today_rounded,
+                          size: 12,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "${item['date']?.toString() ?? ''} ${item['month']?.toString() ?? ''}",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildHomeThoughtBanner(
     BuildContext context,
@@ -666,22 +850,98 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Disconnect School?"),
-        content: const Text(
-          "Are you sure you want to disconnect from this school? You will need the school code to connect again.",
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        contentPadding: const EdgeInsets.fromLTRB(28, 28, 28, 16),
+        title: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.link_off_rounded,
+                color: AppColors.primary,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "Change School?",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF1A1C1E),
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          "Are you sure you want to change school? You will need the school code to connect again.",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 15,
+            color: Colors.grey.shade600,
+            height: 1.5,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("CANCEL"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<AuthBloc>().add(DisconnectSchool());
-            },
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text("DISCONNECT"),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Text(
+                      "Cancel",
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.read<AuthBloc>().add(DisconnectSchool());
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text(
+                      "Change",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

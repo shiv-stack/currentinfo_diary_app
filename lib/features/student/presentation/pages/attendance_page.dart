@@ -28,14 +28,10 @@ class _AttendancePageState extends State<AttendancePage> {
   @override
   void initState() {
     super.initState();
-    _setCurrentMonth();
     _fetchAttendance();
   }
 
-  void _setCurrentMonth() {
-    final now = DateTime.now();
-    _selectedMonthValue = _months[now.month];
-  }
+
 
   void _fetchAttendance() async {
     final authLocal = di.sl<AuthLocalDataSource>();
