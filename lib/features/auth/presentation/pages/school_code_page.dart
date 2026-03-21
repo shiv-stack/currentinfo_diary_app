@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:current_diary_app/core/utils/app_toast.dart';
 import 'package:current_diary_app/core/constants/app_colors.dart';
+import 'package:current_diary_app/core/presentation/widgets/app_loading_indicator.dart';
 import 'package:current_diary_app/widgets/primary_button.dart';
 import 'package:current_diary_app/widgets/webview_page.dart';
 import 'package:current_diary_app/routes/app_routes.dart';
@@ -185,7 +186,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                       ),
                       const SizedBox(height: 32),
                       if (state is AuthLoading)
-                        const CircularProgressIndicator()
+                        const AppLoadingIndicator()
                       else
                         SizedBox(
                           width: double.infinity,

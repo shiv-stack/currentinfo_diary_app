@@ -5,6 +5,7 @@ import 'package:current_diary_app/injection_container.dart' as di;
 import '../bloc/gallery_bloc.dart';
 import '../bloc/gallery_event.dart';
 import '../bloc/gallery_state.dart';
+import '../../../../core/presentation/widgets/app_loading_indicator.dart';
 
 class GalleryPage extends StatefulWidget {
   const GalleryPage({super.key});
@@ -54,7 +55,7 @@ class _GalleryPageState extends State<GalleryPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
+                  const AppLoadingIndicator(),
                   SizedBox(height: 16),
                   Text("Fetching high-quality images..."),
                 ],
@@ -243,7 +244,7 @@ class _GalleryPageState extends State<GalleryPage> {
               ),
             );
           }
-          return const Center(child: CircularProgressIndicator());
+          return const AppLoadingIndicator();
         },
       ),
     );
@@ -283,7 +284,10 @@ class FullScreenImagePage extends StatelessWidget {
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
               return const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+                child: const AppLoadingIndicator(
+                  centered: false,
+                  color: Colors.white,
+                ),
               );
             },
             errorBuilder: (context, error, stackTrace) => const Column(

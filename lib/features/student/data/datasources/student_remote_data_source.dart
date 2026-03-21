@@ -26,6 +26,26 @@ abstract class StudentRemoteDataSource {
     required String session,
     required String month,
   });
+
+  Future<List<dynamic>> getAssignments({
+    required String schoolCode,
+    required String cdiaryId,
+    required String password,
+    required String session,
+    required String month,
+    required String day,
+    required String studentClass,
+    required String section,
+    required String showhw,
+  });
+
+  Future<List<dynamic>> getFees({
+    required String schoolCode,
+    required String cdiaryId,
+    required String password,
+    required String session,
+    required String studentFeeSoftware,
+  });
 }
 
 class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
@@ -96,7 +116,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
       });
 
       final response = await dio.post(
-        "https://www.padhebharat.com/school-notice/school-notice-class-school-cdiary/$schoolCode/",
+        AppUrls.getClassNotice(schoolCode),
         data: formData,
       );
 
@@ -108,6 +128,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
       throw Exception(e.message ?? "Connection Error");
     }
   }
+
   @override
   Future<List<dynamic>> getAttendance({
     required String schoolCode,
@@ -127,7 +148,92 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
       });
 
       final response = await dio.post(
-        "https://www.currentdiary.com/school-attendance/api-school-attendance-api/$schoolCode/",
+        AppUrls.getAttendance(schoolCode),
+        data: formData,
+      );
+
+      if (response.statusCode == 200) {
+        return response.data as List<dynamic>;
+      }
+      return [];
+    } on DioException catch (e) {
+      throw Exception(e.message ?? "Connection Error");
+    }
+  }
+
+  @override
+  Future<List<dynamic>> getAssignments({
+    required String schoolCode,
+    required String cdiaryId,
+    required String password,
+    required String session,
+    required String month,
+    required String day,
+    required String studentClass,
+    required String section,
+    required String showhw,
+  }) async {
+    try {
+      final String StringSection;
+      final String s = section.toLowerCase().trim();
+      if (s == "np" ||
+          s == "na" ||
+          s == "not provided" ||
+          s == "not provid" ||
+          s == "" ||
+          s == "no" ||
+          s == "not applicable") {
+        StringSection = "";
+      } else {
+        StringSection = section;
+      }
+
+      final formData = FormData.fromMap({
+        'cdiaryid': cdiaryId,
+        'password': password,
+        'month': month,
+        'day': day,
+        'studentc': 'Student',
+        'showhw': showhw,
+        'session': session,
+        'class': studentClass,
+        'section': StringSection,
+      });
+
+      final response = await dio.post(
+        AppUrls.getHomework(schoolCode),
+        data: formData,
+      );
+
+      if (response.statusCode == 200) {
+        return response.data as List<dynamic>;
+      }
+      return [];
+    } on DioException catch (e) {
+      throw Exception(e.message ?? "Connection Error");
+    }
+  }
+
+  @override
+  Future<List<dynamic>> getFees({
+    required String schoolCode,
+    required String cdiaryId,
+    required String password,
+    required String session,
+    required String studentFeeSoftware,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'password': password,
+        'studentc': 'student',
+        'cdiaryid': cdiaryId,
+        'session': session,
+        'studentfeesoftware': studentFeeSoftware,
+        'studentwisefeereceipt': 'Yes',
+      });
+
+      final response = await dio.post(
+        AppUrls.getFees(schoolCode),
         data: formData,
       );
 

@@ -19,6 +19,8 @@ class SchoolModel extends Equatable {
   final String? galleryUrl;
   final String? marksUrl;
   final String? session;
+  final String? onlineFeeSubmit;
+  final String? feeSoftware;
 
   const SchoolModel({
     this.title,
@@ -39,6 +41,8 @@ class SchoolModel extends Equatable {
     this.galleryUrl,
     this.marksUrl,
     this.session,
+    this.onlineFeeSubmit,
+    this.feeSoftware,
   });
 
   List<String> get carouselImages {
@@ -70,6 +74,8 @@ class SchoolModel extends Equatable {
       galleryUrl: json['gallery_new_url'] as String?,
       marksUrl: json['mark_url_new'] as String?,
       session: json['session'] as String?,
+      onlineFeeSubmit: json['onlinefeesubmit'] as String?,
+      feeSoftware: json['fee_software'] as String?,
     );
   }
 
@@ -93,6 +99,8 @@ class SchoolModel extends Equatable {
       'gallery_new_url': galleryUrl,
       'mark_url_new': marksUrl,
       'session': session,
+      'onlinefeesubmit': onlineFeeSubmit,
+      'fee_software': feeSoftware,
     };
   }
 
@@ -116,5 +124,7 @@ class SchoolModel extends Equatable {
     galleryUrl,
     marksUrl,
     session,
+    onlineFeeSubmit,
+    feeSoftware,
   ];
 }

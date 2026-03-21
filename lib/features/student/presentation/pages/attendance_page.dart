@@ -6,6 +6,7 @@ import '../bloc/student_bloc.dart';
 import '../bloc/student_event.dart';
 import '../bloc/student_state.dart';
 import '../../../auth/data/datasources/auth_local_data_source.dart';
+import '../../../../core/presentation/widgets/app_loading_indicator.dart';
 import '../../../../injection_container.dart' as di;
 
 class AttendancePage extends StatefulWidget {
@@ -37,26 +38,22 @@ class _AttendancePageState extends State<AttendancePage> {
   }
 
   void _fetchAttendance() async {
-    final localAuth = di.sl<AuthLocalDataSource>();
-    final schoolCode = await localAuth.getCachedSchoolCode() ?? "20";
-    final creds = await localAuth.getCachedStudentCredentials(schoolCode);
+    final authLocal = di.sl<AuthLocalDataSource>();
+    final schoolCode = await authLocal.getCachedSchoolCode();
+    final session = await authLocal.getCachedSession() ?? "2025-2026";
+    final creds = await authLocal.getCachedStudentCredentials(schoolCode ?? "");
 
-    if (!mounted) return;
-
-    String monthParam = "";
-    if (_selectedMonthValue != "Complete Attendance") {
-      monthParam = _selectedMonthValue;
+    if (schoolCode != null && creds != null && mounted) {
+      context.read<StudentBloc>().add(
+            GetAttendance(
+              schoolCode: schoolCode,
+              cdiaryId: widget.student.cdiaryId ?? "",
+              password: creds['password'] ?? "",
+              session: session,
+              month: _selectedMonthValue == "Complete Attendance" ? "" : _selectedMonthValue,
+            ),
+          );
     }
-
-    context.read<StudentBloc>().add(
-          GetAttendance(
-            schoolCode: schoolCode,
-            cdiaryId: widget.student.cdiaryId ?? "",
-            password: creds?['password'] ?? "",
-            session: "2025-2026", // Forced session as requested
-            month: monthParam,
-          ),
-        );
   }
 
   @override
@@ -95,7 +92,7 @@ class _AttendancePageState extends State<AttendancePage> {
               child: BlocBuilder<StudentBloc, StudentState>(
                 builder: (context, state) {
                   if (state is AttendanceLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const AppLoadingIndicator();
                   } else if (state is AttendanceFailure) {
                     return Center(child: Text(state.message));
                   } else if (state is AttendanceLoaded) {
@@ -162,12 +159,11 @@ class _AttendancePageState extends State<AttendancePage> {
                 SizedBox(
                   height: 80,
                   width: 80,
-                  child: CircularProgressIndicator(
+                  child: AppLoadingIndicator(
+                    centered: false,
                     value: percentage / 100,
                     strokeWidth: 8,
-                    backgroundColor: Colors.white.withValues(alpha: 0.2),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeCap: StrokeCap.round,
+                    color: Colors.white,
                   ),
                 ),
                 Text(

@@ -8,6 +8,9 @@ import 'features/auth/presentation/pages/gallery_page.dart';
 import 'features/auth/presentation/pages/notice_page.dart';
 import 'features/student/presentation/pages/class_notice_page.dart';
 import 'features/student/presentation/pages/attendance_page.dart';
+import 'features/student/presentation/pages/assignment_page.dart';
+import 'features/student/presentation/pages/fee_page.dart';
+import 'widgets/webview_page.dart';
 import 'features/student/data/models/student_model.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
 import 'features/auth/presentation/pages/school_code_page.dart';
@@ -15,8 +18,13 @@ import 'features/auth/presentation/pages/student_login_page.dart';
 import 'routes/app_routes.dart';
 import 'injection_container.dart' as di;
 
+import 'package:hive_flutter/hive_flutter.dart';
+import 'features/student/domain/entities/saved_student.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(SavedStudentAdapter());
   await di.init();
   runApp(const MyApp());
 }
@@ -36,8 +44,6 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Current Diary',
         theme: AppTheme.lightTheme,
-        // Optional: Support dark theme if requested
-        // darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.light,
         initialRoute: AppRoutes.splash,
         routes: {
@@ -55,6 +61,25 @@ class MyApp extends StatelessWidget {
             final student =
                 ModalRoute.of(context)!.settings.arguments as StudentModel;
             return AttendancePage(student: student);
+          },
+          AppRoutes.homework: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return AssignmentPage(student: student);
+          },
+          AppRoutes.fees: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return FeePage(student: student);
+          },
+          AppRoutes.webView: (context) {
+            final args =
+                ModalRoute.of(context)!.settings.arguments
+                    as Map<String, dynamic>;
+            return WebViewPage(
+              title: args['title'] as String,
+              url: args['url'] as String,
+            );
           },
         },
       ),

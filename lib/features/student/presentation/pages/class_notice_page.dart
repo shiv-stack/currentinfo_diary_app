@@ -8,6 +8,7 @@ import '../bloc/student_bloc.dart';
 import '../bloc/student_event.dart';
 import '../bloc/student_state.dart';
 import '../../../auth/data/datasources/auth_local_data_source.dart';
+import '../../../../core/presentation/widgets/app_loading_indicator.dart';
 import '../../../../injection_container.dart' as di;
 
 class ClassNoticePage extends StatefulWidget {
@@ -26,29 +27,23 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
   }
 
   void _fetchNotices() async {
-    final localAuth = di.sl<AuthLocalDataSource>();
-    final schoolCode = await localAuth.getCachedSchoolCode() ?? "20";
-    final creds = await localAuth.getCachedStudentCredentials(schoolCode);
+    final authLocal = di.sl<AuthLocalDataSource>();
+    final schoolCode = await authLocal.getCachedSchoolCode();
+    final session = await authLocal.getCachedSession() ?? "2025-2026";
+    final creds = await authLocal.getCachedStudentCredentials(schoolCode ?? "");
 
-    if (!mounted) return;
-
-    String section = widget.student.section ?? "NA";
-    if (section.toUpperCase() == "NA" ||
-        section.toUpperCase() == "NP" ||
-        section.toLowerCase().contains("not provided")) {
-      section = "NA";
+    if (schoolCode != null && creds != null && mounted) {
+      context.read<StudentBloc>().add(
+            GetClassNotices(
+              schoolCode: schoolCode,
+              cdiaryId: widget.student.cdiaryId ?? "",
+              password: creds['password'] ?? "",
+              session: session,
+              className: widget.student.className ?? "",
+              section: widget.student.section ?? "",
+            ),
+          );
     }
-
-    context.read<StudentBloc>().add(
-          GetClassNotices(
-            schoolCode: schoolCode,
-            cdiaryId: widget.student.cdiaryId ?? "",
-            password: creds?['password'] ?? "",
-            session: widget.student.session ?? "",
-            className: widget.student.className ?? "",
-            section: section,
-          ),
-        );
   }
 
   @override
@@ -83,7 +78,7 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
         body: BlocBuilder<StudentBloc, StudentState>(
           builder: (context, state) {
             if (state is ClassNoticesLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const AppLoadingIndicator();
             } else if (state is ClassNoticesFailure) {
               return Center(child: Text(state.message));
             } else if (state is ClassNoticesLoaded) {

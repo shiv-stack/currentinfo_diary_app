@@ -67,3 +67,47 @@ class AttendanceFailure extends StudentState {
   @override
   List<Object?> get props => [message];
 }
+
+class SavedStudentsLoaded extends StudentState {
+  final List<dynamic> savedStudents;
+  SavedStudentsLoaded(this.savedStudents);
+
+  @override
+  List<Object?> get props => [savedStudents];
+}
+
+class AssignmentsLoading extends StudentState {}
+
+class AssignmentsLoaded extends StudentState {
+  final List<dynamic> assignments;
+  AssignmentsLoaded(this.assignments);
+
+  @override
+  List<Object?> get props => [assignments];
+}
+
+class AssignmentsFailure extends StudentState {
+  final String message;
+  AssignmentsFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class FeesLoading extends StudentState {}
+
+class FeesLoaded extends StudentState {
+  final List<dynamic> fees;
+  FeesLoaded(this.fees);
+
+  @override
+  List<Object?> get props => [fees];
+}
+
+class FeesFailure extends StudentState {
+  final String message;
+  FeesFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

@@ -25,4 +25,24 @@ abstract class StudentRepository {
     required String session,
     required String month,
   });
+
+  Future<Either<Failure, List<dynamic>>> getAssignments({
+    required String schoolCode,
+    required String cdiaryId,
+    required String password,
+    required String session,
+    required String month,
+    required String day,
+    required String studentClass,
+    required String section,
+    required String showhw,
+  });
+
+  Future<Either<Failure, List<dynamic>>> getFees({
+    required String schoolCode,
+    required String cdiaryId,
+    required String password,
+    required String session,
+    required String studentFeeSoftware,
+  });
 }

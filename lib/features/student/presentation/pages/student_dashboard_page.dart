@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:current_diary_app/core/utils/app_toast.dart';
 import 'package:current_diary_app/routes/app_routes.dart';
+import 'package:current_diary_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:current_diary_app/features/auth/presentation/bloc/auth_event.dart';
 import '../../data/models/student_model.dart';
+import '../../../../injection_container.dart';
+import '../../../auth/data/datasources/auth_local_data_source.dart';
 
 class StudentDashboardPage extends StatelessWidget {
   final StudentModel student;
@@ -35,11 +39,14 @@ class StudentDashboardPage extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/school-code',
-                      (route) => false,
-                    ),
+                    onPressed: () {
+                      context.read<AuthBloc>().add(StudentLogout());
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        AppRoutes.schoolCode,
+                        (route) => false,
+                      );
+                    },
                     icon: const Icon(
                       Icons.logout_rounded,
                       color: Colors.redAccent,
@@ -333,116 +340,138 @@ class StudentDashboardPage extends StatelessWidget {
   }
 
   Widget _buildActionGrid(BuildContext context) {
-    final actions = [
-      {
-        'title': 'CLASS NOTICE',
-        'imagePath': 'assets/icons/class_notice.png',
-        'color': const Color(0xffDCF8EF),
-      },
-      {
-        'title': 'ATTENDANCE',
-        'imagePath': 'assets/icons/attendance.png',
-        'color': const Color(0xffFFF1E6),
-      },
-      {
-        'title': 'MESSAGE',
-        'imagePath': 'assets/icons/message.png',
-        'color': const Color(0xffE6EEFF),
-      },
-      {
-        'title': 'HOMEWORK',
-        'imagePath': 'assets/icons/homework.png',
-        'color': const Color(0xffF2E6FF),
-      },
-      {
-        'title': 'TRACK BUS',
-        'imagePath': 'assets/icons/track_bus.png',
-        'color': const Color(0xffFFE6E6),
-      },
-      {
-        'title': 'MARKS',
-        'imagePath': 'assets/icons/marks.png',
-        'color': const Color(0xffE6FFEF),
-      },
-      {
-        'title': 'APPLY LEAVE',
-        'imagePath': 'assets/icons/apply_leave.png',
-        'color': const Color(0xffFFFFE6),
-      },
-      {
-        'title': 'TIMETABLE IMAGE',
-        'imagePath': 'assets/icons/timetable.png',
-        'color': const Color(0xffF7F7F7),
-      },
-      {
-        'title': 'FEES',
-        'imagePath': 'assets/icons/fees.png',
-        'color': const Color(0xffE6F7FF),
-      },
-    ];
+    return FutureBuilder<bool>(
+      future: sl<AuthLocalDataSource>().isOnlineFeeSubmitEnabled(),
+      builder: (context, snapshot) {
+        final bool isFeesEnabled = snapshot.data ?? false;
 
-    return GridView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      padding: EdgeInsets.zero,
-      itemCount: actions.length,
-      itemBuilder: (context, index) {
-        final item = actions[index];
-        return InkWell(
-          onTap: () {
-            if (item['title'] == 'CLASS NOTICE') {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.classNotice,
-                arguments: student,
-              );
-            } else if (item['title'] == 'ATTENDANCE') {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.attendance,
-                arguments: student,
-              );
-            } else {
-              AppToast.show(context, "${item['title']} is Coming Soon");
-            }
+        final actions = [
+          {
+            'title': 'CLASS NOTICE',
+            'imagePath': 'assets/icons/class_notice.png',
+            'color': const Color(0xffDCF8EF),
           },
-          borderRadius: BorderRadius.circular(24),
-          child: Column(
-            children: [
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: item['color'] as Color,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Image.asset(
-                    item['imagePath'] as String,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                item['title'] as String,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1C1E),
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+          {
+            'title': 'ATTENDANCE',
+            'imagePath': 'assets/icons/attendance.png',
+            'color': const Color(0xffFFF1E6),
+          },
+          {
+            'title': 'MESSAGE',
+            'imagePath': 'assets/icons/message.png',
+            'color': const Color(0xffE6EEFF),
+          },
+          {
+            'title': 'HOMEWORK',
+            'imagePath': 'assets/icons/homework.png',
+            'color': const Color(0xffF2E6FF),
+          },
+          {
+            'title': 'TRACK BUS',
+            'imagePath': 'assets/icons/track_bus.png',
+            'color': const Color(0xffFFE6E6),
+          },
+          {
+            'title': 'MARKS',
+            'imagePath': 'assets/icons/marks.png',
+            'color': const Color(0xffE6FFEF),
+          },
+          {
+            'title': 'APPLY LEAVE',
+            'imagePath': 'assets/icons/apply_leave.png',
+            'color': const Color(0xffFFFFE6),
+          },
+          {
+            'title': 'TIMETABLE IMAGE',
+            'imagePath': 'assets/icons/timetable.png',
+            'color': const Color(0xffF7F7F7),
+          },
+        ];
+
+        if (isFeesEnabled) {
+          actions.add({
+            'title': 'FEES',
+            'imagePath': 'assets/icons/fees.png',
+            'color': const Color(0xffE6F7FF),
+          });
+        }
+
+        return GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            childAspectRatio: 0.85,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
           ),
+          padding: EdgeInsets.zero,
+          itemCount: actions.length,
+          itemBuilder: (context, index) {
+            final item = actions[index];
+            return InkWell(
+              onTap: () {
+                if (item['title'] == 'CLASS NOTICE') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.classNotice,
+                    arguments: student,
+                  );
+                } else if (item['title'] == 'ATTENDANCE') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.attendance,
+                    arguments: student,
+                  );
+                } else if (item['title'] == 'HOMEWORK') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.homework,
+                    arguments: student,
+                  );
+                } else if (item['title'] == 'FEES') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.fees,
+                    arguments: student,
+                  );
+                } else {
+                  AppToast.show(context, "${item['title']} is Coming Soon");
+                }
+              },
+              borderRadius: BorderRadius.circular(24),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: item['color'] as Color,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Image.asset(
+                        item['imagePath'] as String,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    item['title'] as String,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1A1C1E),
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );

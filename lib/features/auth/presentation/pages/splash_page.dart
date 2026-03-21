@@ -6,6 +6,8 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../../routes/app_routes.dart';
 
+import '../../../student/presentation/pages/student_dashboard_page.dart';
+
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
@@ -24,7 +26,14 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is NavigateToSchoolCode || state is AuthSuccess) {
+        if (state is StudentAuthenticated) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => StudentDashboardPage(student: state.student),
+            ),
+          );
+        } else if (state is NavigateToSchoolCode || state is AuthSuccess) {
           Navigator.pushReplacementNamed(context, AppRoutes.schoolCode);
         }
       },

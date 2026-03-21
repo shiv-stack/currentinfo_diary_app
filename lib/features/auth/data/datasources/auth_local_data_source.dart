@@ -9,8 +9,21 @@ abstract class AuthLocalDataSource {
   Future<SchoolModel?> getCachedSchoolInfo();
   Future<void> cacheStudentId(String studentId);
   Future<String?> getCachedStudentId();
-  Future<void> cacheStudentCredentials(String schoolCode, String name, String password);
+  Future<void> cacheStudentCredentials(
+    String schoolCode,
+    String name,
+    String password,
+  );
   Future<Map<String, String>?> getCachedStudentCredentials(String schoolCode);
+  Future<void> cacheActiveStudentCredentials(String name, String password);
+  Future<Map<String, String>?> getActiveStudentCredentials();
+  Future<void> cacheSession(String session);
+  Future<String?> getCachedSession();
+  Future<void> cacheOnlineFeeSubmit(String value);
+  Future<bool> isOnlineFeeSubmitEnabled();
+  Future<void> cacheFeeSoftware(String value);
+  Future<String?> getCachedFeeSoftware();
+  Future<void> clearActiveStudentSession();
   Future<void> clearAuthData();
 }
 
@@ -23,6 +36,10 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   static const String _schoolInfoKey = 'cached_school_info';
   static const String _studentIdKey = 'cached_student_id';
   static const String _studentCredentialsKey = 'cached_student_credentials';
+  static const String _activeStudentKey = 'active_student_session';
+  static const String _sessionKey = 'cached_session';
+  static const String _feeSubmitKey = 'fee_submit_enabled';
+  static const String _feeSoftwareKey = 'fee_software_type';
 
   @override
   Future<void> cacheSchoolCode(String code) async {
@@ -62,21 +79,27 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
-  Future<void> cacheStudentCredentials(String schoolCode, String name, String password) async {
+  Future<void> cacheStudentCredentials(
+    String schoolCode,
+    String name,
+    String password,
+  ) async {
     final existingData = sharedPreferences.getString(_studentCredentialsKey);
     Map<String, dynamic> credentialsMap = {};
     if (existingData != null) {
       credentialsMap = jsonDecode(existingData);
     }
-    credentialsMap[schoolCode] = {
-      'name': name,
-      'password': password,
-    };
-    await sharedPreferences.setString(_studentCredentialsKey, jsonEncode(credentialsMap));
+    credentialsMap[schoolCode] = {'name': name, 'password': password};
+    await sharedPreferences.setString(
+      _studentCredentialsKey,
+      jsonEncode(credentialsMap),
+    );
   }
 
   @override
-  Future<Map<String, String>?> getCachedStudentCredentials(String schoolCode) async {
+  Future<Map<String, String>?> getCachedStudentCredentials(
+    String schoolCode,
+  ) async {
     final data = sharedPreferences.getString(_studentCredentialsKey);
     if (data != null) {
       final Map<String, dynamic> fullMap = jsonDecode(data);
@@ -92,10 +115,72 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
+  Future<void> cacheActiveStudentCredentials(
+    String name,
+    String password,
+  ) async {
+    final data = {'name': name, 'password': password};
+    await sharedPreferences.setString(_activeStudentKey, jsonEncode(data));
+  }
+
+  @override
+  Future<Map<String, String>?> getActiveStudentCredentials() async {
+    final data = sharedPreferences.getString(_activeStudentKey);
+    if (data != null) {
+      final Map<String, dynamic> parsed = jsonDecode(data);
+      return {
+        'name': parsed['name'] as String,
+        'password': parsed['password'] as String,
+      };
+    }
+    return null;
+  }
+
+  @override
+  Future<void> cacheSession(String session) async {
+    await sharedPreferences.setString(_sessionKey, session);
+  }
+
+  @override
+  Future<String?> getCachedSession() async {
+    return sharedPreferences.getString(_sessionKey);
+  }
+
+  @override
+  Future<void> cacheOnlineFeeSubmit(String value) async {
+    await sharedPreferences.setString(_feeSubmitKey, value);
+  }
+
+  @override
+  Future<bool> isOnlineFeeSubmitEnabled() async {
+    final val = sharedPreferences.getString(_feeSubmitKey);
+    return val == "Yes";
+  }
+
+  @override
+  Future<void> cacheFeeSoftware(String value) async {
+    await sharedPreferences.setString(_feeSoftwareKey, value);
+  }
+
+  @override
+  Future<String?> getCachedFeeSoftware() async {
+    return sharedPreferences.getString(_feeSoftwareKey);
+  }
+
+  @override
+  Future<void> clearActiveStudentSession() async {
+    await sharedPreferences.remove(_activeStudentKey);
+  }
+
+  @override
   Future<void> clearAuthData() async {
     await sharedPreferences.remove(_schoolCodeKey);
     await sharedPreferences.remove(_schoolInfoKey);
     await sharedPreferences.remove(_studentIdKey);
     await sharedPreferences.remove(_studentCredentialsKey);
+    await sharedPreferences.remove(_activeStudentKey);
+    await sharedPreferences.remove(_sessionKey);
+    await sharedPreferences.remove(_feeSubmitKey);
+    await sharedPreferences.remove(_feeSoftwareKey);
   }
 }

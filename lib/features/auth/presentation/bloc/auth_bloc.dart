@@ -2,20 +2,47 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/datasources/auth_local_data_source.dart';
 import '../../domain/usecases/get_school_info_usecase.dart';
+import '../../../student/domain/usecases/student_login_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final GetSchoolInfoUseCase getSchoolInfoUseCase;
+  final StudentLoginUseCase studentLoginUseCase;
   final AuthLocalDataSource localDataSource;
 
-  AuthBloc({required this.getSchoolInfoUseCase, required this.localDataSource})
-    : super(AuthInitial()) {
+  AuthBloc({
+    required this.getSchoolInfoUseCase,
+    required this.studentLoginUseCase,
+    required this.localDataSource,
+  }) : super(AuthInitial()) {
     on<SplashStarted>(_onSplashStarted);
     on<CheckAuthStatus>(_onCheckAuthStatus);
     on<SubmitSchoolCode>(_onSubmit);
     on<DisconnectSchool>(_onDisconnect);
     on<SkipPressed>(_onSkip);
+    on<StudentLogout>(_onStudentLogout);
+  }
+
+  Future<void> _onStudentLogout(
+    StudentLogout event,
+    Emitter<AuthState> emit,
+  ) async {
+    await localDataSource.clearActiveStudentSession();
+    final storedCode = await localDataSource.getCachedSchoolCode();
+    final cachedSchool = await localDataSource.getCachedSchoolInfo();
+
+    if (storedCode != null && cachedSchool != null) {
+      emit(
+        AuthSuccess(
+          message: "Logged out from Student Profile",
+          school: cachedSchool,
+          schoolCode: storedCode,
+        ),
+      );
+    } else {
+      emit(NavigateToSchoolCode());
+    }
   }
 
   Future<void> _onSplashStarted(
@@ -37,7 +64,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
 
-    // Attempt instant load from cache
+    // CHECK FOR ACTIVE STUDENT SESSION (FOR AUTO-LOGIN)
+    final activeCreds = await localDataSource.getActiveStudentCredentials();
+    if (activeCreds != null) {
+      final name = activeCreds['name'];
+      final pass = activeCreds['password'];
+      if (name != null && pass != null) {
+        final loginResult = await studentLoginUseCase(
+          schoolCode: storedCode,
+          name: name,
+          uniqueCode: pass,
+        );
+        
+        // If login is successful, we go straight to student dashboard
+        final bool shouldReturn = await loginResult.fold(
+          (failure) async => false, // Continue to school check if student login fails
+          (student) async {
+            emit(StudentAuthenticated(student));
+            return true;
+          },
+        );
+        if (shouldReturn) return;
+      }
+    }
+
+    // Attempt instant load of school info from cache
     final cachedSchool = await localDataSource.getCachedSchoolInfo();
     if (cachedSchool != null) {
       emit(
@@ -63,7 +114,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       },
       (school) async {
         await localDataSource.cacheSchoolInfo(school);
-        emit(AuthSuccess(message: "Data Updated", school: school, schoolCode: storedCode));
+        if (school.session != null) {
+          await localDataSource.cacheSession(school.session!);
+        }
+        if (school.onlineFeeSubmit != null) {
+          await localDataSource.cacheOnlineFeeSubmit(school.onlineFeeSubmit!);
+        }
+        if (school.feeSoftware != null) {
+          await localDataSource.cacheFeeSoftware(school.feeSoftware!);
+        }
+        emit(AuthSuccess(
+            message: "Data Updated", school: school, schoolCode: storedCode));
       },
     );
   }
@@ -86,6 +147,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ) async {
       await localDataSource.cacheSchoolCode(event.code);
       await localDataSource.cacheSchoolInfo(school);
+      if (school.session != null) {
+        await localDataSource.cacheSession(school.session!);
+      }
+      if (school.onlineFeeSubmit != null) {
+        await localDataSource.cacheOnlineFeeSubmit(school.onlineFeeSubmit!);
+      }
+      if (school.feeSoftware != null) {
+        await localDataSource.cacheFeeSoftware(school.feeSoftware!);
+      }
       emit(
         AuthSuccess(
           message: "Connected to ${school.title ?? 'School'}",

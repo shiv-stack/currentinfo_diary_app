@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:linkify/linkify.dart';
+import '../../../../core/presentation/widgets/app_loading_indicator.dart';
 
 class NoticePage extends StatelessWidget {
   const NoticePage({super.key});
@@ -49,7 +50,7 @@ class NoticePage extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: const AppLoadingIndicator(),
           );
         } else if (snapshot.hasError) {
           return const Center(child: Text("Error loading notices"));

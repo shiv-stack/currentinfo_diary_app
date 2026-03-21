@@ -6,4 +6,7 @@ class AppRoutes {
   static const notice = '/notice';
   static const classNotice = '/class-notice';
   static const attendance = '/attendance';
+  static const homework = '/homework';
+  static const fees = '/fees';
+  static const webView = '/web-view';
 }

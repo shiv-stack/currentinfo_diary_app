@@ -72,4 +72,56 @@ class StudentRepositoryImpl implements StudentRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<dynamic>>> getAssignments({
+    required String schoolCode,
+    required String cdiaryId,
+    required String password,
+    required String session,
+    required String month,
+    required String day,
+    required String studentClass,
+    required String section,
+    required String showhw,
+  }) async {
+    try {
+      final assignments = await remoteDataSource.getAssignments(
+        schoolCode: schoolCode,
+        cdiaryId: cdiaryId,
+        password: password,
+        session: session,
+        month: month,
+        day: day,
+        studentClass: studentClass,
+        section: section,
+        showhw: showhw,
+      );
+      return Right(assignments);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<dynamic>>> getFees({
+    required String schoolCode,
+    required String cdiaryId,
+    required String password,
+    required String session,
+    required String studentFeeSoftware,
+  }) async {
+    try {
+      final fees = await remoteDataSource.getFees(
+        schoolCode: schoolCode,
+        cdiaryId: cdiaryId,
+        password: password,
+        session: session,
+        studentFeeSoftware: studentFeeSoftware,
+      );
+      return Right(fees);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:current_diary_app/core/utils/app_toast.dart';
 import '../../../../injection_container.dart' as di;
 import '../../data/datasources/auth_local_data_source.dart';
+import '../../../../core/presentation/widgets/app_loading_indicator.dart';
 
 import '../../../student/presentation/bloc/student_bloc.dart';
 import '../../../student/presentation/bloc/student_event.dart';
@@ -24,18 +25,30 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
   @override
   void initState() {
     super.initState();
+    context.read<StudentBloc>().add(GetSavedStudents());
   }
 
-  void _onLoginPressed(BuildContext context) async {
-    final name = _nameController.text.trim();
-    final password = _passwordController.text.trim();
+  void _onLoginPressed(
+    BuildContext context, {
+    String? name,
+    String? password,
+    String? schoolCode,
+  }) async {
+    final effectiveName = name ?? _nameController.text.trim();
+    final effectivePassword = password ?? _passwordController.text.trim();
 
-    if (name.isEmpty || password.isEmpty) {
+    if (effectiveName.isEmpty || effectivePassword.isEmpty) {
       AppToast.show(context, "Please enter name and password", isError: true);
       return;
     }
 
-    final code = await di.sl<AuthLocalDataSource>().getCachedSchoolCode();
+    // If schoolCode is provided (from saved student), we use it.
+    // Otherwise, we get it from the cache.
+    String? code = schoolCode;
+    if (code == null || code.isEmpty) {
+      code = await di.sl<AuthLocalDataSource>().getCachedSchoolCode();
+    }
+
     if (code == null || code.isEmpty) {
       AppToast.show(
         context,
@@ -45,9 +58,19 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
       return;
     }
 
+    // Production Ready: If we are logging in with a specific school code (e.g. switching accounts),
+    // we should update our cached school code context so future API calls use the correct URL.
+    if (schoolCode != null) {
+      await di.sl<AuthLocalDataSource>().cacheSchoolCode(schoolCode);
+    }
+
     if (!context.mounted) return;
     context.read<StudentBloc>().add(
-      StudentLoginSubmitted(schoolCode: code, name: name, uniqueCode: password),
+      StudentLoginSubmitted(
+        schoolCode: code,
+        name: effectiveName,
+        uniqueCode: effectivePassword,
+      ),
     );
   }
 
@@ -63,6 +86,8 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
         listener: (context, state) {
           if (state is StudentLoginSuccess) {
             AppToast.show(context, "Login Successful");
+            // Refresh saved students list after successful login
+            context.read<StudentBloc>().add(GetSavedStudents());
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
@@ -160,9 +185,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                                 borderRadius: BorderRadius.circular(28),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(
-                                      alpha: 0.04,
-                                    ),
+                                    color: Colors.black.withValues(alpha: 0.04),
                                     blurRadius: 20,
                                     offset: const Offset(0, 10),
                                   ),
@@ -220,8 +243,8 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                                               ? const SizedBox(
                                                   height: 24,
                                                   width: 24,
-                                                  child:
-                                                      CircularProgressIndicator(
+                                                  child: AppLoadingIndicator(
+                                                    centered: false,
                                                     color: Colors.white,
                                                     strokeWidth: 2,
                                                   ),
@@ -240,6 +263,8 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                                 ],
                               ),
                             ),
+                            const SizedBox(height: 32),
+                            _buildSavedStudentsSection(),
                             const SizedBox(height: 60),
                           ],
                         ),
@@ -251,6 +276,135 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSavedStudentsSection() {
+    return BlocBuilder<StudentBloc, StudentState>(
+      buildWhen: (previous, current) => current is SavedStudentsLoaded,
+      builder: (context, state) {
+        if (state is SavedStudentsLoaded && state.savedStudents.isNotEmpty) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Switch Account".toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: Theme.of(context).primaryColor,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  Text(
+                    "${state.savedStudents.length}/5",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: state.savedStudents.length,
+                  itemBuilder: (context, index) {
+                    final student = state.savedStudents[index];
+                    return Container(
+                      width: 80,
+                      margin: const EdgeInsets.only(right: 16),
+                      child: Column(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              _nameController.text = student.name;
+                              _passwordController.text = student.uniqueCode;
+                              _onLoginPressed(
+                                context,
+                                name: student.name,
+                                password: student.uniqueCode,
+                                schoolCode: student.schoolCode,
+                              );
+                            },
+                            onLongPress: () {
+                              _showDeleteConfirmDialog(student.uniqueCode);
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              height: 60,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).primaryColor.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Theme.of(
+                                    context,
+                                  ).primaryColor.withValues(alpha: 0.2),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.person_rounded,
+                                color: Theme.of(context).primaryColor,
+                                size: 24,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            student.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1A1C1E),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  void _showDeleteConfirmDialog(String uniqueCode) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Account?"),
+        content: const Text("Are you sure you want to remove this account?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("CANCEL"),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<StudentBloc>().add(DeleteSavedStudent(uniqueCode));
+              Navigator.pop(context);
+            },
+            child: const Text("DELETE", style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

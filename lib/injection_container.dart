@@ -13,9 +13,12 @@ import 'features/student/presentation/bloc/student_bloc.dart';
 import 'features/student/domain/usecases/student_login_usecase.dart';
 import 'features/student/domain/usecases/get_class_notices_usecase.dart';
 import 'features/student/domain/usecases/get_attendance_usecase.dart';
+import 'features/student/domain/usecases/get_assignments_usecase.dart';
+import 'features/student/domain/usecases/get_fees_usecase.dart';
 import 'features/student/domain/repositories/student_repository.dart';
 import 'features/student/data/repositories/student_repository_impl.dart';
 import 'features/student/data/datasources/student_remote_data_source.dart';
+import 'features/student/data/datasources/student_local_data_source.dart';
 
 final sl = GetIt.instance;
 
@@ -27,7 +30,11 @@ Future<void> init() async {
 
   // Bloc
   sl.registerFactory(
-    () => AuthBloc(getSchoolInfoUseCase: sl(), localDataSource: sl()),
+    () => AuthBloc(
+      getSchoolInfoUseCase: sl(),
+      studentLoginUseCase: sl(),
+      localDataSource: sl(),
+    ),
   );
   sl.registerFactory(() => GalleryBloc(getGalleryUseCase: sl()));
   sl.registerFactory(
@@ -35,7 +42,10 @@ Future<void> init() async {
       studentLoginUseCase: sl(),
       getClassNoticesUseCase: sl(),
       getAttendanceUseCase: sl(),
+      getAssignmentsUseCase: sl(),
+      getFeesUseCase: sl(),
       authLocalDataSource: sl(),
+      studentLocalDataSource: sl(),
     ),
   );
 
@@ -45,6 +55,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => StudentLoginUseCase(sl()));
   sl.registerLazySingleton(() => GetClassNoticesUseCase(sl()));
   sl.registerLazySingleton(() => GetAttendanceUseCase(sl()));
+  sl.registerLazySingleton(() => GetAssignmentsUseCase(sl()));
+  sl.registerLazySingleton(() => GetFeesUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(
@@ -63,5 +75,8 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<StudentRemoteDataSource>(
     () => StudentRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<StudentLocalDataSource>(
+    () => StudentLocalDataSourceImpl(),
   );
 }
