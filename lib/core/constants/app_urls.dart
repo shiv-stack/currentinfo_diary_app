@@ -40,4 +40,7 @@ class AppUrls {
 
   static String updatePassword(String schoolCode) =>
       "$baseUrl/student-info/update-record-school/$schoolCode/";
+
+  static String getMessages(String schoolCode) =>
+      "https://www.padhebharat.com/multitask/multitask-message/$schoolCode/";
 }

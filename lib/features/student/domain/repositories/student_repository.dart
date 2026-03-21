@@ -92,4 +92,10 @@ abstract class StudentRepository {
     required String currentPassword,
     required String newPassword,
   });
+
+  Future<Either<Failure, List<dynamic>>> getMessages({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+  });
 }

@@ -267,3 +267,18 @@ class UpdatePassword extends StudentEvent {
   @override
   List<Object?> get props => [schoolCode, studentId, currentPassword, newPassword];
 }
+
+class GetMessages extends StudentEvent {
+  final String schoolCode;
+  final String studentId;
+  final String password;
+
+  GetMessages({
+    required this.schoolCode,
+    required this.studentId,
+    required this.password,
+  });
+
+  @override
+  List<Object?> get props => [schoolCode, studentId, password];
+}

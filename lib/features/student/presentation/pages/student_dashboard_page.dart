@@ -360,11 +360,11 @@ class StudentDashboardPage extends StatelessWidget {
             'imagePath': 'assets/icons/attendance.png',
             'color': const Color(0xffFFF1E6),
           },
-          // {
-          //   'title': 'MESSAGE',
-          //   'imagePath': 'assets/icons/message.png',
-          //   'color': const Color(0xffE6EEFF),
-          // },
+          {
+            'title': 'MESSAGE',
+            'imagePath': 'assets/icons/message.png',
+            'color': const Color(0xffE6EEFF),
+          },
           {
             'title': 'HOMEWORK',
             'imagePath': 'assets/icons/homework.png',
@@ -445,6 +445,12 @@ class StudentDashboardPage extends StatelessWidget {
                   Navigator.pushNamed(
                     context,
                     AppRoutes.attendance,
+                    arguments: student,
+                  );
+                } else if (item['title'] == 'MESSAGE') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.messages,
                     arguments: student,
                   );
                 } else if (item['title'] == 'HOMEWORK') {

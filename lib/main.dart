@@ -17,6 +17,7 @@ import 'features/student/presentation/pages/syllabus_page.dart';
 import 'features/student/presentation/pages/timetable_page.dart';
 import 'features/student/presentation/pages/datesheet_page.dart';
 import 'features/student/presentation/pages/student_profile_page.dart';
+import 'features/student/presentation/pages/messages_page.dart';
 import 'widgets/webview_page.dart';
 import 'features/student/data/models/student_model.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
@@ -139,6 +140,11 @@ class MyApp extends StatelessWidget {
             final student =
                 ModalRoute.of(context)!.settings.arguments as StudentModel;
             return StudentProfilePage(student: student);
+          },
+          AppRoutes.messages: (context) {
+            final student =
+                ModalRoute.of(context)!.settings.arguments as StudentModel;
+            return MessagesPage(student: student);
           },
         },
       ),

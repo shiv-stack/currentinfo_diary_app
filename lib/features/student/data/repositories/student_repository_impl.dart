@@ -245,4 +245,22 @@ class StudentRepositoryImpl implements StudentRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<dynamic>>> getMessages({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+  }) async {
+    try {
+      final result = await remoteDataSource.getMessages(
+        schoolCode: schoolCode,
+        studentId: studentId,
+        password: password,
+      );
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

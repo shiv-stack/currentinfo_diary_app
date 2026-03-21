@@ -93,6 +93,12 @@ abstract class StudentRemoteDataSource {
     required String currentPassword,
     required String newPassword,
   });
+
+  Future<List<dynamic>> getMessages({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+  });
 }
 
 class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
@@ -557,6 +563,39 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
       throw Exception("Server Error: ${response.statusCode}");
     } on DioException catch (e) {
       throw Exception(e.message ?? "Connection Error");
+    }
+  }
+
+  @override
+  Future<List<dynamic>> getMessages({
+    required String schoolCode,
+    required String studentId,
+    required String password,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'task': 'onetoonemessage',
+        'modify': 'show',
+        'uniqueshow': '',
+        'stuid': studentId,
+        'password': password,
+        'studentc': 'Student',
+      });
+
+      final response = await dio.post(
+        AppUrls.getMessages(schoolCode),
+        data: formData,
+        options: Options(responseType: ResponseType.plain),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.data);
+        return data;
+      } else {
+        throw Exception("Failed to load messages (Status: ${response.statusCode})");
+      }
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 }

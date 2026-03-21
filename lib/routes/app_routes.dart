@@ -18,4 +18,5 @@ class AppRoutes {
   static const timetable = '/timetable';
   static const datesheet = '/datesheet';
   static const profile = '/profile';
+  static const messages = '/messages';
 }

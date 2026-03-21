@@ -9,6 +9,7 @@ import '../../domain/usecases/apply_leave_usecase.dart';
 import '../../domain/usecases/get_exams_usecase.dart';
 import '../../domain/usecases/get_mark_details_usecase.dart';
 import '../../domain/usecases/update_password_usecase.dart';
+import '../../domain/usecases/get_messages_usecase.dart';
 import '../../../auth/data/datasources/auth_local_data_source.dart';
 import '../../data/datasources/student_local_data_source.dart';
 import '../../domain/entities/saved_student.dart';
@@ -26,6 +27,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
   final GetLeavesUseCase getLeavesUseCase;
   final ApplyLeaveUseCase applyLeaveUseCase;
   final UpdatePasswordUseCase updatePasswordUseCase;
+  final GetMessagesUseCase getMessagesUseCase;
   final AuthLocalDataSource authLocalDataSource;
   final StudentLocalDataSource studentLocalDataSource;
 
@@ -40,6 +42,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     required this.getLeavesUseCase,
     required this.applyLeaveUseCase,
     required this.updatePasswordUseCase,
+    required this.getMessagesUseCase,
     required this.authLocalDataSource,
     required this.studentLocalDataSource,
   }) : super(StudentInitial()) {
@@ -55,6 +58,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     on<GetLeaves>(_onGetLeaves);
     on<ApplyLeave>(_onApplyLeave);
     on<UpdatePassword>(_onUpdatePassword);
+    on<GetMessages>(_onGetMessages);
   }
 
   Future<void> _onLoginSubmitted(
@@ -305,6 +309,24 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
 
         emit(PasswordUpdateSuccess(message));
       },
+    );
+  }
+
+  Future<void> _onGetMessages(
+    GetMessages event,
+    Emitter<StudentState> emit,
+  ) async {
+    emit(MessagesLoading());
+
+    final result = await getMessagesUseCase(
+      schoolCode: event.schoolCode,
+      studentId: event.studentId,
+      password: event.password,
+    );
+
+    result.fold(
+      (failure) => emit(MessagesFailure(failure.message)),
+      (messages) => emit(MessagesLoaded(messages)),
     );
   }
 }

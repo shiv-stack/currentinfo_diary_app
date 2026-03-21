@@ -204,3 +204,21 @@ class PasswordUpdateFailure extends StudentState {
   @override
   List<Object?> get props => [message];
 }
+
+class MessagesLoading extends StudentState {}
+
+class MessagesLoaded extends StudentState {
+  final List<dynamic> messages;
+  MessagesLoaded(this.messages);
+
+  @override
+  List<Object?> get props => [messages];
+}
+
+class MessagesFailure extends StudentState {
+  final String message;
+  MessagesFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
