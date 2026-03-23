@@ -28,9 +28,18 @@ import 'features/student/data/repositories/student_repository_impl.dart';
 import 'features/student/data/datasources/student_remote_data_source.dart';
 import 'features/student/data/datasources/student_local_data_source.dart';
 
+import 'core/services/remote_config_service.dart';
+import 'core/services/analytics_service.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // Services
+  final remoteConfigService = RemoteConfigService();
+  await remoteConfigService.initialize();
+  sl.registerLazySingleton(() => remoteConfigService);
+  sl.registerLazySingleton(() => AnalyticsService());
+
   // External
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);

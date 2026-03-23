@@ -5,6 +5,7 @@ import 'package:current_diary_app/core/utils/app_toast.dart';
 import 'package:current_diary_app/routes/app_routes.dart';
 import 'package:current_diary_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:current_diary_app/features/auth/presentation/bloc/auth_event.dart';
+import 'package:current_diary_app/core/services/analytics_service.dart'; // Absolute path for AnalyticsService
 import '../../data/models/student_model.dart';
 import '../../../../injection_container.dart';
 import '../../../auth/data/datasources/auth_local_data_source.dart';
@@ -435,7 +436,10 @@ class StudentDashboardPage extends StatelessWidget {
             final item = actions[index];
             return InkWell(
               onTap: () {
-                if (item['title'] == 'CLASS NOTICE') {
+                final String title = item['title'] as String;
+                sl<AnalyticsService>().logDashboardAction(title);
+
+                if (title == 'CLASS NOTICE') {
                   Navigator.pushNamed(
                     context,
                     AppRoutes.classNotice,

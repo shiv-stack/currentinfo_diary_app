@@ -1,7 +1,7 @@
 class AppUrls {
   AppUrls._();
 
-  static const String baseUrl = "https://www.currentdiary.com";
+  static const String baseUrl = "https://currentdiary.com";
 
   // Auth / School Info
   static String getSchoolInfo(String code) =>

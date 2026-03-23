@@ -23,6 +23,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? _currentSchoolCode;
+  String? _schoolName;
 
   @override
   void initState() {
@@ -32,9 +33,11 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
 
   void _loadSchoolCodeAndSavedStudents() async {
     final code = await di.sl<AuthLocalDataSource>().getCachedSchoolCode();
+    final school = await di.sl<AuthLocalDataSource>().getCachedSchoolInfo();
     if (mounted) {
       setState(() {
         _currentSchoolCode = code;
+        _schoolName = school?.title;
       });
       context.read<StudentBloc>().add(GetSavedStudents());
     }
@@ -160,7 +163,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                             const SizedBox(height: 20),
                             // Welcome Header
                             Text(
-                              "Student Portal",
+                              _schoolName ?? "Student Portal",
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w800,
@@ -178,7 +181,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                                 letterSpacing: -1.0,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 8),
                             Text(
                               "Please enter your credentials to access your diary.",
                               style: TextStyle(
@@ -187,7 +190,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            const SizedBox(height: 48),
+                            const SizedBox(height: 18),
 
                             // Login Form Card
                             Container(
@@ -226,12 +229,12 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                                     },
                                     context: context,
                                   ),
-                                  const SizedBox(height: 32),
+                                  const SizedBox(height: 15),
 
                                   // Submit Button
                                   SizedBox(
                                     width: double.infinity,
-                                    height: 60,
+                                    height: 50,
                                     child:
                                         BlocBuilder<StudentBloc, StudentState>(
                                           builder: (context, state) {
@@ -280,7 +283,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 15),
                             _buildSavedStudentsSection(),
                             const SizedBox(height: 60),
                           ],

@@ -15,6 +15,7 @@ import '../../../../core/constants/app_urls.dart';
 import '../bloc/auth_state.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../injection_container.dart' as di;
+import '../../../../core/services/analytics_service.dart';
 
 class SchoolCodePage extends StatefulWidget {
   const SchoolCodePage({super.key});
@@ -260,7 +261,8 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                           child: PrimaryButton(
                             title: "SUBMIT",
                             onPressed: () {
-                              if (controller.text.trim().isEmpty) {
+                              final code = controller.text.trim();
+                              if (code.isEmpty) {
                                 AppToast.show(
                                   context,
                                   "Please enter a school code",
@@ -268,8 +270,9 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                                 );
                                 return;
                               }
+                              di.sl<AnalyticsService>().logSchoolSearch(code);
                               context.read<AuthBloc>().add(
-                                SubmitSchoolCode(controller.text.trim()),
+                                SubmitSchoolCode(code),
                               );
                             },
                           ),

@@ -592,7 +592,9 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         final List<dynamic> data = jsonDecode(response.data);
         return data;
       } else {
-        throw Exception("Failed to load messages (Status: ${response.statusCode})");
+        throw Exception(
+          "Failed to load messages (Status: ${response.statusCode})",
+        );
       }
     } catch (e) {
       throw Exception(e.toString());

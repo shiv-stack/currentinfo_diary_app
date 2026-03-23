@@ -34,15 +34,15 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
 
     if (schoolCode != null && creds != null && mounted) {
       context.read<StudentBloc>().add(
-            GetClassNotices(
-              schoolCode: schoolCode,
-              cdiaryId: widget.student.cdiaryId ?? "",
-              password: creds['password'] ?? "",
-              session: session,
-              className: widget.student.className ?? "",
-              section: widget.student.section ?? "",
-            ),
-          );
+        GetClassNotices(
+          schoolCode: schoolCode,
+          cdiaryId: widget.student.cdiaryId ?? "",
+          password: creds['password'] ?? "",
+          session: session,
+          className: widget.student.className ?? "",
+          section: widget.student.section ?? "",
+        ),
+      );
     }
   }
 
@@ -63,7 +63,11 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
           leading: Padding(
             padding: const EdgeInsets.only(left: 10),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1A1C1E), size: 20),
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Color(0xFF1A1C1E),
+                size: 20,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -78,15 +82,6 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
                   letterSpacing: -0.8,
                 ),
               ),
-              Text(
-                "Direct messages from your teachers",
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 11,
-                  letterSpacing: 0.2,
-                ),
-              ),
             ],
           ),
           centerTitle: true,
@@ -96,7 +91,12 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
             if (state is ClassNoticesLoading) {
               return const AppLoadingIndicator();
             } else if (state is ClassNoticesFailure) {
-              return Center(child: Text(state.message, style: const TextStyle(fontWeight: FontWeight.w700)));
+              return Center(
+                child: Text(
+                  state.message,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              );
             } else if (state is ClassNoticesLoaded) {
               if (state.notices.isEmpty) {
                 return _buildEmptyState();
@@ -118,7 +118,9 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
 
   Widget _buildNoticeCard(BuildContext context, dynamic notice) {
     final fileUrl = notice['fileee'] as String? ?? "";
-    final isImage = fileUrl.toLowerCase().contains(RegExp(r'\.(jpg|jpeg|png|gif|webp)'));
+    final isImage = fileUrl.toLowerCase().contains(
+      RegExp(r'\.(jpg|jpeg|png|gif|webp)'),
+    );
     final hasFile = fileUrl.isNotEmpty && !fileUrl.contains("/None");
     final Color primaryColor = Theme.of(context).primaryColor;
 
@@ -142,7 +144,9 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
             decoration: BoxDecoration(
               color: primaryColor.withValues(alpha: 0.04),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -152,11 +156,15 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
                     Container(
                       width: 6,
                       height: 6,
-                      decoration: BoxDecoration(color: primaryColor, shape: BoxShape.circle),
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      notice['time']?.toString().toUpperCase() ?? 'CLASS UPDATE',
+                      notice['time']?.toString().toUpperCase() ??
+                          'CLASS UPDATE',
                       style: TextStyle(
                         color: primaryColor.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w900,
@@ -178,10 +186,14 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
                             fontWeight: FontWeight.w900,
                             fontSize: 11,
                             letterSpacing: 0.5,
-                      ),
+                          ),
                         ),
                         const SizedBox(width: 4),
-                        Icon(Icons.arrow_right_alt_rounded, color: primaryColor, size: 16),
+                        Icon(
+                          Icons.arrow_right_alt_rounded,
+                          color: primaryColor,
+                          size: 16,
+                        ),
                       ],
                     ),
                   ),
@@ -221,7 +233,10 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
                   onOpen: (link) async {
                     try {
                       final uri = Uri.parse(link.url);
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
                     } catch (e) {
                       debugPrint("Link opening error: $e");
                     }
@@ -258,20 +273,37 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
               color: Colors.white,
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 30, offset: const Offset(0, 10)),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 30,
+                  offset: const Offset(0, 10),
+                ),
               ],
             ),
-            child: Icon(Icons.notifications_none_rounded, size: 70, color: Colors.grey.shade300),
+            child: Icon(
+              Icons.notifications_none_rounded,
+              size: 70,
+              color: Colors.grey.shade300,
+            ),
           ),
           const SizedBox(height: 30),
           const Text(
             "No active notices",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF1A1C1E), letterSpacing: -0.5),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF1A1C1E),
+              letterSpacing: -0.5,
+            ),
           ),
           const SizedBox(height: 10),
           Text(
             "Stay tuned for messages from your school.",
-            style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.w600, fontSize: 14),
+            style: TextStyle(
+              color: Colors.grey.shade500,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
           ),
         ],
       ),

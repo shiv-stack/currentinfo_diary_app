@@ -218,7 +218,7 @@ class _SchoolCalendarPageState extends State<SchoolCalendarPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        event['date']?.toString() ?? '',
+                        event['date']?.toString().split('/').first ?? '',
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 16,
@@ -226,9 +226,8 @@ class _SchoolCalendarPageState extends State<SchoolCalendarPage> {
                         ),
                       ),
                       Text(
-                        (event['month']?.toString() ?? '').length >= 3
-                            ? (event['month']?.toString() ?? '').substring(0, 3)
-                            : (event['month']?.toString() ?? ''),
+                        event['day']?.toString().substring(0, 3).toUpperCase() ??
+                            '',
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 10,
@@ -239,7 +238,7 @@ class _SchoolCalendarPageState extends State<SchoolCalendarPage> {
                   ),
                 ),
                 title: Text(
-                  event['holidays-name']?.toString() ?? 'School Event',
+                  event['title']?.toString() ?? 'School Event',
                   style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
@@ -249,7 +248,7 @@ class _SchoolCalendarPageState extends State<SchoolCalendarPage> {
                 subtitle: Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    "${event['date']?.toString() ?? ''} ${event['month']?.toString() ?? ''} ${event['year']?.toString() ?? ''}",
+                    "${event['date']?.toString() ?? ''} (${event['day']?.toString() ?? ''})",
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       color: Colors.grey.shade500,
@@ -268,16 +267,25 @@ class _SchoolCalendarPageState extends State<SchoolCalendarPage> {
   Future<List<dynamic>> _fetchCalendar(String schoolCode, String month) async {
     try {
       final dio = di.sl<Dio>();
-      final response = await dio.post(
+      debugPrint("Calendar URL: ${AppUrls.getCalendar(schoolCode)}");
+      debugPrint("Calendar Payload: login=general, month=$month");
+      final response = await dio.get(
         AppUrls.getCalendar(schoolCode),
-        data: {
+        queryParameters: {
           'login': 'general',
           'month': month,
         },
         options: Options(
-          contentType: Headers.formUrlEncodedContentType,
+          headers: {
+            'User-Agent':
+                'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+            'Accept': 'application/json',
+          },
         ),
       );
+
+      debugPrint("Calendar Response [$_schoolCode, $month]: ${response.statusCode}");
+      debugPrint("Calendar Body: ${response.data}");
 
       if (response.statusCode == 200) {
         final dynamic data = response.data;
