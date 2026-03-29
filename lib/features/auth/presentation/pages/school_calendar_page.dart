@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/presentation/widgets/app_loading_indicator.dart';
+import '../../data/datasources/auth_local_data_source.dart';
+
 import '../../../../core/constants/app_urls.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../injection_container.dart' as di;
@@ -226,7 +228,10 @@ class _SchoolCalendarPageState extends State<SchoolCalendarPage> {
                         ),
                       ),
                       Text(
-                        event['day']?.toString().substring(0, 3).toUpperCase() ??
+                        event['day']
+                                ?.toString()
+                                .substring(0, 3)
+                                .toUpperCase() ??
                             '',
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
@@ -264,27 +269,38 @@ class _SchoolCalendarPageState extends State<SchoolCalendarPage> {
     );
   }
 
-  Future<List<dynamic>> _fetchCalendar(String schoolCode, String month) async {
+  Future<List<dynamic>> _fetchCalendar(
+    String schoolCode,
+    String monthName,
+  ) async {
     try {
       final dio = di.sl<Dio>();
+      final authLocal = di.sl<AuthLocalDataSource>();
+      final session = await authLocal.getCachedSession() ?? "2025-2026";
+
+      // Convert month name to 2-digit number string
+      final int monthIndex = _months.indexOf(monthName);
+      final String paddedMonth = (monthIndex + 1).toString().padLeft(2, '0');
+
       debugPrint("Calendar URL: ${AppUrls.getCalendar(schoolCode)}");
-      debugPrint("Calendar Payload: login=general, month=$month");
-      final response = await dio.get(
+      debugPrint(
+        "Calendar Payload: login=general, month=$paddedMonth, session=$session",
+      );
+      final formData = FormData.fromMap({
+        'login': 'general',
+        'month': paddedMonth,
+        'session': session,
+      });
+
+      final response = await dio.post(
         AppUrls.getCalendar(schoolCode),
-        queryParameters: {
-          'login': 'general',
-          'month': month,
-        },
-        options: Options(
-          headers: {
-            'User-Agent':
-                'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-            'Accept': 'application/json',
-          },
-        ),
+        data: formData,
+        options: Options(headers: {'Accept': 'application/json'}),
       );
 
-      debugPrint("Calendar Response [$_schoolCode, $month]: ${response.statusCode}");
+      debugPrint(
+        "Calendar Response [$_schoolCode, $paddedMonth]: ${response.statusCode}",
+      );
       debugPrint("Calendar Body: ${response.data}");
 
       if (response.statusCode == 200) {

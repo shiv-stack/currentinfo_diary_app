@@ -13,6 +13,7 @@ import 'features/auth/presentation/bloc/query_bloc.dart';
 import 'features/auth/domain/usecases/send_query_usecase.dart';
 import 'features/student/presentation/bloc/student_bloc.dart';
 import 'features/student/domain/usecases/student_login_usecase.dart';
+import 'features/student/domain/usecases/logout_notification_usecase.dart';
 import 'features/student/domain/usecases/get_class_notices_usecase.dart';
 import 'features/student/domain/usecases/get_attendance_usecase.dart';
 import 'features/student/domain/usecases/get_assignments_usecase.dart';
@@ -30,6 +31,7 @@ import 'features/student/data/datasources/student_local_data_source.dart';
 
 import 'core/services/remote_config_service.dart';
 import 'core/services/analytics_service.dart';
+import 'core/services/push_notification_service.dart';
 
 final sl = GetIt.instance;
 
@@ -39,6 +41,10 @@ Future<void> init() async {
   await remoteConfigService.initialize();
   sl.registerLazySingleton(() => remoteConfigService);
   sl.registerLazySingleton(() => AnalyticsService());
+  
+  final pushNotificationService = PushNotificationService();
+  await pushNotificationService.initialize();
+  sl.registerLazySingleton(() => pushNotificationService);
 
   // External
   final sharedPreferences = await SharedPreferences.getInstance();
@@ -50,6 +56,7 @@ Future<void> init() async {
     () => AuthBloc(
       getSchoolInfoUseCase: sl(),
       studentLoginUseCase: sl(),
+      logoutNotificationUseCase: sl(),
       localDataSource: sl(),
     ),
   );
@@ -78,6 +85,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetGalleryUseCase(sl()));
   sl.registerLazySingleton(() => SendQueryUseCase(sl()));
   sl.registerLazySingleton(() => StudentLoginUseCase(sl()));
+  sl.registerLazySingleton(() => LogoutNotificationUseCase(sl()));
   sl.registerLazySingleton(() => GetClassNoticesUseCase(sl()));
   sl.registerLazySingleton(() => GetAttendanceUseCase(sl()));
   sl.registerLazySingleton(() => GetAssignmentsUseCase(sl()));

@@ -31,6 +31,24 @@ class StudentRepositoryImpl implements StudentRepository {
   }
 
   @override
+  Future<Either<Failure, void>> logoutNotification({
+    required String schoolCode,
+    required String name,
+    required String uniqueCode,
+  }) async {
+    try {
+      await remoteDataSource.logoutNotification(
+        schoolCode: schoolCode,
+        name: name,
+        uniqueCode: uniqueCode,
+      );
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<dynamic>>> getClassNotices({
     required String schoolCode,
     required String cdiaryId,

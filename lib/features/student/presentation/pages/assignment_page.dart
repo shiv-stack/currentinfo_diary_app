@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import '../bloc/student_bloc.dart';
 import '../bloc/student_event.dart';
 import '../bloc/student_state.dart';
@@ -19,7 +22,7 @@ class AssignmentPage extends StatefulWidget {
 }
 
 class _AssignmentPageState extends State<AssignmentPage> {
-  String selectedFilter = "Monthwise"; // Default to Monthwise as per typical HW view
+  String selectedFilter = "Monthwise"; 
   DateTime selectedDate = DateTime.now();
 
   @override
@@ -53,62 +56,227 @@ class _AssignmentPageState extends State<AssignmentPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: const Text(
-          "HOME WORK",
-          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.2),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF1A1C1E),
-        actions: [
-          IconButton(
-            onPressed: () => _selectDate(context),
-            icon: const Icon(Icons.calendar_month_rounded),
-          ),
-        ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
       ),
-      body: Column(
-        children: [
-          _buildFilterTabs(),
-          Expanded(
-            child: BlocBuilder<StudentBloc, StudentState>(
-              builder: (context, state) {
-                if (state is AssignmentsLoading) {
-                  return const AppLoadingIndicator();
-                } else if (state is AssignmentsLoaded) {
-                  if (state.assignments.isEmpty) {
-                    return _buildEmptyState();
-                  }
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: state.assignments.length,
-                    itemBuilder: (context, index) {
-                      return _buildAssignmentCard(state.assignments[index]);
-                    },
-                  );
-                } else if (state is AssignmentsFailure) {
-                  return Center(child: Text(state.message));
-                }
-                return const SizedBox.shrink();
-              },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FA),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          toolbarHeight: 70,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Color(0xFF1A1C1E),
+                size: 20,
+              ),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
-        ],
+          title: const Text(
+            "HOME WORK",
+            style: TextStyle(
+              color: Color(0xFF1A1C1E),
+              fontWeight: FontWeight.w900,
+              fontSize: 20,
+              letterSpacing: -0.8,
+            ),
+          ),
+          centerTitle: true,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 15),
+              child: IconButton(
+                onPressed: () => _selectDate(context),
+                icon: const Icon(
+                  Icons.calendar_month_rounded,
+                  color: Color(0xFF1A1C1E),
+                  size: 26,
+                ),
+              ),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            _buildFilterTabs(),
+            if (selectedFilter == "Monthwise") _buildHorizontalMonthSelector(),
+            if (selectedFilter == "Datewise") _buildHorizontalDateSelector(),
+            Expanded(
+              child: BlocBuilder<StudentBloc, StudentState>(
+                builder: (context, state) {
+                  if (state is AssignmentsLoading) {
+                    return const AppLoadingIndicator();
+                  } else if (state is AssignmentsLoaded) {
+                    if (state.assignments.isEmpty) {
+                      return _buildEmptyState();
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                      itemCount: state.assignments.length,
+                      itemBuilder: (context, index) {
+                        return _buildAssignmentCard(state.assignments[index]);
+                      },
+                    );
+                  } else if (state is AssignmentsFailure) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text(
+                          state.message,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHorizontalMonthSelector() {
+    final months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    final currentMonth = DateFormat('MMMM').format(selectedDate);
+
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.only(bottom: 20),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: months.length,
+        itemBuilder: (context, index) {
+          final month = months[index];
+          final isSelected = month == currentMonth;
+          final primaryColor = Theme.of(context).primaryColor;
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                // Keep the same day but change month
+                selectedDate = DateTime(selectedDate.year, index + 1, 1);
+              });
+              _fetchAssignments();
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: isSelected ? primaryColor : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isSelected ? primaryColor : Colors.grey.shade200,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                month,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.grey.shade700,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildHorizontalDateSelector() {
+    final daysInMonth = DateTime(selectedDate.year, selectedDate.month + 1, 0).day;
+    final currentDay = selectedDate.day;
+
+    return Container(
+      height: 70,
+      margin: const EdgeInsets.only(bottom: 20),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: daysInMonth,
+        itemBuilder: (context, index) {
+          final day = index + 1;
+          final isSelected = day == currentDay;
+          final date = DateTime(selectedDate.year, selectedDate.month, day);
+          final dayName = DateFormat('EEE').format(date);
+          final primaryColor = Theme.of(context).primaryColor;
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedDate = DateTime(selectedDate.year, selectedDate.month, day);
+              });
+              _fetchAssignments();
+            },
+            child: Container(
+              width: 55,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: isSelected ? primaryColor : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isSelected ? primaryColor : Colors.grey.shade200,
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    dayName.toUpperCase(),
+                    style: TextStyle(
+                      color: isSelected ? Colors.white70 : Colors.grey.shade500,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 10,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    day.toString(),
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : const Color(0xFF1A1C1E),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildFilterTabs() {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(4),
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -121,6 +289,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
 
   Widget _buildTabItem(String title) {
     bool isSelected = selectedFilter == title;
+    final Color primaryColor = Theme.of(context).primaryColor;
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -130,27 +299,19 @@ class _AssignmentPageState extends State<AssignmentPage> {
           _fetchAssignments();
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    )
-                  ]
-                : [],
+            color: isSelected ? primaryColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: isSelected ? Colors.white : Colors.grey.shade600,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
               fontSize: 13,
+              letterSpacing: 0.5,
             ),
           ),
         ),
@@ -159,21 +320,29 @@ class _AssignmentPageState extends State<AssignmentPage> {
   }
 
   Widget _buildAssignmentCard(dynamic assignment) {
-    final String subject = assignment['subject'] ?? "Subject";
+    final String subject = (assignment['title'] != null && assignment['title'].toString().isNotEmpty) 
+        ? assignment['title'] 
+        : (assignment['by'] ?? "Assignment");
     final String date = assignment['date'] ?? "";
-    final String content = assignment['assignment'] ?? "";
-    final String? fileUrl = assignment['file'];
+    final String content = assignment['desc'] ?? "";
+    final String? fileUrl = assignment['doc'];
+    
+    final bool isImage = fileUrl != null && fileUrl.toLowerCase().contains(
+      RegExp(r'\.(jpg|jpeg|png|gif|webp)'),
+    );
+    final hasFile = fileUrl != null && fileUrl.isNotEmpty && !fileUrl.contains("/None");
+    final Color primaryColor = Theme.of(context).primaryColor;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 22),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -181,98 +350,113 @@ class _AssignmentPageState extends State<AssignmentPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              color: primaryColor.withValues(alpha: 0.04),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  radius: 18,
-                  child: const Icon(Icons.book_rounded, color: Colors.white, size: 18),
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      date.toUpperCase(),
+                      style: TextStyle(
+                        color: primaryColor.withValues(alpha: 0.8),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        subject,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 15,
-                          color: Color(0xFF1A1C1E),
+                if (hasFile && !isImage)
+                  InkWell(
+                    onTap: () => _handleFileLaunch(fileUrl),
+                    child: Row(
+                      children: [
+                        Text(
+                          "VIEW",
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 11,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      ),
-                      Text(
-                        date,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_right_alt_rounded,
+                          color: primaryColor,
+                          size: 16,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
           ),
+          if (isImage && hasFile)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: InteractiveViewer(
+                  child: Image.network(
+                    fileUrl,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (c, e, s) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  content,
+                  subject,
                   style: const TextStyle(
-                    fontSize: 14,
-                    height: 1.5,
-                    color: Color(0xFF424242),
-                    fontWeight: FontWeight.w500,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF1A1C1E),
+                    letterSpacing: -0.6,
+                    height: 1.3,
                   ),
                 ),
-                if (fileUrl != null && fileUrl.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  _buildFilePreview(fileUrl),
-                ],
+                const SizedBox(height: 10),
+                Linkify(
+                  onOpen: (link) => _handleFileLaunch(link.url),
+                  text: content,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: const Color(0xFF1A1C1E).withValues(alpha: 0.65),
+                    height: 1.7,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  linkStyle: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.w800,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilePreview(String url) {
-    final bool isImage = url.toLowerCase().contains(".jpg") || 
-                        url.toLowerCase().contains(".png") || 
-                        url.toLowerCase().contains(".jpeg");
-    
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            isImage ? Icons.image_rounded : Icons.description_rounded,
-            color: Theme.of(context).primaryColor,
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              "View Attachment",
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-            ),
-          ),
-          Icon(Icons.open_in_new_rounded, size: 18, color: Colors.grey.shade400),
         ],
       ),
     );
@@ -283,14 +467,42 @@ class _AssignmentPageState extends State<AssignmentPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.assignment_turned_in_rounded, size: 64, color: Colors.grey.shade300),
-          const SizedBox(height: 16),
-          Text(
-            "No assignments found!",
+          Container(
+            padding: const EdgeInsets.all(30),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 30,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.assignment_turned_in_rounded,
+              size: 70,
+              color: Colors.grey.shade300,
+            ),
+          ),
+          const SizedBox(height: 30),
+          const Text(
+            "No Assignments found!",
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF1A1C1E),
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "You are all caught up!",
+            style: TextStyle(
               color: Colors.grey.shade500,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
             ),
           ),
         ],
@@ -298,11 +510,26 @@ class _AssignmentPageState extends State<AssignmentPage> {
     );
   }
 
+  void _handleFileLaunch(String url) async {
+    try {
+      final uri = Uri.parse(url.trim());
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open document')),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint("Error launching URL: $e");
+    }
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
-      firstDate: DateTime(2020),
+      firstDate: DateTime(2025),
       lastDate: DateTime(2026),
     );
     if (picked != null && picked != selectedDate) {

@@ -12,6 +12,12 @@ abstract class StudentRepository {
     required String uniqueCode,
   });
 
+  Future<Either<Failure, void>> logoutNotification({
+    required String schoolCode,
+    required String name,
+    required String uniqueCode,
+  });
+
   Future<Either<Failure, List<dynamic>>> getClassNotices({
     required String schoolCode,
     required String cdiaryId,

@@ -1,13 +1,24 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/constants/app_urls.dart';
 import '../models/student_model.dart';
 import '../models/leave_model.dart';
 import '../models/exam_model.dart';
 import '../models/mark_detail_model.dart';
+import '../../../../injection_container.dart';
+import '../../../../core/services/push_notification_service.dart';
+
 
 abstract class StudentRemoteDataSource {
   Future<StudentModel> login({
+    required String schoolCode,
+    required String name,
+    required String uniqueCode,
+    String status = "Subscribe",
+  });
+
+  Future<void> logoutNotification({
     required String schoolCode,
     required String name,
     required String uniqueCode,
@@ -111,13 +122,20 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
     required String schoolCode,
     required String name,
     required String uniqueCode,
+    String status = "Subscribe",
   }) async {
     try {
+      final pushNotificationService = sl<PushNotificationService>();
+      final String? deviceToken = await pushNotificationService.getToken();
+
       final formData = FormData.fromMap({
         'Name': name,
         'Profession': 'Student',
         'studentc': 'Student',
         'Unique_Code': uniqueCode,
+        'token': deviceToken ?? "",
+        'appname': 'iOS',
+        'status': status,
       });
 
       final response = await dio.post(
@@ -170,6 +188,36 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         throw Exception("Server is busy, please try again later");
       }
       throw Exception(e.message ?? "Connection Error");
+    }
+  }
+
+  @override
+  Future<void> logoutNotification({
+    required String schoolCode,
+    required String name,
+    required String uniqueCode,
+  }) async {
+    try {
+      final pushNotificationService = sl<PushNotificationService>();
+      final String? deviceToken = await pushNotificationService.getToken();
+
+      final formData = FormData.fromMap({
+        'Name': name,
+        'Profession': 'Student',
+        'studentc': 'Student',
+        'Unique_Code': uniqueCode,
+        'token': deviceToken ?? "",
+        'appname': 'iOS',
+        'status': 'logout',
+      });
+
+      await dio.post(
+        AppUrls.studentLogin(schoolCode),
+        data: formData,
+      );
+    } catch (e) {
+      // Just log and continue, logout should not fail due to notification sync
+      debugPrint("Logout notification sync failed: $e");
     }
   }
 
@@ -273,7 +321,8 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         'password': password,
         'session': session,
         'month': month,
-        'day': day,
+        'day': showhw == 'Monthwise' ? '' : day,
+        'studentc': 'Student',
         'class': studentClass,
         'section': section,
         'showhw': showhw,
@@ -282,6 +331,12 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
       final response = await dio.post(
         AppUrls.getAssignments(schoolCode),
         data: formData,
+        options: Options(
+          headers: {
+            'User-Agent':
+                'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+          },
+        ),
       );
 
       if (response.statusCode == 200) {

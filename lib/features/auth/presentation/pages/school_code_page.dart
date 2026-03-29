@@ -100,16 +100,31 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
           if (state.schoolCode != null) {
             _fetchCalendarData(state.schoolCode!);
           }
+        } else if (state is StudentAuthenticated) {
+          if (state.student.schoolCode != null) {
+            _fetchCalendarData(state.student.schoolCode!);
+          }
         } else if (state is AuthError) {
           AppToast.show(context, "Invalid School Code", isError: true);
         }
       },
       builder: (context, state) {
-        bool isConnected = state is AuthSuccess && state.school != null;
-        final school = isConnected ? state.school : null;
+        bool isConnected = (state is AuthSuccess && state.school != null) ||
+            (state is StudentAuthenticated);
+        
+        dynamic school;
+        String schoolCode = '';
 
-        if (isConnected) {
-          return _buildHomeSection(context, school!, state.schoolCode ?? '');
+        if (state is AuthSuccess) {
+          school = state.school;
+          schoolCode = state.schoolCode ?? '';
+        } else if (state is StudentAuthenticated) {
+          school = state.student; // StudentModel has school info fields like schoolName, logo etc.
+          schoolCode = state.student.schoolCode ?? '';
+        }
+
+        if (isConnected && school != null) {
+          return _buildHomeSection(context, school, schoolCode);
         }
 
         return _buildSchoolCodeEntry(context, state);
