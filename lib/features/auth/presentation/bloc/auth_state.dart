@@ -17,19 +17,27 @@ class AuthSuccess extends AuthState {
   final String message;
   final SchoolModel? school;
   final String? schoolCode;
+  final String? feesoftware;
 
-  AuthSuccess({this.message = "Success", this.school, this.schoolCode});
+  AuthSuccess({
+    this.message = "Success",
+    this.school,
+    this.schoolCode,
+    this.feesoftware,
+  });
 
   @override
-  List<Object?> get props => [message, school, schoolCode];
+  List<Object?> get props => [message, school, schoolCode, feesoftware];
 }
 
 class StudentAuthenticated extends AuthState {
   final StudentModel student;
-  StudentAuthenticated(this.student);
+  final SchoolModel? school;
+
+  StudentAuthenticated(this.student, {this.school});
 
   @override
-  List<Object?> get props => [student];
+  List<Object?> get props => [student, school];
 }
 
 class AuthError extends AuthState {

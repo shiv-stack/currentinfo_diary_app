@@ -22,7 +22,7 @@ class AssignmentPage extends StatefulWidget {
 }
 
 class _AssignmentPageState extends State<AssignmentPage> {
-  String selectedFilter = "Monthwise"; 
+  String selectedFilter = "Monthwise";
   DateTime selectedDate = DateTime.now();
 
   @override
@@ -39,18 +39,18 @@ class _AssignmentPageState extends State<AssignmentPage> {
 
     if (schoolCode != null && creds != null && mounted) {
       context.read<StudentBloc>().add(
-            GetAssignments(
-              schoolCode: schoolCode,
-              cdiaryId: widget.student.cdiaryId ?? "",
-              password: creds['password'] ?? "",
-              session: session,
-              month: DateFormat('MMMM').format(selectedDate),
-              day: DateFormat('dd').format(selectedDate),
-              studentClass: widget.student.className ?? "",
-              section: widget.student.section ?? "",
-              showhw: selectedFilter,
-            ),
-          );
+        GetAssignments(
+          schoolCode: schoolCode,
+          cdiaryId: widget.student.cdiaryId ?? "",
+          password: creds['password'] ?? "",
+          session: session,
+          month: DateFormat('MMMM').format(selectedDate),
+          day: DateFormat('dd').format(selectedDate),
+          studentClass: widget.student.className ?? "",
+          section: widget.student.section ?? "",
+          showhw: selectedFilter,
+        ),
+      );
     }
   }
 
@@ -90,17 +90,17 @@ class _AssignmentPageState extends State<AssignmentPage> {
           ),
           centerTitle: true,
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 15),
-              child: IconButton(
-                onPressed: () => _selectDate(context),
-                icon: const Icon(
-                  Icons.calendar_month_rounded,
-                  color: Color(0xFF1A1C1E),
-                  size: 26,
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(right: 15),
+            //   child: IconButton(
+            //     onPressed: () => _selectDate(context),
+            //     icon: const Icon(
+            //       Icons.calendar_month_rounded,
+            //       color: Color(0xFF1A1C1E),
+            //       size: 26,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
         body: Column(
@@ -148,8 +148,18 @@ class _AssignmentPageState extends State<AssignmentPage> {
 
   Widget _buildHorizontalMonthSelector() {
     final months = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
     final currentMonth = DateFormat('MMMM').format(selectedDate);
 
@@ -200,7 +210,11 @@ class _AssignmentPageState extends State<AssignmentPage> {
   }
 
   Widget _buildHorizontalDateSelector() {
-    final daysInMonth = DateTime(selectedDate.year, selectedDate.month + 1, 0).day;
+    final daysInMonth = DateTime(
+      selectedDate.year,
+      selectedDate.month + 1,
+      0,
+    ).day;
     final currentDay = selectedDate.day;
 
     return Container(
@@ -220,7 +234,11 @@ class _AssignmentPageState extends State<AssignmentPage> {
           return GestureDetector(
             onTap: () {
               setState(() {
-                selectedDate = DateTime(selectedDate.year, selectedDate.month, day);
+                selectedDate = DateTime(
+                  selectedDate.year,
+                  selectedDate.month,
+                  day,
+                );
               });
               _fetchAssignments();
             },
@@ -249,7 +267,9 @@ class _AssignmentPageState extends State<AssignmentPage> {
                   Text(
                     day.toString(),
                     style: TextStyle(
-                      color: isSelected ? Colors.white : const Color(0xFF1A1C1E),
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF1A1C1E),
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
                     ),
@@ -279,10 +299,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
         ],
       ),
       child: Row(
-        children: [
-          _buildTabItem("Monthwise"),
-          _buildTabItem("Datewise"),
-        ],
+        children: [_buildTabItem("Monthwise"), _buildTabItem("Datewise")],
       ),
     );
   }
@@ -320,17 +337,20 @@ class _AssignmentPageState extends State<AssignmentPage> {
   }
 
   Widget _buildAssignmentCard(dynamic assignment) {
-    final String subject = (assignment['title'] != null && assignment['title'].toString().isNotEmpty) 
-        ? assignment['title'] 
+    final String subject =
+        (assignment['title'] != null &&
+            assignment['title'].toString().isNotEmpty)
+        ? assignment['title']
         : (assignment['by'] ?? "Assignment");
     final String date = assignment['date'] ?? "";
     final String content = assignment['desc'] ?? "";
     final String? fileUrl = assignment['doc'];
-    
-    final bool isImage = fileUrl != null && fileUrl.toLowerCase().contains(
-      RegExp(r'\.(jpg|jpeg|png|gif|webp)'),
-    );
-    final hasFile = fileUrl != null && fileUrl.isNotEmpty && !fileUrl.contains("/None");
+
+    final bool isImage =
+        fileUrl != null &&
+        fileUrl.toLowerCase().contains(RegExp(r'\.(jpg|jpeg|png|gif|webp)'));
+    final hasFile =
+        fileUrl != null && fileUrl.isNotEmpty && !fileUrl.contains("/None");
     final Color primaryColor = Theme.of(context).primaryColor;
 
     return Container(

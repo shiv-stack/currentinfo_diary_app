@@ -34,16 +34,16 @@ class _TimetablePageState extends State<TimetablePage> {
 
     if (schoolCode != null && creds != null && mounted) {
       context.read<StudentBloc>().add(
-            GetClassNotices(
-              schoolCode: schoolCode,
-              cdiaryId: widget.student.cdiaryId ?? "",
-              password: creds['password'] ?? "",
-              session: session,
-              className: widget.student.className ?? "",
-              section: widget.student.section ?? "",
-              display: "Timetable",
-            ),
-          );
+        GetClassNotices(
+          schoolCode: schoolCode,
+          cdiaryId: widget.student.cdiaryId ?? "",
+          password: creds['password'] ?? "",
+          session: session,
+          className: widget.student.className ?? "",
+          section: widget.student.section ?? "",
+          display: "Timetable",
+        ),
+      );
     }
   }
 
@@ -64,7 +64,11 @@ class _TimetablePageState extends State<TimetablePage> {
           leading: Padding(
             padding: const EdgeInsets.only(left: 10),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1A1C1E), size: 20),
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Color(0xFF1A1C1E),
+                size: 20,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -84,7 +88,12 @@ class _TimetablePageState extends State<TimetablePage> {
             if (state is ClassNoticesLoading) {
               return const AppLoadingIndicator();
             } else if (state is ClassNoticesFailure) {
-              return Center(child: Text(state.message, style: const TextStyle(fontWeight: FontWeight.w700)));
+              return Center(
+                child: Text(
+                  state.message,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              );
             } else if (state is ClassNoticesLoaded) {
               if (state.notices.isEmpty) {
                 return _buildEmptyState();
@@ -106,7 +115,9 @@ class _TimetablePageState extends State<TimetablePage> {
 
   Widget _buildNoticeCard(BuildContext context, dynamic notice) {
     final fileUrl = notice['fileee'] as String? ?? "";
-    final isImage = fileUrl.toLowerCase().contains(RegExp(r'\.(jpg|jpeg|png|gif|webp)'));
+    final isImage = fileUrl.toLowerCase().contains(
+      RegExp(r'\.(jpg|jpeg|png|gif|webp)'),
+    );
     final hasFile = fileUrl.isNotEmpty && !fileUrl.contains("/None");
     final Color primaryColor = Theme.of(context).primaryColor;
 
@@ -116,7 +127,11 @@ class _TimetablePageState extends State<TimetablePage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 24, offset: const Offset(0, 10)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
         ],
       ),
       child: Column(
@@ -126,17 +141,27 @@ class _TimetablePageState extends State<TimetablePage> {
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
             decoration: BoxDecoration(
               color: primaryColor.withValues(alpha: 0.04),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    Container(width: 6, height: 6, decoration: BoxDecoration(color: primaryColor, shape: BoxShape.circle)),
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                     const SizedBox(width: 10),
                     Text(
-                      notice['time']?.toString().toUpperCase() ?? 'SCHEDULE UPDATE',
+                      notice['time']?.toString().toUpperCase() ??
+                          'SCHEDULE UPDATE',
                       style: TextStyle(
                         color: primaryColor.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w900,
@@ -151,9 +176,21 @@ class _TimetablePageState extends State<TimetablePage> {
                     onTap: () => _handleFileDownload(fileUrl),
                     child: Row(
                       children: [
-                        Text("VIEW", style: TextStyle(color: primaryColor, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 0.5)),
+                        Text(
+                          "VIEW",
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 11,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
                         const SizedBox(width: 4),
-                        Icon(Icons.arrow_right_alt_rounded, color: primaryColor, size: 16),
+                        Icon(
+                          Icons.arrow_right_alt_rounded,
+                          color: primaryColor,
+                          size: 16,
+                        ),
                       ],
                     ),
                   ),
@@ -165,7 +202,12 @@ class _TimetablePageState extends State<TimetablePage> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: Image.network(fileUrl, width: double.infinity, fit: BoxFit.cover, errorBuilder: (c, e, s) => const SizedBox.shrink()),
+                child: Image.network(
+                  fileUrl,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (c, e, s) => const SizedBox.shrink(),
+                ),
               ),
             ),
           Padding(
@@ -175,21 +217,39 @@ class _TimetablePageState extends State<TimetablePage> {
               children: [
                 Text(
                   notice['title'] ?? 'Section Details',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF1A1C1E), letterSpacing: -0.6, height: 1.3),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF1A1C1E),
+                    letterSpacing: -0.6,
+                    height: 1.3,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Linkify(
                   onOpen: (link) async {
                     try {
                       final uri = Uri.parse(link.url);
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
                     } catch (e) {
                       debugPrint("Link opening error: $e");
                     }
                   },
                   text: notice['description'] ?? '',
-                  style: TextStyle(fontSize: 14, color: const Color(0xFF1A1C1E).withValues(alpha: 0.65), height: 1.7, fontWeight: FontWeight.w500),
-                  linkStyle: TextStyle(color: primaryColor, fontWeight: FontWeight.w800, decoration: TextDecoration.underline),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: const Color(0xFF1A1C1E).withValues(alpha: 0.65),
+                    height: 1.7,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  linkStyle: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.w800,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ],
             ),
@@ -206,11 +266,33 @@ class _TimetablePageState extends State<TimetablePage> {
         children: [
           Container(
             padding: const EdgeInsets.all(30),
-            decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 30, offset: const Offset(0, 10))]),
-            child: Icon(Icons.calendar_month_rounded, size: 70, color: Colors.grey.shade300),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 30,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.calendar_month_rounded,
+              size: 70,
+              color: Colors.grey.shade300,
+            ),
           ),
           const SizedBox(height: 30),
-          const Text("No Timetable Found", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF1A1C1E), letterSpacing: -0.5)),
+          const Text(
+            "No Timetable Found",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF1A1C1E),
+              letterSpacing: -0.5,
+            ),
+          ),
         ],
       ),
     );

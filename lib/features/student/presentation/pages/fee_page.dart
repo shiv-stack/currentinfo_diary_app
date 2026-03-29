@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:current_diary_app/widgets/webview_page.dart';
 import 'package:current_diary_app/core/utils/app_toast.dart';
 import '../../data/models/student_model.dart';
 import '../bloc/student_bloc.dart';
@@ -55,6 +55,21 @@ class _FeePageState extends State<FeePage> {
           studentFeeSoftware: feeSoftware,
         ),
       );
+    }
+  }
+
+  void _openUrl(String title, String urlString) {
+    debugPrint("URL: $urlString");
+    if (urlString.isNotEmpty && urlString != "NA") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WebViewPage(title: title, url: urlString),
+        ),
+      );
+    } else {
+      AppToast.show(context, "$title is Coming Soon");
+      HapticFeedback.lightImpact();
     }
   }
 
@@ -138,13 +153,69 @@ class _FeePageState extends State<FeePage> {
                 ),
               );
             } else if (state is FeesLoaded) {
-              if (state.fees.isEmpty) {
-                return _buildEmptyFees();
-              }
-              return _buildFeeList(state.fees);
+              return Column(
+                children: [
+                  _buildOnlinePayButton(),
+                  Expanded(
+                    child: state.fees.isEmpty
+                        ? _buildEmptyFees()
+                        : _buildFeeList(state.fees),
+                  ),
+                ],
+              );
             }
             return const SizedBox.shrink();
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOnlinePayButton() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+      child: InkWell(
+        onTap: () {
+          final url =
+              "https://www.currentdiary.com/student-fee-payment/pay-fee-online/$_schoolCode/feesoftware=$_feeSoftware&admission_no=${widget.student.enrollNumber ?? ''}";
+          _openUrl("Online Payment", url);
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor,
+                Theme.of(context).primaryColor.withValues(alpha: 0.8),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.payment_rounded, color: Colors.white, size: 22),
+              SizedBox(width: 12),
+              Text(
+                "PAY ONLINE",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -323,7 +394,7 @@ class _FeePageState extends State<FeePage> {
                       ),
                     ),
                     TextButton.icon(
-                      onPressed: () async {
+                      onPressed: () {
                         final String feeId = fee['feeid'] ?? "";
                         final String rDate = fee['date'] ?? "";
                         final String rNo = fee['fee_receipt_no'] ?? "";
@@ -337,20 +408,7 @@ class _FeePageState extends State<FeePage> {
                               "https://www.currentdiary.com/feemanage/fee-quick-app-api/$_schoolCode/?getcdiaryid=$feeId&getsession=$_session&getfeereceiptno=$rNo&getdatevalue=$rDate";
                         }
 
-                        final Uri url = Uri.parse(urlValue);
-                        if (await canLaunchUrl(url)) {
-                          await launchUrl(
-                            url,
-                            mode: LaunchMode.externalApplication,
-                          );
-                        } else {
-                          if (mounted) {
-                            AppToast.show(
-                              context,
-                              "Could not open receipt URL",
-                            );
-                          }
-                        }
+                        _openUrl("Fee Slip", urlValue);
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: Theme.of(

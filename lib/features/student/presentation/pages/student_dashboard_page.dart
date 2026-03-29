@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:current_diary_app/core/utils/app_toast.dart';
 import 'package:current_diary_app/routes/app_routes.dart';
 import 'package:current_diary_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:current_diary_app/features/auth/presentation/bloc/auth_event.dart';
-import 'package:current_diary_app/core/services/analytics_service.dart'; // Absolute path for AnalyticsService
+import 'package:current_diary_app/core/services/analytics_service.dart';
 import '../../data/models/student_model.dart';
 import '../../../../injection_container.dart';
 import '../../../auth/data/datasources/auth_local_data_source.dart';
@@ -15,8 +16,28 @@ class StudentDashboardPage extends StatelessWidget {
 
   const StudentDashboardPage({super.key, required this.student});
 
+  bool _isTodayBirthday() {
+    if (student.dob == null || student.dob!.isEmpty) return false;
+    try {
+      // Handle both DD-MM-YYYY and DD/MM/YYYY
+      final cleanDob = student.dob!.replaceAll('-', '/');
+      final parts = cleanDob.split('/');
+      if (parts.length >= 2) {
+        final day = int.tryParse(parts[0]);
+        final month = int.tryParse(parts[1]);
+        if (day == null || month == null) return false;
+
+        final now = DateTime.now();
+        return now.day == day && now.month == month;
+      }
+    } catch (_) {}
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bool isBirthday = _isTodayBirthday();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
@@ -31,7 +52,7 @@ class StudentDashboardPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Student Pannel",
+                    isBirthday ? "Happy Birthday! 🎉" : "Student Pannel",
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w900,
@@ -56,6 +77,12 @@ class StudentDashboardPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
+
+              // Birthday Card (Exclusive for today)
+              if (isBirthday) ...[
+                _buildBirthdayCard(context),
+                const SizedBox(height: 20),
+              ],
 
               // Modern Student Info Card
               _buildModernStudentCard(context),
@@ -84,6 +111,32 @@ class StudentDashboardPage extends StatelessWidget {
               const SizedBox(height: 40),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBirthdayCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: Lottie.asset(
+          'assets/lotie/birthday.json',
+          width: double.infinity,
+          height: 200,
+          fit: BoxFit.contain,
         ),
       ),
     );
@@ -361,6 +414,7 @@ class StudentDashboardPage extends StatelessWidget {
             'imagePath': 'assets/icons/attendance.png',
             'color': const Color(0xffFFF1E6),
           },
+
           {
             'title': 'MESSAGE',
             'imagePath': 'assets/icons/message.png',
@@ -414,7 +468,7 @@ class StudentDashboardPage extends StatelessWidget {
         ];
 
         if (isFeesEnabled) {
-          actions.add({
+          actions.insert(2, {
             'title': 'FEES',
             'imagePath': 'assets/icons/fees.png',
             'color': const Color(0xffE6F7FF),

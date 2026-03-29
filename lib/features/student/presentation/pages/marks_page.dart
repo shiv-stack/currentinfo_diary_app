@@ -110,6 +110,10 @@ class _MarksPageState extends State<MarksPage> {
                   }
                 },
                 child: BlocBuilder<StudentBloc, StudentState>(
+                  buildWhen: (previous, current) =>
+                      current is ExamsLoading ||
+                      current is ExamsLoaded ||
+                      current is ExamsFailure,
                   builder: (context, state) {
                     if (state is ExamsLoading) {
                       return const Center(child: AppLoadingIndicator());
@@ -150,12 +154,14 @@ class _MarksPageState extends State<MarksPage> {
                                 leading: Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFE6FFEF),
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.assignment_rounded,
-                                    color: Color(0xFF2DCE89),
+                                    color: Theme.of(context).primaryColor,
                                   ),
                                 ),
                                 title: Text(
@@ -178,8 +184,8 @@ class _MarksPageState extends State<MarksPage> {
                                   size: 16,
                                   color: Colors.grey,
                                 ),
-                                onTap: () {
-                                  Navigator.push(
+                                onTap: () async {
+                                  await Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => MarkDetailsPage(
@@ -190,6 +196,7 @@ class _MarksPageState extends State<MarksPage> {
                                       ),
                                     ),
                                   );
+                                  _fetchExams();
                                 },
                               ),
                             );
@@ -230,7 +237,7 @@ class _MarksPageState extends State<MarksPage> {
                             ElevatedButton(
                               onPressed: _fetchExams,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2DCE89),
+                                backgroundColor: Theme.of(context).primaryColor,
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 32,

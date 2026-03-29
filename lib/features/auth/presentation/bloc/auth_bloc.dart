@@ -5,6 +5,7 @@ import '../../data/datasources/auth_local_data_source.dart';
 import '../../domain/usecases/get_school_info_usecase.dart';
 import '../../../student/domain/usecases/student_login_usecase.dart';
 import '../../../student/domain/usecases/logout_notification_usecase.dart';
+import '../../../student/data/models/student_model.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -54,6 +55,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           message: "Logged out from Student Profile",
           school: cachedSchool,
           schoolCode: storedCode,
+          feesoftware: cachedSchool.feeSoftware,
         ),
       );
     } else {
@@ -110,7 +112,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           },
           (student) async {
             debugPrint("Re-verification successful for ${student.name}");
-            emit(StudentAuthenticated(student));
+            final school = await localDataSource.getCachedSchoolInfo();
+            // Merge feesoftware from school info if not present in student
+            final updatedStudent = StudentModel(
+              studentImage: student.studentImage,
+              thoughtTitle: student.thoughtTitle,
+              thoughtMessage: student.thoughtMessage,
+              name: student.name,
+              className: student.className,
+              dob: student.dob,
+              contactNumber: student.contactNumber,
+              cdiaryId: student.cdiaryId,
+              section: student.section,
+              session: student.session,
+              schoolName: student.schoolName,
+              address: student.address,
+              email: student.email,
+              fatherName: student.fatherName,
+              motherName: student.motherName,
+              schoolCode: student.schoolCode,
+              enrollNumber: student.enrollNumber,
+              password: student.password,
+              feesoftware: student.feesoftware ?? school?.feeSoftware,
+              doa: student.doa,
+            );
+            emit(StudentAuthenticated(updatedStudent, school: school));
             return true;
           },
         );
@@ -126,6 +152,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           message: "Welcome back to ${cachedSchool.title}",
           school: cachedSchool,
           schoolCode: storedCode,
+          feesoftware: cachedSchool.feeSoftware,
         ),
       );
     } else {
@@ -161,6 +188,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             message: "Data Updated",
             school: school,
             schoolCode: storedCode,
+            feesoftware: school.feeSoftware,
           ),
         );
       },
@@ -202,6 +230,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           message: "Connected to ${school.title ?? 'School'}",
           school: school,
           schoolCode: event.code,
+          feesoftware: school.feeSoftware,
         ),
       );
     });

@@ -109,22 +109,27 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
         }
       },
       builder: (context, state) {
-        bool isConnected = (state is AuthSuccess && state.school != null) ||
+        bool isConnected =
+            (state is AuthSuccess && state.school != null) ||
             (state is StudentAuthenticated);
-        
+
         dynamic school;
         String schoolCode = '';
+        String feesoftware = '';
 
         if (state is AuthSuccess) {
           school = state.school;
           schoolCode = state.schoolCode ?? '';
+          feesoftware = state.feesoftware ?? '';
         } else if (state is StudentAuthenticated) {
-          school = state.student; // StudentModel has school info fields like schoolName, logo etc.
+          school = state
+              .school; // Use the school property from StudentAuthenticated state
           schoolCode = state.student.schoolCode ?? '';
+          feesoftware = state.student.feesoftware ?? '';
         }
 
         if (isConnected && school != null) {
-          return _buildHomeSection(context, school, schoolCode);
+          return _buildHomeSection(context, school, schoolCode, feesoftware);
         }
 
         return _buildSchoolCodeEntry(context, state);
@@ -307,6 +312,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
     BuildContext context,
     dynamic school,
     String schoolCode,
+    String feesoftware,
   ) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -557,7 +563,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                         const Color(0xffE6FFEF),
                         null,
                         url:
-                            "https://www.currentdiary.com/student-fee-payment/pay-fee-online/$schoolCode",
+                            "https://www.currentdiary.com/student-fee-payment/pay-fee-online/$schoolCode/feesoftware=$feesoftware",
                       ),
                       _buildHomeMenuItem(
                         context,

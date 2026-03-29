@@ -9,7 +9,6 @@ import '../models/mark_detail_model.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/services/push_notification_service.dart';
 
-
 abstract class StudentRemoteDataSource {
   Future<StudentModel> login({
     required String schoolCode,
@@ -155,7 +154,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
 
         if (data.isNotEmpty) {
           final student = StudentModel.fromJson(data[0]);
-
+          // debugPrint('Student == > ${student.toJson()}');
           // Check if cdiaryId is present, if not, it's an invalid login
           if (student.cdiaryId == null || student.cdiaryId!.isEmpty) {
             throw Exception("Invalid credentials or student not found");
@@ -179,6 +178,9 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
             fatherName: student.fatherName,
             motherName: student.motherName,
             schoolCode: schoolCode,
+            enrollNumber: student.enrollNumber,
+            password: student.password,
+            doa: student.doa,
           );
         }
       }
@@ -211,10 +213,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         'status': 'logout',
       });
 
-      await dio.post(
-        AppUrls.studentLogin(schoolCode),
-        data: formData,
-      );
+      await dio.post(AppUrls.studentLogin(schoolCode), data: formData);
     } catch (e) {
       // Just log and continue, logout should not fail due to notification sync
       debugPrint("Logout notification sync failed: $e");
@@ -374,9 +373,19 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        return response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final List<dynamic> rawData =
+            response.data is String ? jsonDecode(response.data) : response.data;
+
+        // Filter out empty maps or objects with no actual content
+        return rawData.where((item) {
+          if (item is Map) {
+            return item.isNotEmpty &&
+                item.values.any(
+                  (v) => v != null && v.toString().trim().isNotEmpty,
+                );
+          }
+          return item != null;
+        }).toList();
       }
       return [];
     } on DioException catch (e) {
@@ -450,11 +459,10 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         'marksid': studentId,
         'password': password,
         'studentc': 'Student',
-        'modify': 'shows',
-        'session': session,
-        'marksclass': marksClass,
-        'marksyear': marksYear,
-        'marksexam': marksExam,
+        'modify': '',
+        'year': marksYear,
+        'examdesc': marksExam,
+        'classdetail': marksClass,
       });
 
       final response = await dio.post(
@@ -477,6 +485,107 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
           } catch (e) {
             print("Mark Details Decode Error: $e");
           }
+        }
+
+        if (dataList.isNotEmpty && dataList[0] is Map) {
+          final Map<String, dynamic> firstObj =
+              dataList[0] as Map<String, dynamic>;
+          final List<MarkDetailModel> marks = [];
+
+          final String? globalRoll = firstObj['rollno']?.toString();
+          final String? globalAttendance = firstObj['attendance']?.toString();
+          final String? globalTotalAttendance =
+              firstObj['totalattendance']?.toString();
+          final String? globalEnroll =
+              firstObj['enrollment_number']?.toString();
+          final String? rollNo =
+              (globalRoll == null || globalRoll.trim().toLowerCase() == "na")
+                  ? null
+                  : globalRoll.trim();
+          final String? attendance = (globalAttendance == null ||
+                  globalAttendance.trim().toLowerCase() == "na")
+              ? null
+              : globalAttendance.trim();
+          final String? totalAttendance = (globalTotalAttendance == null ||
+                  globalTotalAttendance.trim().toLowerCase() == "na")
+              ? null
+              : globalTotalAttendance.trim();
+          final String? enrollmentNumber =
+              (globalEnroll == null || globalEnroll.trim().toLowerCase() == "na")
+                  ? null
+                  : globalEnroll.trim();
+
+          // Parse main subjects (sub1 - sub15)
+          for (int i = 1; i <= 15; i++) {
+            final String? sub = firstObj['sub$i']?.toString();
+            if (sub != null &&
+                sub.isNotEmpty &&
+                sub.trim().toLowerCase() != "na") {
+              final String? grade = firstObj['grade$i']?.toString();
+              final String? marksVal = firstObj['marks$i']?.toString();
+              final String? limitVal = firstObj['limitmark$i']?.toString();
+              marks.add(MarkDetailModel(
+                subject: sub.trim(),
+                marksObtained: (marksVal == null ||
+                        marksVal.trim().toLowerCase() == "na")
+                    ? null
+                    : marksVal.trim(),
+                maxMarks: (limitVal == null ||
+                        limitVal.trim().toLowerCase() == "na")
+                    ? null
+                    : limitVal.trim(),
+                grade: (grade == null || grade.trim().toLowerCase() == "na")
+                    ? null
+                    : grade.trim(),
+                rollNo: rollNo,
+                attendance: attendance,
+                totalAttendance: totalAttendance,
+                enrollmentNumber: enrollmentNumber,
+              ));
+            }
+          }
+
+          // Parse Co-Scholastic Aspects (gradename21 - 24)
+          for (int i = 21; i <= 24; i++) {
+            final String? sub = firstObj['gradename$i']?.toString();
+            if (sub != null &&
+                sub.isNotEmpty &&
+                sub.trim().toLowerCase() != "na") {
+              final String? grade = firstObj['grade$i']?.toString();
+              marks.add(MarkDetailModel(
+                subject: sub.trim(),
+                grade: (grade == null || grade.trim().toLowerCase() == "na")
+                    ? null
+                    : grade.trim(),
+                rollNo: rollNo,
+                attendance: attendance,
+                totalAttendance: totalAttendance,
+                enrollmentNumber: enrollmentNumber,
+              ));
+            }
+          }
+
+          // Parse Extra Scholastic Aspects (gradename31 - 35)
+          for (int i = 31; i <= 35; i++) {
+            final String? sub = firstObj['gradename$i']?.toString();
+            if (sub != null &&
+                sub.isNotEmpty &&
+                sub.trim().toLowerCase() != "na") {
+              final String? grade = firstObj['grade$i']?.toString();
+              marks.add(MarkDetailModel(
+                subject: sub.trim(),
+                grade: (grade == null || grade.trim().toLowerCase() == "na")
+                    ? null
+                    : grade.trim(),
+                rollNo: rollNo,
+                attendance: attendance,
+                totalAttendance: totalAttendance,
+                enrollmentNumber: enrollmentNumber,
+              ));
+            }
+          }
+
+          if (marks.isNotEmpty) return marks;
         }
 
         return dataList

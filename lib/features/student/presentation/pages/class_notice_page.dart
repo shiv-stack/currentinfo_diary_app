@@ -74,7 +74,7 @@ class _ClassNoticePageState extends State<ClassNoticePage> {
           title: const Column(
             children: [
               Text(
-                "Class Update",
+                "Class Notice",
                 style: TextStyle(
                   color: Color(0xFF1A1C1E),
                   fontWeight: FontWeight.w900,
