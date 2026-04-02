@@ -82,6 +82,54 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
 
+    // Attempt instant load of school info from cache
+    final cachedSchool = await localDataSource.getCachedSchoolInfo();
+    if (cachedSchool != null) {
+      emit(
+        AuthSuccess(
+          message: "Welcome back",
+          school: cachedSchool,
+          schoolCode: storedCode,
+          feesoftware: cachedSchool.feeSoftware,
+        ),
+      );
+    } else {
+      emit(AuthLoading());
+    }
+
+    // MANDATORY REFRESH: Update cached school values from API
+    final schoolResult = await getSchoolInfoUseCase(storedCode);
+    final school = await schoolResult.fold(
+      (failure) async {
+        debugPrint("School refresh failed: ${failure.message}");
+        if (cachedSchool == null) {
+          emit(NavigateToSchoolCode());
+        }
+        return cachedSchool;
+      },
+      (freshSchool) async {
+        await localDataSource.cacheSchoolInfo(freshSchool);
+        if (freshSchool.session != null) {
+          await localDataSource.cacheSession(freshSchool.session!);
+        }
+        if (freshSchool.onlineFeeSubmit != null) {
+          await localDataSource.cacheOnlineFeeSubmit(
+            freshSchool.onlineFeeSubmit!,
+          );
+        }
+        if (freshSchool.feeSoftware != null) {
+          await localDataSource.cacheFeeSoftware(freshSchool.feeSoftware!);
+        }
+        if (freshSchool.leaveOptionInApp != null) {
+          await localDataSource.cacheLeaveOption(freshSchool.leaveOptionInApp!);
+        }
+        return freshSchool;
+      },
+    );
+    debugPrint("School code refreshed: $storedCode");
+
+    if (school == null) return;
+
     // CHECK FOR ACTIVE STUDENT SESSION (FOR AUTO-LOGIN RE-VERIFICATION)
     final activeCreds = await localDataSource.getActiveStudentCredentials();
     if (activeCreds != null) {
@@ -98,21 +146,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final bool shouldReturn = await loginResult.fold(
           (failure) async {
             debugPrint("Re-verification failed: ${failure.message}");
-            // If the failure is due to invalid credentials (and not just a connectivity issue),
-            // you might want to clear the session.
-            // For now, if we get an explicit error from server regarding credentials, we clear it.
             if (failure.message.toLowerCase().contains("invalid") ||
                 failure.message.toLowerCase().contains("not found")) {
               await localDataSource.clearActiveStudentSession();
               return false;
             }
-            // If it's a network error, we might still want to let them in with cached data if possible,
-            // but the user asked to verify, so let's be strict or at least not emit StudentAuthenticated yet.
             return false;
           },
           (student) async {
             debugPrint("Re-verification successful for ${student.name}");
-            final school = await localDataSource.getCachedSchoolInfo();
             // Merge feesoftware from school info if not present in student
             final updatedStudent = StudentModel(
               studentImage: student.studentImage,
@@ -133,7 +175,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               schoolCode: student.schoolCode,
               enrollNumber: student.enrollNumber,
               password: student.password,
-              feesoftware: student.feesoftware ?? school?.feeSoftware,
+              feesoftware: student.feesoftware ?? school.feeSoftware,
               doa: student.doa,
             );
             emit(StudentAuthenticated(updatedStudent, school: school));
@@ -144,54 +186,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     }
 
-    // Attempt instant load of school info from cache
-    final cachedSchool = await localDataSource.getCachedSchoolInfo();
-    if (cachedSchool != null) {
-      emit(
-        AuthSuccess(
-          message: "Welcome back to ${cachedSchool.title}",
-          school: cachedSchool,
-          schoolCode: storedCode,
-          feesoftware: cachedSchool.feeSoftware,
-        ),
-      );
-    } else {
-      emit(AuthLoading());
-    }
-
-    // Refresh data from API
-    final result = await getSchoolInfoUseCase(storedCode);
-
-    await result.fold(
-      (failure) async {
-        // If we don't even have cached info, redirect to login
-        if (cachedSchool == null) {
-          emit(NavigateToSchoolCode());
-        }
-      },
-      (school) async {
-        await localDataSource.cacheSchoolInfo(school);
-        if (school.session != null) {
-          await localDataSource.cacheSession(school.session!);
-        }
-        if (school.onlineFeeSubmit != null) {
-          await localDataSource.cacheOnlineFeeSubmit(school.onlineFeeSubmit!);
-        }
-        if (school.feeSoftware != null) {
-          await localDataSource.cacheFeeSoftware(school.feeSoftware!);
-        }
-        if (school.leaveOptionInApp != null) {
-          await localDataSource.cacheLeaveOption(school.leaveOptionInApp!);
-        }
-        emit(
-          AuthSuccess(
-            message: "Data Updated",
-            school: school,
-            schoolCode: storedCode,
-            feesoftware: school.feeSoftware,
-          ),
-        );
-      },
+    // Emit the fresh school info context
+    emit(
+      AuthSuccess(
+        message: "Data Updated",
+        school: school,
+        schoolCode: storedCode,
+        feesoftware: school.feeSoftware,
+      ),
     );
   }
 

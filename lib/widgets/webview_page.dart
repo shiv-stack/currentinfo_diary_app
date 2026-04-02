@@ -21,6 +21,7 @@ class _WebViewPageState extends State<WebViewPage> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(Colors.white)
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (String url) {
@@ -39,6 +40,11 @@ class _WebViewPageState extends State<WebViewPage> {
         ),
       )
       ..loadRequest(Uri.parse(widget.url));
+  }
+
+  bool get _shouldShowConfirmation {
+    final t = widget.title.toLowerCase();
+    return t.contains("pay online") || t.contains("online payment");
   }
 
   Future<bool> _showCloseConfirmation(BuildContext context) async {
@@ -82,12 +88,17 @@ class _WebViewPageState extends State<WebViewPage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: !_shouldShowConfirmation,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        final bool shouldPop = await _showCloseConfirmation(context);
-        if (shouldPop && context.mounted) {
-          Navigator.of(context).pop();
+
+        if (_shouldShowConfirmation) {
+          final bool shouldPop = await _showCloseConfirmation(context);
+          if (shouldPop && context.mounted) {
+            Navigator.of(context).pop();
+          }
+        } else {
+          if (context.mounted) Navigator.of(context).pop();
         }
       },
       child: Scaffold(
@@ -102,8 +113,12 @@ class _WebViewPageState extends State<WebViewPage> {
               color: Color(0xFF1A1C1E),
             ),
             onPressed: () async {
-              final bool shouldPop = await _showCloseConfirmation(context);
-              if (shouldPop && context.mounted) {
+              if (_shouldShowConfirmation) {
+                final bool shouldPop = await _showCloseConfirmation(context);
+                if (shouldPop && context.mounted) {
+                  Navigator.of(context).pop();
+                }
+              } else {
                 Navigator.of(context).pop();
               }
             },

@@ -66,6 +66,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
 
     if (code == null || code.isEmpty) {
       AppToast.show(
+        // ignore: use_build_context_synchronously
         context,
         "School code missing. Please connect again.",
         isError: true,

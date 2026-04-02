@@ -95,15 +95,15 @@ class StudentDashboardPage extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Grid Section Title
-              Text(
-                "Quick Services",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF1A1C1E),
-                  letterSpacing: -0.2,
-                ),
-              ),
+              // Text(
+              //   "School code : ${student.schoolCode ?? 'N/A'}",
+              //   style: const TextStyle(
+              //     fontSize: 18,
+              //     fontWeight: FontWeight.w900,
+              //     color: Color(0xFF1A1C1E),
+              //     letterSpacing: -0.2,
+              //   ),
+              // ),
               const SizedBox(height: 16),
 
               // Action Grid
@@ -354,8 +354,8 @@ class StudentDashboardPage extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Text(
-                      "THOUGHT",
+                    child: Text(
+                      "School code : ${student.schoolCode}",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 9,
@@ -366,7 +366,7 @@ class StudentDashboardPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    student.thoughtTitle ?? "Stay Inspired",
+                    student.thoughtTitle ?? "",
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -395,13 +395,9 @@ class StudentDashboardPage extends StatelessWidget {
 
   Widget _buildActionGrid(BuildContext context) {
     return FutureBuilder<List<bool>>(
-      future: Future.wait([
-        sl<AuthLocalDataSource>().isOnlineFeeSubmitEnabled(),
-        sl<AuthLocalDataSource>().isLeaveOptionEnabled(),
-      ]),
+      future: Future.wait([sl<AuthLocalDataSource>().isLeaveOptionEnabled()]),
       builder: (context, snapshot) {
-        final bool isFeesEnabled = snapshot.data?[0] ?? false;
-        final bool isLeaveEnabled = snapshot.data?[1] ?? false;
+        final bool isLeaveEnabled = snapshot.data?[0] ?? false;
 
         final actions = [
           {
@@ -413,6 +409,11 @@ class StudentDashboardPage extends StatelessWidget {
             'title': 'ATTENDANCE',
             'imagePath': 'assets/icons/attendance.png',
             'color': const Color(0xffFFF1E6),
+          },
+          {
+            'title': 'FEES',
+            'imagePath': 'assets/icons/fees.png',
+            'color': const Color(0xffE6F7FF),
           },
 
           {
@@ -466,14 +467,6 @@ class StudentDashboardPage extends StatelessWidget {
             'color': const Color(0xffF3E5F5),
           },
         ];
-
-        if (isFeesEnabled) {
-          actions.insert(2, {
-            'title': 'FEES',
-            'imagePath': 'assets/icons/fees.png',
-            'color': const Color(0xffE6F7FF),
-          });
-        }
 
         return GridView.builder(
           physics: const NeverScrollableScrollPhysics(),

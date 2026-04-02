@@ -23,7 +23,8 @@ class _FeePageState extends State<FeePage> {
   String? _schoolCode;
   String? _session;
   String? _feeSoftware;
-
+  bool isfeeEnable = false;
+  String? _stuid;
   @override
   void initState() {
     super.initState();
@@ -34,14 +35,26 @@ class _FeePageState extends State<FeePage> {
     final authLocal = di.sl<AuthLocalDataSource>();
     final schoolCode = await authLocal.getCachedSchoolCode();
     final session = await authLocal.getCachedSession() ?? "2025-2026";
-    final creds = await authLocal.getCachedStudentCredentials(schoolCode ?? "");
-    final feeSoftware = await authLocal.getCachedFeeSoftware() ?? "quick";
+    final stuid = await authLocal.getCachedStudentId() ?? "";
 
+    final creds = await authLocal.getCachedStudentCredentials(schoolCode ?? "");
+    final feeSoftware = await authLocal.getCachedFeeSoftware() ?? "";
+
+    isfeeEnable = await authLocal.isOnlineFeeSubmitEnabled();
+
+    debugPrint("isfeeEnable: $isfeeEnable");
+    debugPrint("feeSoftware: $feeSoftware");
+    debugPrint("schoolCode: $schoolCode");
+    debugPrint("session: $session");
+    debugPrint("creds: $creds");
+    debugPrint("stuid: $stuid");
+    debugPrint("widget.student: ${widget.student}");
     if (mounted) {
       setState(() {
         _schoolCode = schoolCode;
         _session = session;
         _feeSoftware = feeSoftware;
+        _stuid = stuid;
       });
     }
 
@@ -176,8 +189,18 @@ class _FeePageState extends State<FeePage> {
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
       child: InkWell(
         onTap: () {
+          if (!isfeeEnable) {
+            AppToast.show(
+              context,
+              "Online Fee Payment is not enabled by school",
+            );
+            return;
+          }
+          //https://www.currentdiary.com/student-fee-payment/pay-fee-online/20/?feesoftware=quick&cdiaryid=
           final url =
-              "https://www.currentdiary.com/student-fee-payment/pay-fee-online/$_schoolCode/feesoftware=$_feeSoftware&admission_no=${widget.student.enrollNumber ?? ''}";
+              "https://www.currentdiary.com/student-fee-payment/pay-fee-online/$_schoolCode?feesoftware=$_feeSoftware&cdiaryid=$_stuid";
+          debugPrint("URL: $url");
+
           _openUrl("Online Payment", url);
         },
         borderRadius: BorderRadius.circular(20),

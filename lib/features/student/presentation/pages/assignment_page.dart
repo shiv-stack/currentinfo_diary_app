@@ -24,11 +24,54 @@ class AssignmentPage extends StatefulWidget {
 class _AssignmentPageState extends State<AssignmentPage> {
   String selectedFilter = "Monthwise";
   DateTime selectedDate = DateTime.now();
+  late final ScrollController _monthController;
+  late final ScrollController _dateController;
 
   @override
   void initState() {
     super.initState();
+    _monthController = ScrollController();
+    _dateController = ScrollController();
     _fetchAssignments();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (selectedFilter == "Monthwise") _scrollToSelectedMonth();
+      if (selectedFilter == "Datewise") _scrollToSelectedDate();
+    });
+  }
+
+  @override
+  void dispose() {
+    _monthController.dispose();
+    _dateController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToSelectedMonth() {
+    if (!_monthController.hasClients) return;
+    final index = selectedDate.month - 1;
+    const itemWidth = 100.0 + 8.0; // item width + horizontal margins
+    final screenWidth = MediaQuery.of(context).size.width;
+    final offset =
+        (index * itemWidth) + 16.0 - (screenWidth / 2) + (itemWidth / 2);
+    _monthController.animateTo(
+      offset.clamp(0.0, _monthController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _scrollToSelectedDate() {
+    if (!_dateController.hasClients) return;
+    final index = selectedDate.day - 1;
+    const itemWidth = 55.0 + 8.0; // width + horizontal margins
+    final screenWidth = MediaQuery.of(context).size.width;
+    final offset =
+        (index * itemWidth) + 16.0 - (screenWidth / 2) + (itemWidth / 2);
+    _dateController.animateTo(
+      offset.clamp(0.0, _dateController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   Future<void> _fetchAssignments() async {
@@ -167,6 +210,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
       height: 50,
       margin: const EdgeInsets.only(bottom: 20),
       child: ListView.builder(
+        controller: _monthController,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: months.length,
@@ -181,11 +225,12 @@ class _AssignmentPageState extends State<AssignmentPage> {
                 // Keep the same day but change month
                 selectedDate = DateTime(selectedDate.year, index + 1, 1);
               });
+              _scrollToSelectedMonth();
               _fetchAssignments();
             },
             child: Container(
+              width: 100,
               margin: const EdgeInsets.symmetric(horizontal: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 color: isSelected ? primaryColor : Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -221,6 +266,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
       height: 70,
       margin: const EdgeInsets.only(bottom: 20),
       child: ListView.builder(
+        controller: _dateController,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: daysInMonth,
@@ -240,6 +286,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
                   day,
                 );
               });
+              _scrollToSelectedDate();
               _fetchAssignments();
             },
             child: Container(
@@ -309,12 +356,16 @@ class _AssignmentPageState extends State<AssignmentPage> {
     final Color primaryColor = Theme.of(context).primaryColor;
     return Expanded(
       child: GestureDetector(
-        onTap: () {
-          setState(() {
-            selectedFilter = title;
-          });
-          _fetchAssignments();
-        },
+          onTap: () {
+            setState(() {
+              selectedFilter = title;
+            });
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (selectedFilter == "Monthwise") _scrollToSelectedMonth();
+              if (selectedFilter == "Datewise") _scrollToSelectedDate();
+            });
+            _fetchAssignments();
+          },
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
@@ -545,18 +596,18 @@ class _AssignmentPageState extends State<AssignmentPage> {
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2025),
-      lastDate: DateTime(2026),
-    );
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-      });
-      _fetchAssignments();
-    }
-  }
+  // Future<void> _selectDate(BuildContext context) async {
+  //   final DateTime? picked = await showDatePicker(
+  //     context: context,
+  //     initialDate: selectedDate,
+  //     firstDate: DateTime(2025),
+  //     lastDate: DateTime(2026),
+  //   );
+  //   if (picked != null && picked != selectedDate) {
+  //     setState(() {
+  //       selectedDate = picked;
+  //     });
+  //     _fetchAssignments();
+  //   }
+  // }
 }

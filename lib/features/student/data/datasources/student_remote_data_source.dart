@@ -373,8 +373,9 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> rawData =
-            response.data is String ? jsonDecode(response.data) : response.data;
+        final List<dynamic> rawData = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
         // Filter out empty maps or objects with no actual content
         return rawData.where((item) {
@@ -427,7 +428,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
               dataList = decoded;
             }
           } catch (e) {
-            print("Exam Decode Error: $e");
+            debugPrint("Exam Decode Error: $e");
           }
         }
 
@@ -483,7 +484,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
               dataList = decoded;
             }
           } catch (e) {
-            print("Mark Details Decode Error: $e");
+            debugPrint("Mark Details Decode Error: $e");
           }
         }
 
@@ -494,26 +495,29 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
 
           final String? globalRoll = firstObj['rollno']?.toString();
           final String? globalAttendance = firstObj['attendance']?.toString();
-          final String? globalTotalAttendance =
-              firstObj['totalattendance']?.toString();
-          final String? globalEnroll =
-              firstObj['enrollment_number']?.toString();
+          final String? globalTotalAttendance = firstObj['totalattendance']
+              ?.toString();
+          final String? globalEnroll = firstObj['enrollment_number']
+              ?.toString();
           final String? rollNo =
               (globalRoll == null || globalRoll.trim().toLowerCase() == "na")
-                  ? null
-                  : globalRoll.trim();
-          final String? attendance = (globalAttendance == null ||
+              ? null
+              : globalRoll.trim();
+          final String? attendance =
+              (globalAttendance == null ||
                   globalAttendance.trim().toLowerCase() == "na")
               ? null
               : globalAttendance.trim();
-          final String? totalAttendance = (globalTotalAttendance == null ||
+          final String? totalAttendance =
+              (globalTotalAttendance == null ||
                   globalTotalAttendance.trim().toLowerCase() == "na")
               ? null
               : globalTotalAttendance.trim();
           final String? enrollmentNumber =
-              (globalEnroll == null || globalEnroll.trim().toLowerCase() == "na")
-                  ? null
-                  : globalEnroll.trim();
+              (globalEnroll == null ||
+                  globalEnroll.trim().toLowerCase() == "na")
+              ? null
+              : globalEnroll.trim();
 
           // Parse main subjects (sub1 - sub15)
           for (int i = 1; i <= 15; i++) {
@@ -524,24 +528,28 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
               final String? grade = firstObj['grade$i']?.toString();
               final String? marksVal = firstObj['marks$i']?.toString();
               final String? limitVal = firstObj['limitmark$i']?.toString();
-              marks.add(MarkDetailModel(
-                subject: sub.trim(),
-                marksObtained: (marksVal == null ||
-                        marksVal.trim().toLowerCase() == "na")
-                    ? null
-                    : marksVal.trim(),
-                maxMarks: (limitVal == null ||
-                        limitVal.trim().toLowerCase() == "na")
-                    ? null
-                    : limitVal.trim(),
-                grade: (grade == null || grade.trim().toLowerCase() == "na")
-                    ? null
-                    : grade.trim(),
-                rollNo: rollNo,
-                attendance: attendance,
-                totalAttendance: totalAttendance,
-                enrollmentNumber: enrollmentNumber,
-              ));
+              marks.add(
+                MarkDetailModel(
+                  subject: sub.trim(),
+                  marksObtained:
+                      (marksVal == null ||
+                          marksVal.trim().toLowerCase() == "na")
+                      ? null
+                      : marksVal.trim(),
+                  maxMarks:
+                      (limitVal == null ||
+                          limitVal.trim().toLowerCase() == "na")
+                      ? null
+                      : limitVal.trim(),
+                  grade: (grade == null || grade.trim().toLowerCase() == "na")
+                      ? null
+                      : grade.trim(),
+                  rollNo: rollNo,
+                  attendance: attendance,
+                  totalAttendance: totalAttendance,
+                  enrollmentNumber: enrollmentNumber,
+                ),
+              );
             }
           }
 
@@ -552,16 +560,18 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
                 sub.isNotEmpty &&
                 sub.trim().toLowerCase() != "na") {
               final String? grade = firstObj['grade$i']?.toString();
-              marks.add(MarkDetailModel(
-                subject: sub.trim(),
-                grade: (grade == null || grade.trim().toLowerCase() == "na")
-                    ? null
-                    : grade.trim(),
-                rollNo: rollNo,
-                attendance: attendance,
-                totalAttendance: totalAttendance,
-                enrollmentNumber: enrollmentNumber,
-              ));
+              marks.add(
+                MarkDetailModel(
+                  subject: sub.trim(),
+                  grade: (grade == null || grade.trim().toLowerCase() == "na")
+                      ? null
+                      : grade.trim(),
+                  rollNo: rollNo,
+                  attendance: attendance,
+                  totalAttendance: totalAttendance,
+                  enrollmentNumber: enrollmentNumber,
+                ),
+              );
             }
           }
 
@@ -572,16 +582,18 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
                 sub.isNotEmpty &&
                 sub.trim().toLowerCase() != "na") {
               final String? grade = firstObj['grade$i']?.toString();
-              marks.add(MarkDetailModel(
-                subject: sub.trim(),
-                grade: (grade == null || grade.trim().toLowerCase() == "na")
-                    ? null
-                    : grade.trim(),
-                rollNo: rollNo,
-                attendance: attendance,
-                totalAttendance: totalAttendance,
-                enrollmentNumber: enrollmentNumber,
-              ));
+              marks.add(
+                MarkDetailModel(
+                  subject: sub.trim(),
+                  grade: (grade == null || grade.trim().toLowerCase() == "na")
+                      ? null
+                      : grade.trim(),
+                  rollNo: rollNo,
+                  attendance: attendance,
+                  totalAttendance: totalAttendance,
+                  enrollmentNumber: enrollmentNumber,
+                ),
+              );
             }
           }
 

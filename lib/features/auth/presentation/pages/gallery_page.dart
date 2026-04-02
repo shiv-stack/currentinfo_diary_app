@@ -55,7 +55,7 @@ class _GalleryPageState extends State<GalleryPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const AppLoadingIndicator(),
+                  AppLoadingIndicator(),
                   SizedBox(height: 16),
                   Text("Fetching high-quality images..."),
                 ],
@@ -284,7 +284,7 @@ class FullScreenImagePage extends StatelessWidget {
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
               return const Center(
-                child: const AppLoadingIndicator(
+                child: AppLoadingIndicator(
                   centered: false,
                   color: Colors.white,
                 ),

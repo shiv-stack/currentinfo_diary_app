@@ -25,8 +25,8 @@ class _MessagesPageState extends State<MessagesPage> {
   }
 
   Future<void> _loadMessages() async {
-    final credentials =
-        await sl<AuthLocalDataSource>().getActiveStudentCredentials();
+    final credentials = await sl<AuthLocalDataSource>()
+        .getActiveStudentCredentials();
     if (credentials != null) {
       if (mounted) {
         context.read<StudentBloc>().add(
@@ -106,8 +106,9 @@ class _MessagesPageState extends State<MessagesPage> {
     final String body = message['msg'] ?? "";
     final String time = message['time'] ?? "";
     final bool isSent = (message['replystatus'] ?? "reply") == "send";
-    final Color accentColor =
-        isSent ? const Color(0xFF3B82F6) : Theme.of(context).primaryColor;
+    final Color accentColor = isSent
+        ? const Color(0xFF3B82F6)
+        : Theme.of(context).primaryColor;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -305,8 +306,9 @@ class _DetailedMessageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryColor =
-        isSent ? const Color(0xFF3B82F6) : Theme.of(context).primaryColor;
+    final Color primaryColor = isSent
+        ? const Color(0xFF3B82F6)
+        : Theme.of(context).primaryColor;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
@@ -347,7 +349,7 @@ class _DetailedMessageView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isSent ? "Sent to ${sender}" : "From ${sender}",
+                        isSent ? "Sent to $sender" : "From $sender",
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 18,

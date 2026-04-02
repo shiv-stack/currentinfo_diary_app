@@ -563,7 +563,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                         const Color(0xffE6FFEF),
                         null,
                         url:
-                            "https://www.currentdiary.com/student-fee-payment/pay-fee-online/$schoolCode/feesoftware=$feesoftware",
+                            "https://www.currentdiary.com/student-fee-payment/pay-fee-online/$schoolCode?feesoftware=$feesoftware",
                       ),
                       _buildHomeMenuItem(
                         context,
@@ -690,6 +690,26 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                             ),
                           ),
                         ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade100),
+                        ),
+                        child: Text(
+                          "School code : $schoolCode",
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

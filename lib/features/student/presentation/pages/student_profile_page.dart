@@ -421,8 +421,9 @@ class StudentProfilePage extends StatelessWidget {
                   hint: "Enter new numerical password",
                   icon: Icons.lock_reset_rounded,
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return "Field is required";
+                    }
                     if (value.length < 6) return "Minimum 6 digits required";
                     return null;
                   },
@@ -434,10 +435,12 @@ class StudentProfilePage extends StatelessWidget {
                   hint: "Re-type new password",
                   icon: Icons.check_circle_outline_rounded,
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return "Field is required";
-                    if (value != newPassController.text)
+                    }
+                    if (value != newPassController.text) {
                       return "Passwords do not match";
+                    }
                     return null;
                   },
                 ),
