@@ -84,16 +84,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     // Attempt instant load of school info from cache
     final cachedSchool = await localDataSource.getCachedSchoolInfo();
-    if (cachedSchool != null) {
-      emit(
-        AuthSuccess(
-          message: "Welcome back",
-          school: cachedSchool,
-          schoolCode: storedCode,
-          feesoftware: cachedSchool.feeSoftware,
-        ),
-      );
+
+    // CHECK: Do we have an active student session pending re-verification?
+    // If yes, do NOT emit AuthSuccess yet — wait for full verification to complete
+    // so that SplashPage doesn't navigate to SchoolCodePage prematurely.
+    final activeCreds = await localDataSource.getActiveStudentCredentials();
+    final hasActiveSession =
+        activeCreds != null &&
+        activeCreds['name'] != null &&
+        activeCreds['password'] != null;
+
+    if (!hasActiveSession) {
+      // No active student session → safe to show school home immediately from cache
+      if (cachedSchool != null) {
+        emit(
+          AuthSuccess(
+            message: "Welcome back",
+            school: cachedSchool,
+            schoolCode: storedCode,
+            feesoftware: cachedSchool.feeSoftware,
+          ),
+        );
+      } else {
+        emit(AuthLoading());
+      }
     } else {
+      // Active session exists → show loading while we re-verify
       emit(AuthLoading());
     }
 
@@ -130,63 +146,59 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     if (school == null) return;
 
-    // CHECK FOR ACTIVE STUDENT SESSION (FOR AUTO-LOGIN RE-VERIFICATION)
-    final activeCreds = await localDataSource.getActiveStudentCredentials();
-    if (activeCreds != null) {
-      final name = activeCreds['name'];
-      final pass = activeCreds['password'];
-      if (name != null && pass != null) {
-        debugPrint("Re-verifying student session: $name");
-        final loginResult = await studentLoginUseCase(
-          schoolCode: storedCode,
-          name: name,
-          uniqueCode: pass,
-        );
+    // RE-VERIFY ACTIVE STUDENT SESSION (AUTO-LOGIN)
+    if (hasActiveSession) {
+      final name = activeCreds!['name']!;
+      final pass = activeCreds['password']!;
+      debugPrint("Re-verifying student session: $name");
+      final loginResult = await studentLoginUseCase(
+        schoolCode: storedCode,
+        name: name,
+        uniqueCode: pass,
+      );
 
-        final bool shouldReturn = await loginResult.fold(
-          (failure) async {
-            debugPrint("Re-verification failed: ${failure.message}");
-            if (failure.message.toLowerCase().contains("invalid") ||
-                failure.message.toLowerCase().contains("not found")) {
-              await localDataSource.clearActiveStudentSession();
-              return false;
-            }
-            return false;
-          },
-          (student) async {
-            debugPrint("Re-verification successful for ${student.name}");
-            // Merge feesoftware from school info if not present in student
-            final updatedStudent = StudentModel(
-              studentImage: student.studentImage,
-              thoughtTitle: student.thoughtTitle,
-              thoughtMessage: student.thoughtMessage,
-              name: student.name,
-              className: student.className,
-              dob: student.dob,
-              contactNumber: student.contactNumber,
-              cdiaryId: student.cdiaryId,
-              section: student.section,
-              session: student.session,
-              schoolName: student.schoolName,
-              address: student.address,
-              email: student.email,
-              fatherName: student.fatherName,
-              motherName: student.motherName,
-              schoolCode: student.schoolCode,
-              enrollNumber: student.enrollNumber,
-              password: student.password,
-              feesoftware: student.feesoftware ?? school.feeSoftware,
-              doa: student.doa,
-            );
-            emit(StudentAuthenticated(updatedStudent, school: school));
-            return true;
-          },
-        );
-        if (shouldReturn) return;
-      }
+      final bool shouldReturn = await loginResult.fold(
+        (failure) async {
+          debugPrint("Re-verification failed: ${failure.message}");
+          if (failure.message.toLowerCase().contains("invalid") ||
+              failure.message.toLowerCase().contains("not found")) {
+            await localDataSource.clearActiveStudentSession();
+          }
+          return false;
+        },
+        (student) async {
+          debugPrint("Re-verification successful for ${student.name}");
+          // Merge feesoftware from school info if not present in student
+          final updatedStudent = StudentModel(
+            studentImage: student.studentImage,
+            thoughtTitle: student.thoughtTitle,
+            thoughtMessage: student.thoughtMessage,
+            name: student.name,
+            className: student.className,
+            dob: student.dob,
+            contactNumber: student.contactNumber,
+            cdiaryId: student.cdiaryId,
+            section: student.section,
+            session: student.session,
+            schoolName: student.schoolName,
+            address: student.address,
+            email: student.email,
+            fatherName: student.fatherName,
+            motherName: student.motherName,
+            schoolCode: student.schoolCode,
+            enrollNumber: student.enrollNumber,
+            password: student.password,
+            feesoftware: student.feesoftware ?? school.feeSoftware,
+            doa: student.doa,
+          );
+          emit(StudentAuthenticated(updatedStudent, school: school));
+          return true;
+        },
+      );
+      if (shouldReturn) return;
     }
 
-    // Emit the fresh school info context
+    // Emit the fresh school info context (fallback: no active session, or re-verification failed)
     emit(
       AuthSuccess(
         message: "Data Updated",
