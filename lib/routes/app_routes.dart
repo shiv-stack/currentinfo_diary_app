@@ -19,4 +19,5 @@ class AppRoutes {
   static const datesheet = '/datesheet';
   static const profile = '/profile';
   static const messages = '/messages';
+  static const staffLogin = '/staff-login';
 }

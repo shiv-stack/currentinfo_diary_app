@@ -491,7 +491,7 @@ class _SchoolCodePageState extends State<SchoolCodePage> {
                         'Staff Login',
                         'assets/images/staff_login.png',
                         const Color(0xffDCF8EF),
-                        null,
+                        AppRoutes.staffLogin,
                       ),
                       _buildHomeMenuItem(
                         context,

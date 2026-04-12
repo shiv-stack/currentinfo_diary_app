@@ -43,4 +43,8 @@ class AppUrls {
 
   static String getMessages(String schoolCode) =>
       "https://www.padhebharat.com/multitask/multitask-message/$schoolCode/";
+
+  // Staff
+  static String staffLogin(String schoolCode) =>
+      "$baseUrl/staff-login/staff-register-all-volley/$schoolCode/";
 }

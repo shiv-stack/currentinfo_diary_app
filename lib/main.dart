@@ -27,6 +27,8 @@ import 'features/auth/presentation/pages/school_calendar_page.dart';
 import 'features/auth/presentation/pages/query_page.dart';
 import 'features/auth/presentation/bloc/query_bloc.dart';
 import 'features/auth/data/models/school_model.dart';
+import 'features/staff/presentation/pages/staff_login_page.dart';
+import 'features/staff/presentation/bloc/staff_bloc.dart';
 import 'routes/app_routes.dart';
 import 'injection_container.dart' as di;
 
@@ -68,6 +70,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => di.sl<AuthBloc>()),
         BlocProvider(create: (_) => di.sl<GalleryBloc>()),
         BlocProvider(create: (_) => di.sl<StudentBloc>()),
+        BlocProvider(create: (_) => di.sl<StaffBloc>()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -166,6 +169,7 @@ class MyApp extends StatelessWidget {
                 ModalRoute.of(context)!.settings.arguments as StudentModel;
             return MessagesPage(student: student);
           },
+          AppRoutes.staffLogin: (_) => const StaffLoginPage(),
         },
       ),
     );
