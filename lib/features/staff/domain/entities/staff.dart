@@ -13,6 +13,25 @@ class Staff extends Equatable {
   final String? schoolCode;
   final String? password;
 
+  // New columns from API response
+  final String? feedbackUrl;
+  final String? attendanceUrl;
+  final String? controlSms;
+  final String? month;
+  final String? behaviourUrl;
+  final String? checkPlanner;
+  final String? uploadMarks;
+  final String? checkAssignmentUrl;
+  final String? assignmentUrl;
+  final String? galleryNewUrlGlide;
+  final String? galleryUrl;
+  final String? vts;
+  final String? costExpense;
+  final String? contactSchool;
+  final String? returnStatus;
+  final String? tokenMainHit;
+  final String? getPassword;
+
   const Staff({
     this.staffImage,
     this.name,
@@ -25,6 +44,23 @@ class Staff extends Equatable {
     this.email,
     this.schoolCode,
     this.password,
+    this.feedbackUrl,
+    this.attendanceUrl,
+    this.controlSms,
+    this.month,
+    this.behaviourUrl,
+    this.checkPlanner,
+    this.uploadMarks,
+    this.checkAssignmentUrl,
+    this.assignmentUrl,
+    this.galleryNewUrlGlide,
+    this.galleryUrl,
+    this.vts,
+    this.costExpense,
+    this.contactSchool,
+    this.returnStatus,
+    this.tokenMainHit,
+    this.getPassword,
   });
 
   @override
@@ -40,5 +76,22 @@ class Staff extends Equatable {
         email,
         schoolCode,
         password,
+        feedbackUrl,
+        attendanceUrl,
+        controlSms,
+        month,
+        behaviourUrl,
+        checkPlanner,
+        uploadMarks,
+        checkAssignmentUrl,
+        assignmentUrl,
+        galleryNewUrlGlide,
+        galleryUrl,
+        vts,
+        costExpense,
+        contactSchool,
+        returnStatus,
+        tokenMainHit,
+        getPassword,
       ];
 }

@@ -70,6 +70,23 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
             email: staff.email,
             schoolCode: schoolCode,
             password: staff.password,
+            feedbackUrl: staff.feedbackUrl,
+            attendanceUrl: staff.attendanceUrl,
+            controlSms: staff.controlSms,
+            month: staff.month,
+            behaviourUrl: staff.behaviourUrl,
+            checkPlanner: staff.checkPlanner,
+            uploadMarks: staff.uploadMarks,
+            checkAssignmentUrl: staff.checkAssignmentUrl,
+            assignmentUrl: staff.assignmentUrl,
+            galleryNewUrlGlide: staff.galleryNewUrlGlide,
+            galleryUrl: staff.galleryUrl,
+            vts: staff.vts,
+            costExpense: staff.costExpense,
+            contactSchool: staff.contactSchool,
+            returnStatus: staff.returnStatus,
+            tokenMainHit: staff.tokenMainHit,
+            getPassword: staff.getPassword,
           );
         }
       }
