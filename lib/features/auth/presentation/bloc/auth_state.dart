@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../data/models/school_model.dart';
 import '../../../student/data/models/student_model.dart';
+import '../../../staff/data/models/staff_model.dart';
 
 abstract class AuthState extends Equatable {
   @override
@@ -38,6 +39,16 @@ class StudentAuthenticated extends AuthState {
 
   @override
   List<Object?> get props => [student, school];
+}
+
+class StaffAuthenticated extends AuthState {
+  final StaffModel staff;
+  final SchoolModel? school;
+
+  StaffAuthenticated(this.staff, {this.school});
+
+  @override
+  List<Object?> get props => [staff, school];
 }
 
 class AuthError extends AuthState {

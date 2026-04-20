@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/staff.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
 
 class StaffDashboardPage extends StatelessWidget {
   final Staff staff;
@@ -31,7 +34,7 @@ class StaffDashboardPage extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: () => Navigator.of(context).pushReplacementNamed('/school-code'),
+                    onPressed: () => context.read<AuthBloc>().add(StaffLogout()),
                     icon: const Icon(
                       Icons.logout_rounded,
                       color: Colors.redAccent,
@@ -168,8 +171,13 @@ class StaffDashboardPage extends StatelessWidget {
     return Container(
       width: 90,
       height: 110,
-      color: Colors.grey.shade100,
-      child: Icon(Icons.person, size: 40, color: Colors.grey.shade300),
+      color: Colors.grey.shade50,
+      padding: const EdgeInsets.all(20),
+      child: Image.asset(
+        'assets/icons/profile.png',
+        fit: BoxFit.contain,
+        opacity: const AlwaysStoppedAnimation(0.5),
+      ),
     );
   }
 
@@ -177,15 +185,13 @@ class StaffDashboardPage extends StatelessWidget {
     final List<Map<String, dynamic>> actions = [
       {
         'title': 'Student Record',
-        'icon': Icons.fact_check_rounded,
+        'imagePath': 'assets/icons/student_record.png',
         'color': const Color(0xffDCF8EF),
-        'iconColor': const Color(0xff00C853),
       },
       {
         'title': 'Add Student',
-        'icon': Icons.person_add_rounded,
+        'imagePath': 'assets/icons/add_student.png',
         'color': const Color(0xffFFF1E6),
-        'iconColor': const Color(0xffFF6D00),
       },
       {
         'title': 'Attendance',
@@ -194,21 +200,18 @@ class StaffDashboardPage extends StatelessWidget {
       },
       {
         'title': 'Staff List',
-        'icon': Icons.groups_rounded,
+        'imagePath': 'assets/icons/staff_list.png',
         'color': const Color(0xffE6EEFF),
-        'iconColor': const Color(0xff2962FF),
       },
       {
         'title': 'Add Staff',
-        'icon': Icons.group_add_rounded,
+        'imagePath': 'assets/icons/add_staff.png',
         'color': const Color(0xffF2E6FF),
-        'iconColor': const Color(0xffAA00FF),
       },
       {
         'title': 'Search',
-        'icon': Icons.search_rounded,
+        'imagePath': 'assets/icons/search.png',
         'color': const Color(0xffFFE6E6),
-        'iconColor': const Color(0xffD50000),
       },
       {
         'title': 'Upload Homework',
@@ -217,9 +220,8 @@ class StaffDashboardPage extends StatelessWidget {
       },
       {
         'title': 'Check Homework',
-        'icon': Icons.rule_rounded,
+        'imagePath': 'assets/icons/check_homework.png',
         'color': const Color(0xffFFFFE6),
-        'iconColor': const Color(0xffFFD600),
       },
       {
         'title': 'Upload Marks',
@@ -228,9 +230,8 @@ class StaffDashboardPage extends StatelessWidget {
       },
       {
         'title': 'Check Marks',
-        'icon': Icons.assignment_turned_in_rounded,
+        'imagePath': 'assets/icons/check_marks.png',
         'color': const Color(0xffF2F2F2),
-        'iconColor': const Color(0xff424242),
       },
       {
         'title': 'Upload Notice',
@@ -249,15 +250,13 @@ class StaffDashboardPage extends StatelessWidget {
       },
       {
         'title': 'Task to Do',
-        'icon': Icons.checklist_rounded,
+        'imagePath': 'assets/icons/task_to_do.png',
         'color': const Color(0xffE0F2F1),
-        'iconColor': const Color(0xff00796B),
       },
       {
         'title': 'Class Circular',
-        'icon': Icons.campaign_rounded,
+        'imagePath': 'assets/icons/class_circular.png',
         'color': const Color(0xffFFF3E0),
-        'iconColor': const Color(0xffE65100),
       },
       {
         'title': 'Holiday Homework',
@@ -303,20 +302,14 @@ class StaffDashboardPage extends StatelessWidget {
                     color: item['color'] as Color,
                     borderRadius: BorderRadius.circular(24),
                   ),
-                  padding: const EdgeInsets.all(16),
-                  child: item.containsKey('icon')
-                      ? Icon(
-                          item['icon'] as IconData,
-                          size: 36,
-                          color: item['iconColor'] as Color,
-                        )
-                      : Image.asset(
-                          item['imagePath'] as String,
-                          fit: BoxFit.contain,
-                        ),
+                  padding: const EdgeInsets.all(18),
+                  child: Image.asset(
+                    item['imagePath'] as String,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Text(
                 item['title'] as String,
                 textAlign: TextAlign.center,

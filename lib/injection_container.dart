@@ -61,6 +61,7 @@ Future<void> init() async {
     () => AuthBloc(
       getSchoolInfoUseCase: sl(),
       studentLoginUseCase: sl(),
+      staffLoginUseCase: sl(),
       logoutNotificationUseCase: sl(),
       localDataSource: sl(),
     ),
@@ -84,7 +85,7 @@ Future<void> init() async {
       studentLocalDataSource: sl(),
     ),
   );
-  sl.registerFactory(() => StaffBloc(staffLoginUseCase: sl()));
+  sl.registerFactory(() => StaffBloc(staffLoginUseCase: sl(), authLocalDataSource: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => GetSchoolInfoUseCase(sl()));

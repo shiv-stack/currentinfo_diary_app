@@ -4,20 +4,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/datasources/auth_local_data_source.dart';
 import '../../domain/usecases/get_school_info_usecase.dart';
 import '../../../student/domain/usecases/student_login_usecase.dart';
+import '../../../staff/domain/usecases/staff_login_usecase.dart';
 import '../../../student/domain/usecases/logout_notification_usecase.dart';
 import '../../../student/data/models/student_model.dart';
+import '../../../staff/data/models/staff_model.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final GetSchoolInfoUseCase getSchoolInfoUseCase;
   final StudentLoginUseCase studentLoginUseCase;
+  final StaffLoginUseCase staffLoginUseCase;
   final LogoutNotificationUseCase logoutNotificationUseCase;
   final AuthLocalDataSource localDataSource;
 
   AuthBloc({
     required this.getSchoolInfoUseCase,
     required this.studentLoginUseCase,
+    required this.staffLoginUseCase,
     required this.logoutNotificationUseCase,
     required this.localDataSource,
   }) : super(AuthInitial()) {
@@ -27,6 +31,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<DisconnectSchool>(_onDisconnect);
     on<SkipPressed>(_onSkip);
     on<StudentLogout>(_onStudentLogout);
+    on<StaffLogout>(_onStaffLogout);
+  }
+
+  Future<void> _onStaffLogout(
+    StaffLogout event,
+    Emitter<AuthState> emit,
+  ) async {
+    await localDataSource.clearActiveStaffSession();
+    final storedCode = await localDataSource.getCachedSchoolCode();
+    final cachedSchool = await localDataSource.getCachedSchoolInfo();
+
+    if (storedCode != null && cachedSchool != null) {
+      emit(
+        AuthSuccess(
+          message: "Logged out from Staff Profile",
+          school: cachedSchool,
+          schoolCode: storedCode,
+          feesoftware: cachedSchool.feeSoftware,
+        ),
+      );
+    } else {
+      emit(NavigateToSchoolCode());
+    }
   }
 
   Future<void> _onStudentLogout(
@@ -85,17 +112,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // Attempt instant load of school info from cache
     final cachedSchool = await localDataSource.getCachedSchoolInfo();
 
-    // CHECK: Do we have an active student session pending re-verification?
-    // If yes, do NOT emit AuthSuccess yet — wait for full verification to complete
-    // so that SplashPage doesn't navigate to SchoolCodePage prematurely.
+    // CHECK: Do we have an active student or staff session pending re-verification?
     final activeCreds = await localDataSource.getActiveStudentCredentials();
-    final hasActiveSession =
+    final activeStaffCreds = await localDataSource.getActiveStaffCredentials();
+
+    final hasActiveStudentSession =
         activeCreds != null &&
         activeCreds['name'] != null &&
         activeCreds['password'] != null;
 
-    if (!hasActiveSession) {
-      // No active student session → safe to show school home immediately from cache
+    final hasActiveStaffSession =
+        activeStaffCreds != null &&
+        activeStaffCreds['name'] != null &&
+        activeStaffCreds['password'] != null;
+
+    if (!hasActiveStudentSession && !hasActiveStaffSession) {
+      // No active session → safe to show school home immediately from cache
       if (cachedSchool != null) {
         emit(
           AuthSuccess(
@@ -147,7 +179,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (school == null) return;
 
     // RE-VERIFY ACTIVE STUDENT SESSION (AUTO-LOGIN)
-    if (hasActiveSession) {
+    if (hasActiveStudentSession) {
       final name = activeCreds!['name']!;
       final pass = activeCreds['password']!;
       debugPrint("Re-verifying student session: $name");
@@ -192,6 +224,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             doa: student.doa,
           );
           emit(StudentAuthenticated(updatedStudent, school: school));
+          return true;
+        },
+      );
+      if (shouldReturn) return;
+    }
+
+    // RE-VERIFY ACTIVE STAFF SESSION (AUTO-LOGIN)
+    if (hasActiveStaffSession) {
+      final name = activeStaffCreds!['name']!;
+      final pass = activeStaffCreds['password']!;
+      debugPrint("Re-verifying staff session: $name");
+      final loginResult = await staffLoginUseCase(
+        schoolCode: storedCode,
+        name: name,
+        uniqueCode: pass,
+      );
+
+      final bool shouldReturn = await loginResult.fold(
+        (failure) async {
+          debugPrint("Staff re-verification failed: ${failure.message}");
+          if (failure.message.toLowerCase().contains("invalid") ||
+              failure.message.toLowerCase().contains("not found")) {
+            await localDataSource.clearActiveStaffSession();
+          }
+          return false;
+        },
+        (staff) async {
+          debugPrint("Staff re-verification successful for ${staff.name}");
+          // Clear student session if any
+          await localDataSource.clearActiveStudentSession();
+          if (staff.cdiaryId != null && staff.cdiaryId!.isNotEmpty) {
+            await localDataSource.cacheStaffCdiaryId(staff.cdiaryId!);
+          }
+          emit(StaffAuthenticated(staff as StaffModel, school: school));
           return true;
         },
       );

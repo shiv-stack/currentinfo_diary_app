@@ -26,6 +26,11 @@ abstract class AuthLocalDataSource {
   Future<void> cacheLeaveOption(String value);
   Future<bool> isLeaveOptionEnabled();
   Future<void> clearActiveStudentSession();
+  Future<void> cacheActiveStaffCredentials(String name, String password);
+  Future<Map<String, String>?> getActiveStaffCredentials();
+  Future<void> cacheStaffCdiaryId(String cdiaryId);
+  Future<String?> getStaffCdiaryId();
+  Future<void> clearActiveStaffSession();
   Future<void> clearAuthData();
 }
 
@@ -43,6 +48,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   static const String _feeSubmitKey = 'fee_submit_enabled';
   static const String _feeSoftwareKey = 'fee_software_type';
   static const String _leaveOptionKey = 'leave_option_enabled';
+  static const String _activeStaffKey = 'active_staff_session';
+  static const String _staffCdiaryIdKey = 'staff_cdiary_id';
 
   @override
   Future<void> cacheSchoolCode(String code) async {
@@ -187,6 +194,44 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
+  Future<void> cacheActiveStaffCredentials(
+    String name,
+    String password,
+  ) async {
+    final data = {'name': name, 'password': password};
+    await sharedPreferences.setString(_activeStaffKey, jsonEncode(data));
+  }
+
+  @override
+  Future<Map<String, String>?> getActiveStaffCredentials() async {
+    final data = sharedPreferences.getString(_activeStaffKey);
+    if (data != null) {
+      final Map<String, dynamic> parsed = jsonDecode(data);
+      return {
+        'name': parsed['name'] as String,
+        'password': parsed['password'] as String,
+      };
+    }
+    return null;
+  }
+
+  @override
+  Future<void> cacheStaffCdiaryId(String cdiaryId) async {
+    await sharedPreferences.setString(_staffCdiaryIdKey, cdiaryId);
+  }
+
+  @override
+  Future<String?> getStaffCdiaryId() async {
+    return sharedPreferences.getString(_staffCdiaryIdKey);
+  }
+
+  @override
+  Future<void> clearActiveStaffSession() async {
+    await sharedPreferences.remove(_activeStaffKey);
+    await sharedPreferences.remove(_staffCdiaryIdKey);
+  }
+
+  @override
   Future<void> clearAuthData() async {
     await sharedPreferences.remove(_schoolCodeKey);
     await sharedPreferences.remove(_schoolInfoKey);
@@ -197,5 +242,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     await sharedPreferences.remove(_feeSubmitKey);
     await sharedPreferences.remove(_feeSoftwareKey);
     await sharedPreferences.remove(_leaveOptionKey);
+    await sharedPreferences.remove(_activeStaffKey);
+    await sharedPreferences.remove(_staffCdiaryIdKey);
   }
 }

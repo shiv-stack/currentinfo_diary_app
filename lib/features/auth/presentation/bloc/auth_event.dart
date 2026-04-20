@@ -23,3 +23,5 @@ class DisconnectSchool extends AuthEvent {}
 class SkipPressed extends AuthEvent {}
 
 class StudentLogout extends AuthEvent {}
+
+class StaffLogout extends AuthEvent {}

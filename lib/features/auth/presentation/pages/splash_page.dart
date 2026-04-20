@@ -9,6 +9,7 @@ import '../../../../routes/app_routes.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/services/remote_config_service.dart';
 import '../../../student/presentation/pages/student_dashboard_page.dart';
+import '../../../staff/presentation/pages/staff_dashboard_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -152,6 +153,13 @@ class _SplashPageState extends State<SplashPage> {
             context,
             MaterialPageRoute(
               builder: (_) => StudentDashboardPage(student: state.student),
+            ),
+          );
+        } else if (state is StaffAuthenticated) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => StaffDashboardPage(staff: state.staff),
             ),
           );
         } else if (state is NavigateToSchoolCode || state is AuthSuccess) {
