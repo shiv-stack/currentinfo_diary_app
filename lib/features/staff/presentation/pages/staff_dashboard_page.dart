@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/staff.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../../routes/app_routes.dart';
 import './staff_upload_page.dart';
 
 class StaffDashboardPage extends StatelessWidget {
@@ -12,60 +14,72 @@ class StaffDashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Staff Panel",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF1A1C1E),
-                      letterSpacing: -0.8,
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthSuccess || state is NavigateToSchoolCode) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.schoolCode,
+            (route) => false,
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FA),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Staff Panel",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF1A1C1E),
+                        letterSpacing: -0.8,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => context.read<AuthBloc>().add(StaffLogout()),
-                    icon: const Icon(
-                      Icons.logout_rounded,
-                      color: Colors.redAccent,
+                    IconButton(
+                      onPressed: () =>
+                          context.read<AuthBloc>().add(StaffLogout()),
+                      icon: const Icon(
+                        Icons.logout_rounded,
+                        color: Colors.redAccent,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Staff Card
-              _buildStaffCard(context),
-
-              const SizedBox(height: 32),
-
-              // Grid Section Title
-              const Text(
-                "Management Features",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF1A1C1E),
-                  letterSpacing: -0.2,
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-              // Action Grid
-              _buildActionGrid(context),
-              const SizedBox(height: 40),
-            ],
+                // Staff Card
+                _buildStaffCard(context),
+
+                const SizedBox(height: 32),
+
+                // Grid Section Title
+                const Text(
+                  "Management Features",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF1A1C1E),
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Action Grid
+                _buildActionGrid(context),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),
@@ -80,7 +94,7 @@ class StaffDashboardPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -95,7 +109,7 @@ class StaffDashboardPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).primaryColor.withOpacity(0.15),
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
                   blurRadius: 15,
                   offset: const Offset(0, 8),
                 ),
@@ -121,9 +135,14 @@ class StaffDashboardPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.08),
+                    color: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -148,7 +167,11 @@ class StaffDashboardPage extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.call_rounded, size: 14, color: Colors.grey.shade400),
+                    Icon(
+                      Icons.call_rounded,
+                      size: 14,
+                      color: Colors.grey.shade400,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       staff.contactNumber ?? 'N/A',
@@ -297,7 +320,7 @@ class StaffDashboardPage extends StatelessWidget {
               'Class Circular',
               'Holiday Homework',
               'Datesheet',
-              'Timetable'
+              'Timetable',
             ];
 
             if (uploadFeatures.contains(item['title'])) {
@@ -348,4 +371,3 @@ class StaffDashboardPage extends StatelessWidget {
     );
   }
 }
-

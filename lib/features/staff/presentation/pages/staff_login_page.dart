@@ -9,6 +9,8 @@ import '../bloc/staff_bloc.dart';
 import '../bloc/staff_event.dart';
 import '../bloc/staff_state.dart';
 import 'staff_dashboard_page.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
 
 class StaffLoginPage extends StatefulWidget {
   const StaffLoginPage({super.key});
@@ -48,6 +50,7 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
     }
 
     final code = await di.sl<AuthLocalDataSource>().getCachedSchoolCode();
+    if (!mounted) return;
     if (code == null || code.isEmpty) {
       AppToast.show(context, "School code missing. Please connect again.", isError: true);
       return;
@@ -74,6 +77,7 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
         listener: (context, state) {
           if (state is StaffLoginSuccess) {
             AppToast.show(context, "Login Successful");
+            context.read<AuthBloc>().add(CheckAuthStatus());
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(

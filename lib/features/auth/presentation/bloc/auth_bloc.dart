@@ -180,7 +180,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     // RE-VERIFY ACTIVE STUDENT SESSION (AUTO-LOGIN)
     if (hasActiveStudentSession) {
-      final name = activeCreds!['name']!;
+      final name = activeCreds['name']!;
       final pass = activeCreds['password']!;
       debugPrint("Re-verifying student session: $name");
       final loginResult = await studentLoginUseCase(
@@ -232,7 +232,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     // RE-VERIFY ACTIVE STAFF SESSION (AUTO-LOGIN)
     if (hasActiveStaffSession) {
-      final name = activeStaffCreds!['name']!;
+      final name = activeStaffCreds['name']!;
       final pass = activeStaffCreds['password']!;
       debugPrint("Re-verifying staff session: $name");
       final loginResult = await staffLoginUseCase(

@@ -10,6 +10,8 @@ import '../../../student/presentation/bloc/student_bloc.dart';
 import '../../../student/presentation/bloc/student_event.dart';
 import '../../../student/presentation/bloc/student_state.dart';
 import '../../../student/presentation/pages/student_dashboard_page.dart';
+import '../../presentation/bloc/auth_bloc.dart';
+import '../../presentation/bloc/auth_event.dart';
 
 class StudentLoginPage extends StatefulWidget {
   const StudentLoginPage({super.key});
@@ -104,6 +106,9 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
             AppToast.show(context, "Login Successful");
             // Refresh saved students list after successful login
             context.read<StudentBloc>().add(GetSavedStudents());
+            // Synchronize AuthBloc state
+            context.read<AuthBloc>().add(CheckAuthStatus());
+            
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
@@ -493,7 +498,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(

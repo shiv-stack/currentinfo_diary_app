@@ -214,7 +214,7 @@ class _StaffUploadPageState extends State<StaffUploadPage> {
           border: Border.all(
             color: _selectedFile == null
                 ? Colors.grey.shade200
-                : Colors.green.withOpacity(0.3),
+                : Colors.green.withValues(alpha: 0.3),
             style: BorderStyle.solid,
           ),
         ),
@@ -258,7 +258,7 @@ class _StaffUploadPageState extends State<StaffUploadPage> {
                         right: 8,
                         top: 8,
                         child: CircleAvatar(
-                          backgroundColor: Colors.black.withOpacity(0.5),
+                          backgroundColor: Colors.black.withValues(alpha: 0.5),
                           radius: 16,
                           child: IconButton(
                             icon: const Icon(
@@ -335,6 +335,7 @@ class _StaffUploadPageState extends State<StaffUploadPage> {
     if (_formKey.currentState!.validate()) {
       final localData = sl<AuthLocalDataSource>();
       final session = await localData.getCachedSession();
+      if (!mounted) return;
 
       // Use designation as staffc for now, or the same class value
       final staffc = _classController.text;
