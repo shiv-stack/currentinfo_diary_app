@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/staff.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
+import './staff_upload_page.dart';
 
 class StaffDashboardPage extends StatelessWidget {
   final Staff staff;
@@ -290,7 +291,26 @@ class StaffDashboardPage extends StatelessWidget {
         final item = actions[index];
         return InkWell(
           onTap: () {
-            // Navigation will be implemented as detail pages are ready
+            final uploadFeatures = [
+              'Upload Homework',
+              'Upload Notice',
+              'Class Circular',
+              'Holiday Homework',
+              'Datesheet',
+              'Timetable'
+            ];
+
+            if (uploadFeatures.contains(item['title'])) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StaffUploadPage(
+                    featureTitle: item['title'] as String,
+                    staff: staff,
+                  ),
+                ),
+              );
+            }
           },
           borderRadius: BorderRadius.circular(24),
           child: Column(

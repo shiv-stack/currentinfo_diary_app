@@ -8,4 +8,18 @@ abstract class StaffRepository {
     required String name,
     required String uniqueCode,
   });
+
+  Future<Either<Failure, String>> uploadData({
+    required String schoolCode,
+    required String login,
+    required String password,
+    required String staffClass,
+    required String title,
+    required String description,
+    required String className,
+    required String section,
+    required String session,
+    required String uploadDetails,
+    String? filePath,
+  });
 }

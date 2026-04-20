@@ -47,4 +47,7 @@ class AppUrls {
   // Staff
   static String staffLogin(String schoolCode) =>
       "$baseUrl/staff-login/staff-register-all-volley/$schoolCode/";
+
+  static String uploadStaffData(String schoolCode) =>
+      "$baseUrl/assignment/upload-assignment-school/$schoolCode/";
 }

@@ -26,4 +26,38 @@ class StaffRepositoryImpl implements StaffRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> uploadData({
+    required String schoolCode,
+    required String login,
+    required String password,
+    required String staffClass,
+    required String title,
+    required String description,
+    required String className,
+    required String section,
+    required String session,
+    required String uploadDetails,
+    String? filePath,
+  }) async {
+    try {
+      final result = await remoteDataSource.uploadData(
+        schoolCode: schoolCode,
+        login: login,
+        password: password,
+        staffClass: staffClass,
+        title: title,
+        description: description,
+        className: className,
+        section: section,
+        session: session,
+        uploadDetails: uploadDetails,
+        filePath: filePath,
+      );
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

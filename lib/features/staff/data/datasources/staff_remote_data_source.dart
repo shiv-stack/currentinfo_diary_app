@@ -11,12 +11,79 @@ abstract class StaffRemoteDataSource {
     required String name,
     required String uniqueCode,
   });
+
+  Future<String> uploadData({
+    required String schoolCode,
+    required String login,
+    required String password,
+    required String staffClass,
+    required String title,
+    required String description,
+    required String className,
+    required String section,
+    required String session,
+    required String uploadDetails,
+    String? filePath,
+  });
 }
 
 class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
   final Dio dio;
 
   StaffRemoteDataSourceImpl({required this.dio});
+
+  @override
+  Future<String> uploadData({
+    required String schoolCode,
+    required String login,
+    required String password,
+    required String staffClass,
+    required String title,
+    required String description,
+    required String className,
+    required String section,
+    required String session,
+    required String uploadDetails,
+    String? filePath,
+  }) async {
+    try {
+      final Map<String, dynamic> data = {
+        'login': login,
+        'passwo': password,
+        'staffc': staffClass,
+        'title': title,
+        'desc': description,
+        'name': login,
+        'class': className,
+        'sec': section.toLowerCase().contains("not applicable") ? "NA" : section,
+        'hindisms': 'No',
+        'sms': 'Notification',
+        'uploaddetails': uploadDetails,
+        'session': session,
+      };
+
+      if (filePath != null && filePath.isNotEmpty) {
+        data['myfile'] = await MultipartFile.fromFile(
+          filePath,
+          filename: filePath.split('/').last,
+        );
+      }
+
+      final formData = FormData.fromMap(data);
+
+      final response = await dio.post(
+        AppUrls.uploadStaffData(schoolCode),
+        data: formData,
+      );
+
+      if (response.statusCode == 200) {
+        return "Upload Successful";
+      }
+      throw Exception("Upload failed with status code: ${response.statusCode}");
+    } on DioException catch (e) {
+      throw Exception(e.message ?? "Connection Error during upload");
+    }
+  }
 
   @override
   Future<StaffModel> login({
