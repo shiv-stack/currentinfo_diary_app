@@ -361,23 +361,36 @@ class _StudentRecordPageState extends State<StudentRecordPage> {
                             ],
                           ),
                           child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             leading: Container(
                               width: 50,
                               height: 50,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
-                                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                color: Theme.of(
+                                  context,
+                                ).primaryColor.withValues(alpha: 0.1),
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: student.studentImage != null && student.studentImage!.isNotEmpty
+                                child:
+                                    student.studentImage != null &&
+                                        student.studentImage!.isNotEmpty
                                     ? Image.network(
                                         student.studentImage!,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (c, e, s) => Icon(Icons.person, color: Theme.of(context).primaryColor),
+                                        errorBuilder: (c, e, s) => Icon(
+                                          Icons.person,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
                                       )
-                                    : Icon(Icons.person, color: Theme.of(context).primaryColor),
+                                    : Icon(
+                                        Icons.person,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
                               ),
                             ),
                             title: Text(
@@ -472,7 +485,10 @@ class _StudentRecordPageState extends State<StudentRecordPage> {
                   value: item,
                   child: Text(
                     item,
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF1A1C1E)),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF1A1C1E),
+                    ),
                   ),
                 );
               }).toList(),

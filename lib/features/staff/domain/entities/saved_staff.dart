@@ -16,10 +16,14 @@ class SavedStaff extends HiveObject {
   @HiveField(3)
   final String? profileImage;
 
+  @HiveField(4)
+  final String? assignClass;
+
   SavedStaff({
     required this.schoolCode,
     required this.name,
     required this.uniqueCode,
     this.profileImage,
+    this.assignClass,
   });
 }

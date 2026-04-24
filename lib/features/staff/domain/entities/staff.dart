@@ -32,6 +32,8 @@ class Staff extends Equatable {
   final String? tokenMainHit;
   final String? getPassword;
 
+  final String? assignClass;
+
   const Staff({
     this.staffImage,
     this.name,
@@ -61,6 +63,7 @@ class Staff extends Equatable {
     this.returnStatus,
     this.tokenMainHit,
     this.getPassword,
+    this.assignClass,
   });
 
   @override
@@ -93,5 +96,6 @@ class Staff extends Equatable {
         returnStatus,
         tokenMainHit,
         getPassword,
+        assignClass,
       ];
 }

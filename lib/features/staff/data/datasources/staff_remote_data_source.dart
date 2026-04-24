@@ -224,6 +224,7 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
             returnStatus: staff.returnStatus,
             tokenMainHit: staff.tokenMainHit,
             getPassword: staff.getPassword,
+            assignClass: staff.assignClass,
           );
         }
       }

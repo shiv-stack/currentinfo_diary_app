@@ -55,6 +55,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
             name: event.name,
             uniqueCode: event.uniqueCode,
             profileImage: staff.staffImage,
+            assignClass: staff.assignClass,
           ),
         );
 

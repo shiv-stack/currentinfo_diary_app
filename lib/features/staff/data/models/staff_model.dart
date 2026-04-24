@@ -30,6 +30,7 @@ class StaffModel extends Staff {
     super.returnStatus,
     super.tokenMainHit,
     super.getPassword,
+    super.assignClass,
   });
 
   factory StaffModel.fromJson(Map<String, dynamic> json) {
@@ -62,6 +63,7 @@ class StaffModel extends Staff {
       returnStatus: json['return']?.toString(),
       tokenMainHit: json['token_main_hit']?.toString(),
       getPassword: json['getpassword']?.toString(),
+      assignClass: json['assign_class']?.toString(),
     );
   }
 
@@ -95,6 +97,7 @@ class StaffModel extends Staff {
       'return': returnStatus,
       'token_main_hit': tokenMainHit,
       'getpassword': getPassword,
+      'assign_class': assignClass,
     };
   }
 

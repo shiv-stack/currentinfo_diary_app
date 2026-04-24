@@ -21,13 +21,14 @@ class SavedStaffAdapter extends TypeAdapter<SavedStaff> {
       name: fields[1] as String,
       uniqueCode: fields[2] as String,
       profileImage: fields[3] as String?,
+      assignClass: fields[4] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, SavedStaff obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.schoolCode)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class SavedStaffAdapter extends TypeAdapter<SavedStaff> {
       ..writeByte(2)
       ..write(obj.uniqueCode)
       ..writeByte(3)
-      ..write(obj.profileImage);
+      ..write(obj.profileImage)
+      ..writeByte(4)
+      ..write(obj.assignClass);
   }
 
   @override
