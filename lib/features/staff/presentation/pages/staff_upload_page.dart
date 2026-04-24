@@ -642,11 +642,8 @@ class _StaffUploadPageState extends State<StaffUploadPage> {
       final session = await localData.getCachedSession();
       if (!mounted) return;
 
-      // Use assignClass for Holiday Homework as per requirements
-      final bool isHolidayHw = widget.featureTitle == "Holiday Homework";
-      final staffc = isHolidayHw 
-          ? (widget.staff.assignClass ?? _selectedClass ?? "")
-          : (_selectedClass ?? "");
+      // Use assignClass as staffc for all modules as it is the staff's identifier from login
+      final staffc = widget.staff.assignClass ?? _selectedClass ?? "";
 
       context.read<StaffUploadCubit>().uploadData(
         schoolCode: widget.staff.schoolCode ?? "",

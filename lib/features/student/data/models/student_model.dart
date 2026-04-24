@@ -20,6 +20,8 @@ class StudentModel {
   final String? feesoftware;
   final String? doa;
 
+  final String? alternateNumber;
+
   StudentModel({
     this.studentImage,
     this.thoughtTitle,
@@ -41,6 +43,7 @@ class StudentModel {
     this.password,
     this.feesoftware,
     this.doa,
+    this.alternateNumber,
   });
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
@@ -66,6 +69,7 @@ class StudentModel {
       password: json['pass'] as String?,
       feesoftware: json['feesoftware'] as String?,
       doa: json['doa'] as String?,
+      alternateNumber: json['alternatenumber'] as String?,
     );
   }
 
@@ -91,6 +95,7 @@ class StudentModel {
       'pass': password,
       'feesoftware': feesoftware,
       'doa': doa,
+      'alternatenumber': alternateNumber,
     };
   }
 }

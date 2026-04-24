@@ -209,7 +209,7 @@ class StaffDashboardPage extends StatelessWidget {
   Widget _buildActionGrid(BuildContext context) {
     final List<Map<String, dynamic>> actions = [
       {
-        'title': 'Student Record',
+        'title': 'User Record',
         'imagePath': 'assets/icons/student_record.png',
         'color': const Color(0xffDCF8EF),
       },
@@ -298,6 +298,11 @@ class StaffDashboardPage extends StatelessWidget {
         'imagePath': 'assets/icons/timetable_new.png',
         'color': const Color(0xffE8EAF6),
       },
+      {
+        'title': 'Syllabus',
+        'imagePath': 'assets/icons/syllabus.png',
+        'color': const Color(0xffF3E5F5),
+      },
     ];
 
     return GridView.builder(
@@ -322,6 +327,7 @@ class StaffDashboardPage extends StatelessWidget {
               'Holiday Homework',
               'Datesheet',
               'Timetable',
+              'Syllabus',
             ];
 
             if (uploadFeatures.contains(item['title'])) {
@@ -334,7 +340,7 @@ class StaffDashboardPage extends StatelessWidget {
                   ),
                 ),
               );
-            } else if (item['title'] == 'Student Record') {
+            } else if (item['title'] == 'User Record') {
               Navigator.push(
                 context,
                 MaterialPageRoute(

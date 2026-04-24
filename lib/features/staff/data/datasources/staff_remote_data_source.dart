@@ -65,14 +65,43 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
     String? filePath,
   }) async {
     try {
-      final bool isHolidayHw = featureTitle == "Holiday Homework";
-      final String apiUrl = isHolidayHw
+      final List<String> classNoticeFeatures = [
+        "holiday homework",
+        "upload notice",
+        "datesheet",
+        "timetable",
+        "syllabus",
+        "slaybus",
+        "class circular",
+        "class notice",
+      ];
+      final String normalizedTitle = featureTitle.trim().toLowerCase();
+      final bool useClassNoticeApi = classNoticeFeatures.contains(
+        normalizedTitle,
+      );
+      final String apiUrl = useClassNoticeApi
           ? AppUrls.getClassNotices(schoolCode)
           : AppUrls.uploadStaffData(schoolCode);
 
       final Map<String, dynamic> data = {};
 
-      if (isHolidayHw) {
+      if (useClassNoticeApi) {
+        String displayValue = "HolidayHw";
+        if (normalizedTitle == "upload notice" ||
+            normalizedTitle == "class notice") {
+          displayValue = "classnot";
+        } else if (normalizedTitle == "datesheet") {
+          displayValue = "Datesheet";
+        } else if (normalizedTitle == "timetable") {
+          displayValue = "Timetable";
+        } else if (normalizedTitle == "syllabus" ||
+            normalizedTitle == "slaybus") {
+          displayValue = "Syllabus";
+        } else if (normalizedTitle == "class circular") {
+          displayValue =
+              "classnot"; // Or another value if specified? Assuming classnot for circulars too.
+        }
+
         data.addAll({
           'login': login,
           'password': password,
@@ -90,7 +119,7 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
           'to': className,
           'as': 'Notification',
           'hs': 'No',
-          'display': 'HolidayHw',
+          'display': displayValue,
           'inschool': 'Yes',
         });
       } else {
@@ -268,10 +297,10 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         'staffc': tclass,
         'inschool': mappedInSchool,
         'session': session,
-        'Class': mappedClass,
+        'Class': "",
         'Profession': mappedProfession,
         'section': mappedSection,
-        'transportfacility': transportstatus,
+        'transportfacility': "",
       });
 
       final response = await dio.post(

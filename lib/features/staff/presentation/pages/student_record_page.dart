@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../injection_container.dart' as di;
 import '../../domain/entities/staff.dart';
@@ -217,7 +218,7 @@ class _StudentRecordPageState extends State<StudentRecordPage> {
         backgroundColor: const Color(0xFFF8F9FA),
         appBar: AppBar(
           title: const Text(
-            "Student Record",
+            "Users Record",
             style: TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 18,
@@ -229,222 +230,326 @@ class _StudentRecordPageState extends State<StudentRecordPage> {
           elevation: 0,
           centerTitle: false,
         ),
-        body: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildDropdown(
-                          "Class/Profession",
-                          classes,
-                          selectedClass,
-                          (val) => setState(() => selectedClass = val!),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildDropdown(
-                          "Section",
-                          sections,
-                          selectedSection,
-                          (val) => setState(() => selectedSection = val!),
-                        ),
+        body: BlocBuilder<StudentRecordCubit, StudentRecordState>(
+          builder: (context, state) {
+            return ListView(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              children: [
+                // --- Scrollable Filter Section ---
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Row(
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: _buildDropdown(
-                          "Session",
-                          sessions,
-                          selectedSession,
-                          (val) => setState(() => selectedSession = val!),
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildDropdown(
+                              "Class/Profession",
+                              classes,
+                              selectedClass,
+                              (val) => setState(() => selectedClass = val!),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildDropdown(
+                              "Section",
+                              sections,
+                              selectedSection,
+                              (val) => setState(() => selectedSection = val!),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildDropdown(
-                          "School Status",
-                          schoolStatuses,
-                          selectedStatus,
-                          (val) => setState(() => selectedStatus = val!),
-                        ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildDropdown(
+                              "Session",
+                              sessions,
+                              selectedSession,
+                              (val) => setState(() => selectedSession = val!),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildDropdown(
+                              "Status",
+                              schoolStatuses,
+                              selectedStatus,
+                              (val) => setState(() => selectedStatus = val!),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  _buildDropdown(
-                    "Transport Facility",
-                    transports,
-                    selectedTransport,
-                    (val) => setState(() => selectedTransport = val!),
-                  ),
-                  const SizedBox(height: 12),
-                  BlocBuilder<StudentRecordCubit, StudentRecordState>(
-                    builder: (context, state) {
-                      final isLoading = state is StudentRecordLoading;
-                      return SizedBox(
+                      const SizedBox(height: 12),
+                      _buildDropdown(
+                        "Transport Facility",
+                        transports,
+                        selectedTransport,
+                        (val) => setState(() => selectedTransport = val!),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: isLoading
+                          onPressed: state is StudentRecordLoading
                               ? null
                               : () => _onSearchPressed(context),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).primaryColor,
                             foregroundColor: Colors.white,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: isLoading
-                              ? const AppLoadingIndicator(
-                                  centered: false,
-                                  color: Colors.white,
-                                  strokeWidth: 2,
+                          child: state is StudentRecordLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : const Text(
                                   "SEARCH RECORDS",
                                   style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 14,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
                         ),
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: BlocBuilder<StudentRecordCubit, StudentRecordState>(
-                builder: (context, state) {
-                  if (state is StudentRecordLoaded) {
-                    if (state.students.isEmpty) {
-                      return const Center(
-                        child: Text("No students found matching filters."),
-                      );
-                    }
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: state.students.length,
-                      itemBuilder: (context, index) {
-                        final student = state.students[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                ),
+
+                const SizedBox(height: 24),
+
+                // --- Results Section ---
+                if (state is StudentRecordLoaded)
+                  state.students.isEmpty
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 60),
+                            child: Text(
+                              "No matching records found.",
+                              style: TextStyle(color: Colors.grey),
                             ),
-                            leading: Container(
-                              width: 50,
-                              height: 50,
+                          ),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: state.students.length,
+                          itemBuilder: (context, index) {
+                            final student = state.students[index];
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 12),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: Theme.of(
-                                  context,
-                                ).primaryColor.withValues(alpha: 0.1),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.grey.shade100),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.02),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child:
-                                    student.studentImage != null &&
-                                        student.studentImage!.isNotEmpty
-                                    ? Image.network(
-                                        student.studentImage!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (c, e, s) => Icon(
-                                          Icons.person,
-                                          color: Theme.of(context).primaryColor,
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 45,
+                                          height: 45,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            color: Theme.of(context)
+                                                .primaryColor
+                                                .withValues(alpha: 0.1),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            child:
+                                                student.studentImage != null &&
+                                                    student
+                                                        .studentImage!
+                                                        .isNotEmpty
+                                                ? Image.network(
+                                                    student.studentImage!,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (c, e, s) =>
+                                                        Icon(
+                                                          Icons.person,
+                                                          size: 24,
+                                                          color: Theme.of(
+                                                            context,
+                                                          ).primaryColor,
+                                                        ),
+                                                  )
+                                                : Icon(
+                                                    Icons.person,
+                                                    size: 24,
+                                                    color: Theme.of(
+                                                      context,
+                                                    ).primaryColor,
+                                                  ),
+                                          ),
                                         ),
-                                      )
-                                    : Icon(
-                                        Icons.person,
-                                        color: Theme.of(context).primaryColor,
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                student.name ?? "NA",
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w900,
+                                                  fontSize: 14,
+                                                  color: Color(0xFF1A1C1E),
+                                                ),
+                                              ),
+                                              Text(
+                                                "${student.className ?? ""} • ${student.section ?? ""}",
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w800,
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).primaryColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        _compactBadge(
+                                          "Enroll No: ${student.enrollNumber ?? "NA"}",
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Divider(
+                                    height: 1,
+                                    indent: 12,
+                                    endIndent: 12,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      children: [
+                                        _compactInfo(
+                                          Icons.cake_rounded,
+                                          student.dob ?? "NA",
+                                        ),
+                                        const SizedBox(height: 6),
+                                        _compactInfo(
+                                          Icons.family_restroom_rounded,
+                                          "Father: ${student.fatherName ?? "NA"}  |  Mother: ${student.motherName ?? "NA"}",
+                                        ),
+                                        const SizedBox(height: 6),
+                                        _compactInfo(
+                                          Icons.phone_rounded,
+                                          "${student.contactNumber ?? "NA"} / ${student.alternateNumber ?? "NA"}",
+                                          canCopy: true,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade50,
+                                      borderRadius: const BorderRadius.vertical(
+                                        bottom: Radius.circular(16),
                                       ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.lock_person_rounded,
+                                          size: 14,
+                                          color: Colors.amber,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        const Text(
+                                          "Pass:",
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          student.password ?? "NA",
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w900,
+                                            color: Color(0xFF1A1C1E),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            title: Text(
-                              student.name ?? "Unknown",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF1A1C1E),
-                                fontSize: 16,
-                              ),
-                            ),
-                            subtitle: Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                "Class: ${student.className} | Sec: ${student.section}",
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade600,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            trailing: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade50,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 14,
-                                color: Colors.grey.shade400,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  } else if (state is StudentRecordError) {
-                    return Center(
+                            );
+                          },
+                        )
+                else if (state is StudentRecordError)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
                       child: Text(
                         state.message,
                         style: const TextStyle(color: Colors.red),
                       ),
-                    );
-                  } else if (state is StudentRecordInitial) {
-                    return const Center(
-                      child: Text("Select filters and press search"),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ),
-          ],
+                    ),
+                  )
+                else
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 60),
+                      child: Text(
+                        "Enter filters and tap Search.",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -506,13 +611,54 @@ class _StudentRecordPageState extends State<StudentRecordPage> {
       teaname: widget.staff.name ?? "",
       tpass: widget.staff.password ?? "",
       tclass:
-          widget.staff.designation ?? "", // staffc maps to designation or class
+          widget.staff.assignClass ??
+          widget.staff.designation ??
+          "", // staffc maps to assignClass (or designation/class)
       inschool: selectedStatus == "Yes" ? "School Status - Yes" : "No",
       session: selectedSession,
       classValue: selectedClass,
       profession: selectedClass, // Profession same as class in dropdown
       section: selectedSection,
       transportstatus: selectedTransport,
+    );
+  }
+
+  Widget _compactBadge(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F3F5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget _compactInfo(IconData icon, String value, {bool canCopy = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 14, color: Colors.grey.shade400),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF495057),
+              height: 1.3,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
