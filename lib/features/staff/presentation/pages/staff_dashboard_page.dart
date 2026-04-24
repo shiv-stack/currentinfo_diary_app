@@ -223,11 +223,11 @@ class StaffDashboardPage extends StatelessWidget {
         'imagePath': 'assets/icons/attendance.png',
         'color': const Color(0xffE6F7FF),
       },
-      {
-        'title': 'Staff List',
-        'imagePath': 'assets/icons/staff_list.png',
-        'color': const Color(0xffE6EEFF),
-      },
+      // {
+      //   'title': 'Staff List',
+      //   'imagePath': 'assets/icons/staff_list.png',
+      //   'color': const Color(0xffE6EEFF),
+      // },
       {
         'title': 'Add Staff',
         'imagePath': 'assets/icons/add_staff.png',
