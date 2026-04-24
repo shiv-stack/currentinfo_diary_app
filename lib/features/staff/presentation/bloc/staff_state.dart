@@ -27,3 +27,12 @@ class StaffLoginFailure extends StaffState {
   @override
   List<Object> get props => [message];
 }
+
+class SavedStaffLoaded extends StaffState {
+  final List<dynamic> savedStaff;
+
+  SavedStaffLoaded(this.savedStaff);
+
+  @override
+  List<Object> get props => [savedStaff];
+}

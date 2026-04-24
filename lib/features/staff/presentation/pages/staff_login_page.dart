@@ -23,44 +23,66 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
   bool _isPasswordVisible = false;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  String? _currentSchoolCode;
   String? _schoolName;
 
   @override
   void initState() {
     super.initState();
-    _loadSchoolInfo();
+    _loadSchoolCodeAndSavedStaff();
   }
 
-  void _loadSchoolInfo() async {
+  void _loadSchoolCodeAndSavedStaff() async {
+    final code = await di.sl<AuthLocalDataSource>().getCachedSchoolCode();
     final school = await di.sl<AuthLocalDataSource>().getCachedSchoolInfo();
     if (mounted) {
       setState(() {
+        _currentSchoolCode = code;
         _schoolName = school?.title;
       });
+      context.read<StaffBloc>().add(GetSavedStaff());
     }
   }
 
-  void _onLoginPressed(BuildContext context) async {
-    final name = _nameController.text.trim();
-    final password = _passwordController.text.trim();
+  void _onLoginPressed(
+    BuildContext context, {
+    String? name,
+    String? password,
+    String? schoolCode,
+  }) async {
+    final effectiveName = name ?? _nameController.text.trim();
+    final effectivePassword = password ?? _passwordController.text.trim();
 
-    if (name.isEmpty || password.isEmpty) {
+    if (effectiveName.isEmpty || effectivePassword.isEmpty) {
       AppToast.show(context, "Please enter name and password", isError: true);
       return;
     }
 
-    final code = await di.sl<AuthLocalDataSource>().getCachedSchoolCode();
-    if (!mounted) return;
+    String? code = schoolCode;
     if (code == null || code.isEmpty) {
-      AppToast.show(context, "School code missing. Please connect again.", isError: true);
+      code = await di.sl<AuthLocalDataSource>().getCachedSchoolCode();
+    }
+
+    if (code == null || code.isEmpty) {
+      AppToast.show(
+        // ignore: use_build_context_synchronously
+        context,
+        "School code missing. Please connect again.",
+        isError: true,
+      );
       return;
     }
 
+    if (schoolCode != null) {
+      await di.sl<AuthLocalDataSource>().cacheSchoolCode(schoolCode);
+    }
+
+    if (!mounted) return;
     context.read<StaffBloc>().add(
       StaffLoginSubmitted(
         schoolCode: code,
-        name: name,
-        uniqueCode: password,
+        name: effectiveName,
+        uniqueCode: effectivePassword,
       ),
     );
   }
@@ -77,6 +99,7 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
         listener: (context, state) {
           if (state is StaffLoginSuccess) {
             AppToast.show(context, "Login Successful");
+            context.read<StaffBloc>().add(GetSavedStaff());
             context.read<AuthBloc>().add(CheckAuthStatus());
             Navigator.pushAndRemoveUntil(
               context,
@@ -197,13 +220,17 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
                                       builder: (context, state) {
                                         final isLoading = state is StaffLoading;
                                         return ElevatedButton(
-                                          onPressed: isLoading ? null : () => _onLoginPressed(context),
+                                          onPressed: isLoading
+                                              ? null
+                                              : () => _onLoginPressed(context),
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Theme.of(context).primaryColor,
+                                            backgroundColor:
+                                                Theme.of(context).primaryColor,
                                             foregroundColor: Colors.white,
                                             elevation: 0,
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(16),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
                                             ),
                                           ),
                                           child: isLoading
@@ -230,7 +257,9 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 15),
+                            _buildSavedStaffSection(),
+                            const SizedBox(height: 60),
                           ],
                         ),
                       ),
@@ -240,6 +269,302 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSavedStaffSection() {
+    return BlocBuilder<StaffBloc, StaffState>(
+      buildWhen: (previous, current) => current is SavedStaffLoaded,
+      builder: (context, state) {
+        if (state is SavedStaffLoaded && state.savedStaff.isNotEmpty) {
+          final filteredStaff = state.savedStaff
+              .where((s) => s.schoolCode == _currentSchoolCode)
+              .toList();
+
+          if (filteredStaff.isEmpty) return const SizedBox.shrink();
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Switch Account".toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: Theme.of(context).primaryColor,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  Text(
+                    "${filteredStaff.length}/5",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 120,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: filteredStaff.length,
+                  itemBuilder: (context, index) {
+                    final staff = filteredStaff[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: Column(
+                        children: [
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              InkWell(
+                                onTap: () => _onLoginPressed(
+                                  context,
+                                  name: staff.name,
+                                  password: staff.uniqueCode,
+                                  schoolCode: staff.schoolCode,
+                                ),
+                                borderRadius: BorderRadius.circular(24),
+                                child: Container(
+                                  height: 80,
+                                  width: 80,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Theme.of(
+                                          context,
+                                        ).primaryColor.withValues(alpha: 0.15),
+                                        Theme.of(
+                                          context,
+                                        ).primaryColor.withValues(alpha: 0.05),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: Theme.of(
+                                        context,
+                                      ).primaryColor.withValues(alpha: 0.1),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child:
+                                      staff.profileImage != null &&
+                                              staff.profileImage!.isNotEmpty
+                                          ? ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                              child: Image.network(
+                                                staff.profileImage!,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error,
+                                                        stackTrace) =>
+                                                    _buildInitials(staff.name),
+                                              ),
+                                            )
+                                          : _buildInitials(staff.name),
+                                ),
+                              ),
+                              Positioned(
+                                top: -6,
+                                right: -6,
+                                child: InkWell(
+                                  onTap: () => _showDeleteConfirmDialog(
+                                    staff.uniqueCode,
+                                  ),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.close_rounded,
+                                      color: Colors.red,
+                                      size: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: 80,
+                            child: Text(
+                              staff.name,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF1A1C1E),
+                                height: 1.2,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  void _showDeleteConfirmDialog(String uniqueCode) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.person_remove_rounded,
+                  size: 40,
+                  color: Colors.red,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                "Remove Account?",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF1A1C1E),
+                  letterSpacing: -0.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Are you sure you want to remove this account from your saved list? You'll need to log in again with your credentials.",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade600,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        "CANCEL",
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.read<StaffBloc>().add(
+                              DeleteSavedStaff(uniqueCode),
+                            );
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text(
+                        "REMOVE",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInitials(String name) {
+    return Center(
+      child: Text(
+        (() {
+          final names = name.trim().split(RegExp(r'\s+'));
+          if (names.isEmpty) return "?";
+          if (names.length == 1) return names[0][0].toUpperCase();
+          return (names[0][0] + names[1][0]).toUpperCase();
+        })(),
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w900,
+          color: Theme.of(context).primaryColor,
+          letterSpacing: -1,
         ),
       ),
     );

@@ -18,6 +18,7 @@ class StaffUploadDataUseCase {
     required String section,
     required String session,
     required String uploadDetails,
+    required String featureTitle,
     String? filePath,
   }) async {
     return await repository.uploadData(
@@ -31,6 +32,7 @@ class StaffUploadDataUseCase {
       section: section,
       session: session,
       uploadDetails: uploadDetails,
+      featureTitle: featureTitle,
       filePath: filePath,
     );
   }

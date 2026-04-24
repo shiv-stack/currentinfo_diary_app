@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/constants/app_urls.dart';
 import '../models/staff_model.dart';
+import '../../../student/data/models/student_model.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/services/push_notification_service.dart';
 
@@ -23,7 +26,21 @@ abstract class StaffRemoteDataSource {
     required String section,
     required String session,
     required String uploadDetails,
+    required String featureTitle,
     String? filePath,
+  });
+
+  Future<List<StudentModel>> getStudentRecord({
+    required String schoolCode,
+    required String teaname,
+    required String tpass,
+    required String tclass,
+    required String inschool,
+    required String session,
+    required String classValue,
+    required String profession,
+    required String section,
+    required String transportstatus,
   });
 }
 
@@ -44,44 +61,97 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
     required String section,
     required String session,
     required String uploadDetails,
+    required String featureTitle,
     String? filePath,
   }) async {
     try {
-      final Map<String, dynamic> data = {
-        'login': login,
-        'passwo': password,
-        'staffc': staffClass,
-        'title': title,
-        'desc': description,
-        'name': login,
-        'class': className,
-        'sec': section.toLowerCase().contains("not applicable") ? "NA" : section,
-        'hindisms': 'No',
-        'sms': 'Notification',
-        'uploaddetails': uploadDetails,
-        'session': session,
-      };
+      final bool isHolidayHw = featureTitle == "Holiday Homework";
+      final String apiUrl = isHolidayHw
+          ? AppUrls.getClassNotices(schoolCode)
+          : AppUrls.uploadStaffData(schoolCode);
+
+      final Map<String, dynamic> data = {};
+
+      if (isHolidayHw) {
+        data.addAll({
+          'login': login,
+          'password': password,
+          'staffc': staffClass,
+          'title': title,
+          'desc': description,
+          'uploaddetails': login,
+          'section':
+              (section.isEmpty ||
+                  section == "Section" ||
+                  section.toLowerCase().contains("not applicable"))
+              ? "NA"
+              : section,
+          'session': session,
+          'to': className,
+          'as': 'Notification',
+          'hs': 'No',
+          'display': 'HolidayHw',
+          'inschool': 'Yes',
+        });
+      } else {
+        data.addAll({
+          'login': login,
+          'passwo': password,
+          'staffc': staffClass,
+          'title': title,
+          'desc': description,
+          'name': login,
+          'class': className,
+          'sec':
+              (section.isEmpty ||
+                  section == "Section" ||
+                  section.toLowerCase().contains("not applicable"))
+              ? "NA"
+              : section,
+          'hindisms': 'No',
+          'sms': 'Notification',
+          'uploaddetails': uploadDetails,
+          'session': session,
+        });
+      }
 
       if (filePath != null && filePath.isNotEmpty) {
+        final mimeType = lookupMimeType(filePath) ?? 'application/octet-stream';
+        final typeSplit = mimeType.split('/');
         data['myfile'] = await MultipartFile.fromFile(
           filePath,
           filename: filePath.split('/').last,
+          contentType: MediaType(typeSplit[0], typeSplit[1]),
         );
       }
 
       final formData = FormData.fromMap(data);
 
       final response = await dio.post(
-        AppUrls.uploadStaffData(schoolCode),
+        apiUrl,
         data: formData,
+        options: Options(responseType: ResponseType.plain),
       );
 
       if (response.statusCode == 200) {
-        return "Upload Successful";
+        final resData = response.data;
+        if (resData is Map && resData.containsKey('message')) {
+          return resData['message'].toString();
+        }
+        return resData.toString();
       }
       throw Exception("Upload failed with status code: ${response.statusCode}");
     } on DioException catch (e) {
-      throw Exception(e.message ?? "Connection Error during upload");
+      if (e.response?.statusCode == 200) {
+        return e.response?.data?.toString() ?? "Upload Successful";
+      }
+      throw Exception(
+        e.response?.data?.toString() ??
+            e.message ??
+            "Connection Error during upload",
+      );
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 
@@ -127,7 +197,7 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
 
           return StaffModel(
             staffImage: staff.staffImage,
-            name: staff.name,
+            name: staff.name ?? name,
             designation: staff.designation,
             dob: staff.dob,
             contactNumber: staff.contactNumber,
@@ -136,7 +206,7 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
             address: staff.address,
             email: staff.email,
             schoolCode: schoolCode,
-            password: staff.password,
+            password: uniqueCode,
             feedbackUrl: staff.feedbackUrl,
             attendanceUrl: staff.attendanceUrl,
             controlSms: staff.controlSms,
@@ -162,6 +232,66 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
       if (e.response?.statusCode == 500) {
         throw Exception("Server is busy, please try again later");
       }
+      throw Exception(e.message ?? "Connection Error");
+    }
+  }
+
+  @override
+  Future<List<StudentModel>> getStudentRecord({
+    required String schoolCode,
+    required String teaname,
+    required String tpass,
+    required String tclass,
+    required String inschool,
+    required String session,
+    required String classValue,
+    required String profession,
+    required String section,
+    required String transportstatus,
+  }) async {
+    try {
+      final String mappedClass = (classValue == "Twelfth")
+          ? "Twelth"
+          : (classValue == "All" ? "" : classValue);
+      final String mappedProfession = (profession == "Twelfth")
+          ? "Twelth"
+          : profession;
+      final String mappedSection = (section == "Section") ? "" : section;
+      final String mappedInSchool = (inschool == "School Status - Yes")
+          ? "Yes"
+          : "No";
+
+      final formData = FormData.fromMap({
+        'login': teaname,
+        'pass': tpass,
+        'staffc': tclass,
+        'inschool': mappedInSchool,
+        'session': session,
+        'Class': mappedClass,
+        'Profession': mappedProfession,
+        'section': mappedSection,
+        'transportfacility': transportstatus,
+      });
+
+      final response = await dio.post(
+        AppUrls.getStudentRecord(schoolCode),
+        data: formData,
+      );
+
+      if (response.statusCode == 200) {
+        final dynamic rawData = response.data;
+        List<dynamic> data = [];
+
+        if (rawData is List) {
+          data = rawData;
+        } else if (rawData is String && rawData.trim().isNotEmpty) {
+          data = jsonDecode(rawData);
+        }
+
+        return data.map((json) => StudentModel.fromJson(json)).toList();
+      }
+      throw Exception("Failed to fetch student record");
+    } on DioException catch (e) {
       throw Exception(e.message ?? "Connection Error");
     }
   }

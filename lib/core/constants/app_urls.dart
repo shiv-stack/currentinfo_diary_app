@@ -50,4 +50,7 @@ class AppUrls {
 
   static String uploadStaffData(String schoolCode) =>
       "$baseUrl/assignment/upload-assignment-school/$schoolCode/";
+
+  static String getStudentRecord(String schoolCode) =>
+      "$baseUrl/student-info/api-request-school/$schoolCode/";
 }

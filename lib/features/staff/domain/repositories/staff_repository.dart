@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/staff.dart';
+import '../../../student/data/models/student_model.dart';
 
 abstract class StaffRepository {
   Future<Either<Failure, Staff>> login({
@@ -20,6 +21,20 @@ abstract class StaffRepository {
     required String section,
     required String session,
     required String uploadDetails,
+    required String featureTitle,
     String? filePath,
+  });
+
+  Future<Either<Failure, List<StudentModel>>> getStudentRecord({
+    required String schoolCode,
+    required String teaname,
+    required String tpass,
+    required String tclass,
+    required String inschool,
+    required String session,
+    required String classValue,
+    required String profession,
+    required String section,
+    required String transportstatus,
   });
 }

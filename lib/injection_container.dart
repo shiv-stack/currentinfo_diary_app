@@ -33,8 +33,11 @@ import 'features/staff/domain/usecases/staff_login_usecase.dart';
 import 'features/staff/domain/repositories/staff_repository.dart';
 import 'features/staff/data/repositories/staff_repository_impl.dart';
 import 'features/staff/data/datasources/staff_remote_data_source.dart';
+import 'features/staff/data/datasources/staff_local_data_source.dart';
 import 'features/staff/presentation/bloc/staff_upload_cubit.dart';
+import 'features/staff/presentation/bloc/student_record_cubit.dart';
 import 'features/staff/domain/usecases/staff_upload_data_usecase.dart';
+import 'features/staff/domain/usecases/get_student_record_usecase.dart';
 
 import 'core/services/remote_config_service.dart';
 import 'core/services/analytics_service.dart';
@@ -87,8 +90,15 @@ Future<void> init() async {
       studentLocalDataSource: sl(),
     ),
   );
-  sl.registerFactory(() => StaffBloc(staffLoginUseCase: sl(), authLocalDataSource: sl()));
+  sl.registerFactory(
+    () => StaffBloc(
+      staffLoginUseCase: sl(),
+      authLocalDataSource: sl(),
+      staffLocalDataSource: sl(),
+    ),
+  );
   sl.registerFactory(() => StaffUploadCubit(uploadDataUseCase: sl()));
+  sl.registerFactory(() => StudentRecordCubit(getStudentRecordUseCase: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => GetSchoolInfoUseCase(sl()));
@@ -108,6 +118,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetMessagesUseCase(repository: sl()));
   sl.registerLazySingleton(() => StaffLoginUseCase(sl()));
   sl.registerLazySingleton(() => StaffUploadDataUseCase(sl()));
+  sl.registerLazySingleton(() => GetStudentRecordUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(
@@ -135,5 +146,8 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<StaffRemoteDataSource>(
     () => StaffRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<StaffLocalDataSource>(
+    () => StaffLocalDataSourceImpl(),
   );
 }

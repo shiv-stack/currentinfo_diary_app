@@ -34,6 +34,7 @@ import 'injection_container.dart' as di;
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'features/student/domain/entities/saved_student.dart';
+import 'features/staff/domain/entities/saved_staff.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -47,6 +48,7 @@ void main() async {
   );
   await Hive.initFlutter();
   Hive.registerAdapter(SavedStudentAdapter());
+  Hive.registerAdapter(SavedStaffAdapter());
   await di.init();
 
   FlutterError.onError = (errorDetails) {

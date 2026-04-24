@@ -19,3 +19,14 @@ class StaffLoginSubmitted extends StaffEvent {
   @override
   List<Object> get props => [schoolCode, name, uniqueCode];
 }
+
+class GetSavedStaff extends StaffEvent {}
+
+class DeleteSavedStaff extends StaffEvent {
+  final String uniqueCode;
+
+  DeleteSavedStaff(this.uniqueCode);
+
+  @override
+  List<Object> get props => [uniqueCode];
+}

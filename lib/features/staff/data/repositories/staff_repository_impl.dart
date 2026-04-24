@@ -3,6 +3,7 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/staff.dart';
 import '../../domain/repositories/staff_repository.dart';
 import '../datasources/staff_remote_data_source.dart';
+import '../../../student/data/models/student_model.dart';
 
 class StaffRepositoryImpl implements StaffRepository {
   final StaffRemoteDataSource remoteDataSource;
@@ -39,6 +40,7 @@ class StaffRepositoryImpl implements StaffRepository {
     required String section,
     required String session,
     required String uploadDetails,
+    required String featureTitle,
     String? filePath,
   }) async {
     try {
@@ -53,9 +55,42 @@ class StaffRepositoryImpl implements StaffRepository {
         section: section,
         session: session,
         uploadDetails: uploadDetails,
+        featureTitle: featureTitle,
         filePath: filePath,
       );
       return Right(result);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<StudentModel>>> getStudentRecord({
+    required String schoolCode,
+    required String teaname,
+    required String tpass,
+    required String tclass,
+    required String inschool,
+    required String session,
+    required String classValue,
+    required String profession,
+    required String section,
+    required String transportstatus,
+  }) async {
+    try {
+      final students = await remoteDataSource.getStudentRecord(
+        schoolCode: schoolCode,
+        teaname: teaname,
+        tpass: tpass,
+        tclass: tclass,
+        inschool: inschool,
+        session: session,
+        classValue: classValue,
+        profession: profession,
+        section: section,
+        transportstatus: transportstatus,
+      );
+      return Right(students);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

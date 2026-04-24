@@ -6,6 +6,7 @@ import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../../routes/app_routes.dart';
 import './staff_upload_page.dart';
+import './student_record_page.dart';
 
 class StaffDashboardPage extends StatelessWidget {
   final Staff staff;
@@ -331,6 +332,13 @@ class StaffDashboardPage extends StatelessWidget {
                     featureTitle: item['title'] as String,
                     staff: staff,
                   ),
+                ),
+              );
+            } else if (item['title'] == 'Student Record') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StudentRecordPage(staff: staff),
                 ),
               );
             }

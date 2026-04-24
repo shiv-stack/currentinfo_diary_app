@@ -18,6 +18,7 @@ class StaffUploadCubit extends Cubit<StaffUploadState> {
     required String section,
     required String session,
     required String uploadDetails,
+    required String featureTitle,
     String? filePath,
   }) async {
     emit(StaffUploadLoading());
@@ -33,6 +34,7 @@ class StaffUploadCubit extends Cubit<StaffUploadState> {
       section: section,
       session: session,
       uploadDetails: uploadDetails,
+      featureTitle: featureTitle,
       filePath: filePath,
     );
 
