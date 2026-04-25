@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../core/constants/app_urls.dart';
 import '../models/staff_model.dart';
 import '../../../student/data/models/student_model.dart';
+import '../models/fee_report_model.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/services/push_notification_service.dart';
 
@@ -43,7 +45,7 @@ abstract class StaffRemoteDataSource {
     required String transportstatus,
   });
 
-  Future<List<dynamic>> getFeeReport({
+  Future<List<FeeReportModel>> getFeeReport({
     required String schoolCode,
     required String login,
     required String password,
@@ -361,7 +363,7 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
   }
 
   @override
-  Future<List<dynamic>> getFeeReport({
+  Future<List<FeeReportModel>> getFeeReport({
     required String schoolCode,
     required String login,
     required String password,
@@ -374,6 +376,7 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
     required String studentFeeSoftware,
   }) async {
     try {
+      // EXACT same form-data field names as Postman
       final formData = FormData.fromMap({
         'login': login,
         'password': password,
@@ -385,6 +388,11 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         'cashchequevalue': paymentMode,
       });
 
+      if (kDebugMode) {
+        print('--- Fee Report API Request Payload ---');
+        formData.fields.forEach((field) => print('  ${field.key}: ${field.value}'));
+      }
+
       final response = await dio.post(
         AppUrls.getFees(schoolCode),
         data: formData,
@@ -392,19 +400,39 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
 
       if (response.statusCode == 200) {
         final dynamic rawData = response.data;
-        List<dynamic> data = [];
+        print('--- RAW API RESPONSE (Fee Report) ---');
+        print(rawData);
 
+        List<dynamic> dataList = [];
         if (rawData is List) {
-          data = rawData;
+          dataList = rawData;
+        } else if (rawData is Map) {
+          dataList = [rawData];
         } else if (rawData is String && rawData.trim().isNotEmpty) {
-          data = jsonDecode(rawData);
+          final decoded = jsonDecode(rawData);
+          if (decoded is List) {
+            dataList = decoded;
+          } else if (decoded is Map) {
+            dataList = [decoded];
+          }
         }
 
-        return data;
+        // Filter out empty maps like [{}] before parsing
+        final parsed = dataList
+            .where((json) => json is Map && json.isNotEmpty && json.keys.isNotEmpty)
+            .map((json) => FeeReportModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+
+        print('Parsed Fee List Length: ${parsed.length}');
+        if (parsed.isNotEmpty) {
+          print('First Parsed Item: ${parsed[0]}');
+        }
+
+        return parsed;
       }
-      throw Exception("Failed to fetch fee report");
+      throw Exception("Failed to fetch fee report (Status: ${response.statusCode})");
     } on DioException catch (e) {
-      throw Exception(e.message ?? "Connection Error");
+      throw Exception(e.message ?? "Connection Error during fee report fetch");
     }
   }
 }

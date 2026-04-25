@@ -5,6 +5,10 @@ import '../../domain/entities/staff.dart';
 import '../bloc/staff_fee_report_cubit.dart';
 import '../bloc/staff_fee_report_state.dart';
 import '../../../auth/data/datasources/auth_local_data_source.dart';
+import '../../../../core/constants/app_urls.dart';
+
+import 'package:flutter/foundation.dart';
+import '../../data/models/fee_report_model.dart';
 
 class StaffFeeReportPage extends StatefulWidget {
   final Staff staff;
@@ -15,6 +19,7 @@ class StaffFeeReportPage extends StatefulWidget {
 }
 
 class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
+// ... existing state fields ...
   final List<String> reportTypes = ["Fee's Collection", "Fees Defaulters"];
   final List<String> paymentModes = [
     "Cash/Cheque...",
@@ -307,107 +312,135 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
     );
   }
 
-  Widget _buildUserRecordStyleCard(dynamic item) {
-    final String name = item['name']?.toString() ?? "Student Name";
-    final String admissionNo = item['admissionno']?.toString() ?? "N/A";
-    final String amount = item['f-amount']?.toString() ?? "0";
-    final String receipt = item['fee_receipt_no']?.toString() ?? "N/A";
-    final String mode = item['payment-mode']?.toString() ?? "N/A";
-    final String dues = item['dues']?.toString() ?? "0";
-    final String month = item['month']?.toString() ?? "N/A";
-    final String paidFor = item['f-m-submitted']?.toString() ?? "N/A";
-    final String paidOn = item['date']?.toString() ?? "N/A";
-    final String contact = item['mobile']?.toString() ?? item['contact']?.toString() ?? "N/A";
+  Widget _buildUserRecordStyleCard(FeeReportModel item) {
+    if (kDebugMode) {
+      print('Before Rendering - Name: ${item.name}, Month: ${item.month}, Amount: ${item.amount}');
+    }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
+          // Top Bar with Paid On
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  width: 45,
-                  height: 45,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                  ),
-                  child: Icon(
-                    Icons.person_rounded,
-                    color: Theme.of(context).primaryColor,
+                Text(
+                  "Paid On ",
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade600,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 14,
-                          color: Color(0xFF1A1C1E),
-                        ),
-                      ),
-                      Text(
-                        "Admission No: $admissionNo",
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8F5E9),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    "₹$amount",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 13,
-                      color: Colors.green,
-                    ),
+                Text(
+                  item.paidOn,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF1A1C1E),
                   ),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1, indent: 12, endIndent: 12),
+
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Expanded(child: _compactInfo(Icons.calendar_today_outlined, "Month: $month")),
-                    Expanded(child: _compactInfo(Icons.check_circle_outline_rounded, "Paid For: $paidFor")),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.person, color: Theme.of(context).primaryColor, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        item.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        "Rs ${item.amount}",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          color: Colors.green,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(height: 1),
+                ),
+
+                Text(
+                  "Receipt No ${item.receiptNo}, Payment Mode ${item.paymentMode}",
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF495057)),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Amount Rs ${item.amount}, Dues ${item.dues}",
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF495057)),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Month : ${item.month}",
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF495057)),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Paid For : ${item.paidFor}",
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.grey),
+                ),
+                Text(
+                  "Admission No : ${item.admissionNo}",
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.grey),
+                ),
+                
+                const SizedBox(height: 16),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(child: _compactInfo(Icons.event_note_outlined, "Session: $selectedSession")),
                     Text(
                       "Status: SUCCESS",
                       style: TextStyle(
@@ -415,6 +448,18 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
                         fontWeight: FontWeight.w900,
                         color: Colors.green.shade600,
                       ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // View Slip placeholder
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text("VIEW SLIP", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -461,7 +506,12 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
       "July": "07", "August": "08", "September": "09", "October": "10", "November": "11", "December": "12"
     };
     final authLocal = di.sl<AuthLocalDataSource>();
-    final feeSoftware = await authLocal.getCachedFeeSoftware() ?? "quickfeesw";
+    String feeSoftware = await authLocal.getCachedFeeSoftware() ?? "quickfeesw";
+    
+    // Normalize "quicksw" to "quickfeesw" to match Postman exactly
+    if (feeSoftware.toLowerCase() == "quicksw") {
+      feeSoftware = "quickfeesw";
+    }
 
     // Format parameters to match Postman exactly
     final String apiDay = selectedDay.padLeft(2, '0');
@@ -471,11 +521,24 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
     String staffc = widget.staff.assignClass ?? widget.staff.designation ?? "Admin";
     if (staffc.toLowerCase().contains("admin")) staffc = "Admin";
 
+    if (kDebugMode) {
+      print('--- SENDING FEE REPORT REQUEST ---');
+      print('URL: ${AppUrls.getFees(widget.staff.schoolCode ?? "")}');
+      print('Login: ${widget.staff.name}');
+      print('Password: ${widget.staff.password}');
+      print('StaffC: $staffc');
+      print('Day/Date: $apiDay');
+      print('Month: $apiMonth');
+      print('Session: $selectedSession');
+      print('PaymentMode: $apiPaymentMode');
+      print('FeeSoftware: $feeSoftware');
+    }
+
     if (context.mounted) {
       context.read<StaffFeeReportCubit>().fetchFeeReport(
         schoolCode: widget.staff.schoolCode ?? "",
-        login: widget.staff.name ?? "",
-        password: widget.staff.password ?? "",
+        login: widget.staff.name ?? "", // Match Postman login field
+        password: widget.staff.password ?? "", // Match Postman password field
         session: selectedSession,
         reportType: selectedReportType,
         paymentMode: apiPaymentMode,

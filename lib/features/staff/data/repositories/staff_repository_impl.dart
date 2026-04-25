@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/staff.dart';
 import '../../domain/repositories/staff_repository.dart';
+import '../models/fee_report_model.dart';
 import '../datasources/staff_remote_data_source.dart';
 import '../../../student/data/models/student_model.dart';
 
@@ -97,7 +98,7 @@ class StaffRepositoryImpl implements StaffRepository {
   }
 
   @override
-  Future<Either<Failure, List<dynamic>>> getFeeReport({
+  Future<Either<Failure, List<FeeReportModel>>> getFeeReport({
     required String schoolCode,
     required String login,
     required String password,

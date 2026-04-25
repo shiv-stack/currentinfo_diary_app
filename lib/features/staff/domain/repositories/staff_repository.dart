@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/staff.dart';
+import '../../data/models/fee_report_model.dart';
 import '../../../student/data/models/student_model.dart';
 
 abstract class StaffRepository {
@@ -38,7 +39,7 @@ abstract class StaffRepository {
     required String transportstatus,
   });
 
-  Future<Either<Failure, List<dynamic>>> getFeeReport({
+  Future<Either<Failure, List<FeeReportModel>>> getFeeReport({
     required String schoolCode,
     required String login,
     required String password,

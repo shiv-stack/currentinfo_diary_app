@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/repositories/staff_repository.dart';
 import './staff_fee_report_state.dart';
+import '../../data/models/fee_report_model.dart';
+import 'package:flutter/foundation.dart';
 
 class StaffFeeReportCubit extends Cubit<StaffFeeReportState> {
   final StaffRepository repository;
@@ -39,10 +41,15 @@ class StaffFeeReportCubit extends Cubit<StaffFeeReportState> {
       (report) {
         double total = 0;
         for (var item in report) {
-          if (item is Map) {
-            total += double.tryParse(item['f-amount']?.toString() ?? '0') ?? 0;
-          }
+          total += double.tryParse(item.amount) ?? 0;
         }
+        
+        if (kDebugMode) {
+          print('--- Cubit Processing ---');
+          print('Total Items: ${report.length}');
+          print('Calculated Total Amount: $total');
+        }
+
         emit(StaffFeeReportLoaded(report, total));
       },
     );
