@@ -280,9 +280,6 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
     required String transportstatus,
   }) async {
     try {
-      final String mappedClass = (classValue == "Twelfth")
-          ? "Twelth"
-          : (classValue == "All" ? "" : classValue);
       final String mappedProfession = (profession == "Twelfth")
           ? "Twelth"
           : profession;
@@ -290,6 +287,10 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
       final String mappedInSchool = (inschool == "School Status - Yes")
           ? "Yes"
           : "No";
+
+      var transportstatusValue = (transportstatus.toLowerCase() == "transport")
+          ? ""
+          : transportstatus;
 
       final formData = FormData.fromMap({
         'login': teaname,
@@ -300,7 +301,7 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         'Class': "",
         'Profession': mappedProfession,
         'section': mappedSection,
-        'transportfacility': "",
+        'transportfacility': transportstatusValue,
       });
 
       final response = await dio.post(

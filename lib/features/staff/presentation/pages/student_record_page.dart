@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../injection_container.dart' as di;
 import '../../domain/entities/staff.dart';
 import '../bloc/student_record_cubit.dart';
-import '../../../../core/presentation/widgets/app_loading_indicator.dart';
-import '../../../../core/utils/app_toast.dart';
 
 class StudentRecordPage extends StatefulWidget {
   final Staff staff;
