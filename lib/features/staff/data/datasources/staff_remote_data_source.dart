@@ -280,9 +280,29 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
     required String transportstatus,
   }) async {
     try {
-      final String mappedProfession = (profession == "Twelfth")
+      final List<String> staffProfessions = [
+        "Chairman",
+        "Teacher",
+        "Student",
+        "Vice-Principal",
+        "Principal",
+        "Director",
+        "Helper",
+        "Accountant",
+        "Staff",
+        "Driver",
+        "Admin",
+      ];
+
+      final bool isStaffRole = staffProfessions.any(
+        (p) => p.toLowerCase() == classValue.toLowerCase(),
+      );
+
+      final String mappedProfession = isStaffRole ? classValue : "Student";
+      final String mappedClassValue = (classValue == "Twelfth")
           ? "Twelth"
-          : profession;
+          : (isStaffRole ? "" : classValue);
+
       final String mappedSection = (section == "Section") ? "" : section;
       final String mappedInSchool = (inschool == "School Status - Yes")
           ? "Yes"
@@ -298,7 +318,7 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         'staffc': tclass,
         'inschool': mappedInSchool,
         'session': session,
-        'Class': "",
+        'Class': mappedClassValue,
         'Profession': mappedProfession,
         'section': mappedSection,
         'transportfacility': transportstatusValue,
