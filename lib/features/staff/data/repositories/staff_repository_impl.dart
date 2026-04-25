@@ -95,4 +95,36 @@ class StaffRepositoryImpl implements StaffRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<dynamic>>> getFeeReport({
+    required String schoolCode,
+    required String login,
+    required String password,
+    required String session,
+    required String reportType,
+    required String paymentMode,
+    required String day,
+    required String month,
+    required String staffc,
+    required String studentFeeSoftware,
+  }) async {
+    try {
+      final report = await remoteDataSource.getFeeReport(
+        schoolCode: schoolCode,
+        login: login,
+        password: password,
+        session: session,
+        reportType: reportType,
+        paymentMode: paymentMode,
+        day: day,
+        month: month,
+        staffc: staffc,
+        studentFeeSoftware: studentFeeSoftware,
+      );
+      return Right(report);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

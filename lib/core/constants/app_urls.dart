@@ -27,7 +27,7 @@ class AppUrls {
       "$baseUrl/assignment/assignment-school/$schoolCode/";
 
   static String getFees(String schoolCode) =>
-      "$baseUrl/feemanage/fee-quick-app-api/$schoolCode/";
+      "http://www.currentdiary.com/feemanage/fee-quick-app-api/$schoolCode/";
 
   static String getMultitask(String schoolCode) =>
       "$baseUrl/multitask/multitask/$schoolCode/";

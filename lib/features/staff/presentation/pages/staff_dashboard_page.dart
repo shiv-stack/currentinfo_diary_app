@@ -7,6 +7,7 @@ import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../../routes/app_routes.dart';
 import './staff_upload_page.dart';
 import './student_record_page.dart';
+import './staff_fee_report_page.dart';
 
 class StaffDashboardPage extends StatelessWidget {
   final Staff staff;
@@ -345,6 +346,13 @@ class StaffDashboardPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (_) => StudentRecordPage(staff: staff),
+                ),
+              );
+            } else if (item['title'] == 'Fees') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StaffFeeReportPage(staff: staff),
                 ),
               );
             }

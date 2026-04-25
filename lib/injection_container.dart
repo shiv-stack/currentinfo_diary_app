@@ -35,6 +35,7 @@ import 'features/staff/data/repositories/staff_repository_impl.dart';
 import 'features/staff/data/datasources/staff_remote_data_source.dart';
 import 'features/staff/data/datasources/staff_local_data_source.dart';
 import 'features/staff/presentation/bloc/staff_upload_cubit.dart';
+import 'features/staff/presentation/bloc/staff_fee_report_cubit.dart';
 import 'features/staff/presentation/bloc/student_record_cubit.dart';
 import 'features/staff/domain/usecases/staff_upload_data_usecase.dart';
 import 'features/staff/domain/usecases/get_student_record_usecase.dart';
@@ -99,6 +100,7 @@ Future<void> init() async {
   );
   sl.registerFactory(() => StaffUploadCubit(uploadDataUseCase: sl()));
   sl.registerFactory(() => StudentRecordCubit(getStudentRecordUseCase: sl()));
+  sl.registerFactory(() => StaffFeeReportCubit(repository: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => GetSchoolInfoUseCase(sl()));

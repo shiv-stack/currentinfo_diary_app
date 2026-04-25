@@ -42,6 +42,19 @@ abstract class StaffRemoteDataSource {
     required String section,
     required String transportstatus,
   });
+
+  Future<List<dynamic>> getFeeReport({
+    required String schoolCode,
+    required String login,
+    required String password,
+    required String session,
+    required String reportType,
+    required String paymentMode,
+    required String day,
+    required String month,
+    required String staffc,
+    required String studentFeeSoftware,
+  });
 }
 
 class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
@@ -342,6 +355,54 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         return data.map((json) => StudentModel.fromJson(json)).toList();
       }
       throw Exception("Failed to fetch student record");
+    } on DioException catch (e) {
+      throw Exception(e.message ?? "Connection Error");
+    }
+  }
+
+  @override
+  Future<List<dynamic>> getFeeReport({
+    required String schoolCode,
+    required String login,
+    required String password,
+    required String session,
+    required String reportType,
+    required String paymentMode,
+    required String day,
+    required String month,
+    required String staffc,
+    required String studentFeeSoftware,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'login': login,
+        'password': password,
+        'staffc': staffc,
+        'date': day,
+        'studentfeesoftware': studentFeeSoftware,
+        'month': month,
+        'session': session,
+        'cashchequevalue': paymentMode,
+      });
+
+      final response = await dio.post(
+        AppUrls.getFees(schoolCode),
+        data: formData,
+      );
+
+      if (response.statusCode == 200) {
+        final dynamic rawData = response.data;
+        List<dynamic> data = [];
+
+        if (rawData is List) {
+          data = rawData;
+        } else if (rawData is String && rawData.trim().isNotEmpty) {
+          data = jsonDecode(rawData);
+        }
+
+        return data;
+      }
+      throw Exception("Failed to fetch fee report");
     } on DioException catch (e) {
       throw Exception(e.message ?? "Connection Error");
     }
