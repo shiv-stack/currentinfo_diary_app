@@ -40,6 +40,7 @@ import 'features/staff/presentation/bloc/user_detail_cubit.dart';
 import 'features/staff/domain/usecases/staff_upload_data_usecase.dart';
 import 'features/staff/domain/usecases/get_student_record_usecase.dart';
 import 'features/staff/domain/usecases/update_student_record_usecase.dart';
+import 'features/staff/domain/usecases/add_student_record_usecase.dart';
 
 import 'core/services/remote_config_service.dart';
 import 'core/services/analytics_service.dart';
@@ -101,7 +102,12 @@ Future<void> init() async {
   );
   sl.registerFactory(() => StaffUploadCubit(uploadDataUseCase: sl()));
   sl.registerFactory(() => StudentRecordCubit(getStudentRecordUseCase: sl()));
-  sl.registerFactory(() => UserDetailCubit(updateStudentRecordUseCase: sl()));
+  sl.registerFactory(
+    () => UserDetailCubit(
+      updateStudentRecordUseCase: sl(),
+      addStudentRecordUseCase: sl(),
+    ),
+  );
 
   // Use cases
   sl.registerLazySingleton(() => GetSchoolInfoUseCase(sl()));
@@ -123,6 +129,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => StaffUploadDataUseCase(sl()));
   sl.registerLazySingleton(() => GetStudentRecordUseCase(sl()));
   sl.registerLazySingleton(() => UpdateStudentRecordUseCase(sl()));
+  sl.registerLazySingleton(() => AddStudentRecordUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(

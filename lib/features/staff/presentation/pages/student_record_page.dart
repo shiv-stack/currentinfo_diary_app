@@ -380,6 +380,25 @@ class _StudentRecordPageState extends State<StudentRecordPage> {
                               ),
                               child: InkWell(
                                 onTap: () async {
+                                  final staffRoles = [
+                                    "Chairman",
+                                    "Director",
+                                    "Principal",
+                                    "Vice-Principal",
+                                    "Teacher",
+                                    "Helper",
+                                    "Accountant",
+                                    "Staff",
+                                    "Admin",
+                                    "Transport Incharge",
+                                    "Driver",
+                                    "Reception",
+                                    "Guard",
+                                  ];
+                                  if (staffRoles.contains(selectedClass)) {
+                                    return;
+                                  }
+
                                   await Navigator.push(
                                     context,
                                     MaterialPageRoute(

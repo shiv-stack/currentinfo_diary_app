@@ -7,6 +7,9 @@ import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../../routes/app_routes.dart';
 import './staff_upload_page.dart';
 import './student_record_page.dart';
+import './add_student_page.dart';
+import '../bloc/user_detail_cubit.dart';
+import '../../../../injection_container.dart' as di;
 
 class StaffDashboardPage extends StatelessWidget {
   final Staff staff;
@@ -214,7 +217,7 @@ class StaffDashboardPage extends StatelessWidget {
         'color': const Color(0xffDCF8EF),
       },
       {
-        'title': 'Add Student',
+        'title': 'Add User',
         'imagePath': 'assets/icons/add_student.png',
         'color': const Color(0xffFFF1E6),
       },
@@ -228,11 +231,11 @@ class StaffDashboardPage extends StatelessWidget {
       //   'imagePath': 'assets/icons/staff_list.png',
       //   'color': const Color(0xffE6EEFF),
       // },
-      {
-        'title': 'Add Staff',
-        'imagePath': 'assets/icons/add_staff.png',
-        'color': const Color(0xffF2E6FF),
-      },
+      // {
+      //   'title': 'Add Staff',
+      //   'imagePath': 'assets/icons/add_staff.png',
+      //   'color': const Color(0xffF2E6FF),
+      // },
       {
         'title': 'Search',
         'imagePath': 'assets/icons/search.png',
@@ -345,6 +348,16 @@ class StaffDashboardPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (_) => StudentRecordPage(staff: staff),
+                ),
+              );
+            } else if (item['title'] == 'Add User') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider(
+                    create: (context) => di.sl<UserDetailCubit>(),
+                    child: AddStudentPage(staff: staff),
+                  ),
                 ),
               );
             }

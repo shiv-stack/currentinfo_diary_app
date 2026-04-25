@@ -45,4 +45,12 @@ abstract class StaffRepository {
     required String staffClass,
     required Map<String, String> fields,
   });
+
+  Future<Either<Failure, String>> addStudentRecord({
+    required String schoolCode,
+    required String staffLogin,
+    required String staffPass,
+    required String staffClass,
+    required Map<String, String> fields,
+  });
 }

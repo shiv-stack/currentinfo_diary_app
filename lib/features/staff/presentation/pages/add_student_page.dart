@@ -7,17 +7,16 @@ import '../../domain/entities/staff.dart';
 import '../bloc/user_detail_cubit.dart';
 import '../bloc/user_detail_state.dart';
 
-class UserDetailPage extends StatefulWidget {
-  final StudentModel student;
+class AddStudentPage extends StatefulWidget {
   final Staff staff;
-  const UserDetailPage({super.key, required this.student, required this.staff});
+  const AddStudentPage({super.key, required this.staff});
 
   @override
-  State<UserDetailPage> createState() => _UserDetailPageState();
+  State<AddStudentPage> createState() => _AddStudentPageState();
 }
 
-class _UserDetailPageState extends State<UserDetailPage> {
-  bool _isEditing = false;
+class _AddStudentPageState extends State<AddStudentPage> {
+  bool _isEditing = true;
   final Map<String, TextEditingController> _ctrl = {};
   late TextEditingController _otherNationalityCtrl;
 
@@ -156,7 +155,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
   final List<String> _nationalityList = ["INDIAN", "Others"];
   final List<String> _categoryList = ["General", "SC", "ST", "OBC"];
 
-  StudentModel get s => widget.student;
+  StudentModel get s => StudentModel(cdiaryId: '', name: '');
   Staff get staff => widget.staff;
 
   @override
@@ -236,7 +235,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
         transportValue.startsWith("Bus") &&
         transportValue.endsWith("No")) {
       transportValue =
-          transportValue.substring(0, transportValue.length - 2) + "N";
+          "${transportValue.substring(0, transportValue.length - 2)}N";
     }
     add('transport', transportValue);
 
@@ -365,88 +364,79 @@ class _UserDetailPageState extends State<UserDetailPage> {
                 onPressed: isSaving
                     ? null
                     : () async {
-                        if (_isEditing) {
-                          final name = _ctrl['name']?.text.trim() ?? '';
-                          if (name.length < 5) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  "Name must be at least 5 characters long",
-                                ),
-                                backgroundColor: Colors.red,
-                                behavior: SnackBarBehavior.floating,
+                        final name = _ctrl['name']?.text.trim() ?? '';
+                        if (name.length < 5) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Name must be at least 5 characters long",
                               ),
-                            );
-                            return;
-                          }
-                          context.read<UserDetailCubit>().updateRecord(
-                            schoolCode: staff.schoolCode ?? '',
-                            staffLogin: staff.name ?? '',
-                            staffPass: staff.password ?? '',
-                            staffClass: staff.assignClass ?? '',
-                            fields: {
-                              'cdiaryid': _ctrl['cdiaryId']?.text ?? '',
-                              'name': _ctrl['name']?.text ?? '',
-                              'transport': _ctrl['transport']?.text ?? 'NA',
-                              'lastclass': _ctrl['lastclass']?.text ?? '',
-                              'email': _ctrl['email']?.text ?? '',
-                              'tcissued': _ctrl['tcissued']?.text ?? 'No',
-                              'tcissueddate': _ctrl['tcissueddate']?.text ?? '',
-                              'pen_number': _ctrl['penNumber']?.text ?? '',
-                              'nccscout': _ctrl['nccscout']?.text ?? 'No',
-                              'rollno': _ctrl['rollno']?.text ?? '',
-                              'registration': _ctrl['registration']?.text ?? '',
-                              'schoolhouse': _ctrl['schoolhouse']?.text ?? '',
-                              'busno': _ctrl['transport']?.text ?? 'NA',
-                              'password': _ctrl['password']?.text ?? '',
-                              'class': _ctrl['className']?.text ?? '',
-                              'section': _ctrl['section']?.text ?? '',
-                              'doa': _ctrl['doa']?.text ?? '',
-                              'religion': _ctrl['religion']?.text ?? '',
-                              'oldnewadmission':
-                                  _ctrl['oldnewadmission']?.text ?? 'Old',
-                              'message': _ctrl['message']?.text ?? '',
-                              'alternatenumber':
-                                  _ctrl['alternateNumber']?.text ?? '',
-                              'adhar': _ctrl['adharNumber']?.text ?? '',
-                              'srnumber': _ctrl['srnumber']?.text ?? '',
-                              'family_id': _ctrl['familyId']?.text ?? '',
-                              'enroll': _ctrl['enrollNumber']?.text ?? '',
-                              'dob': _ctrl['dob']?.text ?? '',
-                              'mobile': _ctrl['contactNumber']?.text ?? '',
-                              'father': _ctrl['fatherName']?.text ?? '',
-                              'rfid': _ctrl['rfid']?.text ?? '',
-                              'height': _ctrl['height']?.text ?? '',
-                              'weight': _ctrl['weight']?.text ?? '',
-                              'bloodgroup': _ctrl['bloodgroup']?.text ?? '',
-                              'mother': _ctrl['motherName']?.text ?? '',
-                              'address': _ctrl['address']?.text ?? '',
-                              'lastschool': _ctrl['lastschool']?.text ?? '',
-                              'guardian': _ctrl['guardian']?.text ?? '',
-                              'inschool': _ctrl['inschool']?.text ?? 'Yes',
-                              'gender': _ctrl['gender']?.text ?? '',
-                              'rte': _ctrl['rte']?.text ?? 'No',
-                              'category': _ctrl['category']?.text ?? 'General',
-                              'profession':
-                                  _ctrl['profession']?.text ?? 'Student',
-                              'nationality':
-                                  _ctrl['nationality']?.text == 'Others'
-                                  ? _otherNationalityCtrl.text
-                                  : _ctrl['nationality']?.text ?? '',
-                              'session': s.session ?? '',
-                              'uploaddetails':
-                                  '${staff.contactNumber ?? ''}${staff.name ?? ''}',
-                              'dress_size': _ctrl['dress_size']?.text ?? '',
-                              'shoe_size': _ctrl['shoe_size']?.text ?? '',
-                            },
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
                           );
-                        } else {
-                          setState(() => _isEditing = true);
+                          return;
                         }
+                        context.read<UserDetailCubit>().addRecord(
+                          schoolCode: staff.schoolCode ?? '',
+                          staffLogin: staff.name ?? '',
+                          staffPass: staff.password ?? '',
+                          staffClass: staff.assignClass ?? '',
+                          fields: {
+                            'name': _ctrl['name']?.text ?? '',
+                            'transport': _ctrl['transport']?.text ?? 'NA',
+                            'lastclass': _ctrl['lastclass']?.text ?? '',
+                            'email': _ctrl['email']?.text ?? '',
+                            'tcissued': _ctrl['tcissued']?.text ?? 'No',
+                            'tcissueddate': _ctrl['tcissueddate']?.text ?? '',
+                            'pen_number': _ctrl['penNumber']?.text ?? '',
+                            'nccscout': _ctrl['nccscout']?.text ?? 'No',
+                            'rollno': _ctrl['rollno']?.text ?? '',
+                            'registration': _ctrl['registration']?.text ?? '',
+                            'schoolhouse': _ctrl['schoolhouse']?.text ?? '',
+                            'password': _ctrl['password']?.text ?? '',
+                            'class': _ctrl['className']?.text ?? '',
+                            'section': _ctrl['section']?.text ?? '',
+                            'doa': _ctrl['doa']?.text ?? '',
+                            'religion': _ctrl['religion']?.text ?? '',
+                            'oldnewadmission':
+                                _ctrl['oldnewadmission']?.text ?? 'Old',
+                            'message': _ctrl['message']?.text ?? '',
+                            'alternatenumber':
+                                _ctrl['alternateNumber']?.text ?? '',
+                            'adhar': _ctrl['adharNumber']?.text ?? '',
+                            'srnumber': _ctrl['srnumber']?.text ?? '',
+                            'family_id': _ctrl['familyId']?.text ?? '',
+                            'enroll': _ctrl['enrollNumber']?.text ?? '',
+                            'dob': _ctrl['dob']?.text ?? '',
+                            'mobile': _ctrl['contactNumber']?.text ?? '',
+                            'father': _ctrl['fatherName']?.text ?? '',
+                            'rfid': _ctrl['rfid']?.text ?? '',
+                            'height': _ctrl['height']?.text ?? '',
+                            'weight': _ctrl['weight']?.text ?? '',
+                            'bloodgroup': _ctrl['bloodgroup']?.text ?? '',
+                            'mother': _ctrl['motherName']?.text ?? '',
+                            'address': _ctrl['address']?.text ?? '',
+                            'lastschool': _ctrl['lastschool']?.text ?? '',
+                            'guardian': _ctrl['guardian']?.text ?? '',
+                            'inschool': _ctrl['inschool']?.text ?? 'Yes',
+                            'gender': _ctrl['gender']?.text ?? '',
+                            'rte': _ctrl['rte']?.text ?? 'No',
+                            'category': _ctrl['category']?.text ?? 'General',
+                            'profession':
+                                _ctrl['profession']?.text ?? 'Student',
+                            'nationality':
+                                _ctrl['nationality']?.text == 'Others'
+                                ? _otherNationalityCtrl.text
+                                : _ctrl['nationality']?.text ?? '',
+                            'session': '2026-2027',
+                            'uploaddetails': '${staff.contactNumber ?? ''}${staff.name ?? ''}',
+                            'dress_size': _ctrl['dress_size']?.text ?? '',
+                            'shoe_size': _ctrl['shoe_size']?.text ?? '',
+                          },
+                        );
                       },
-                backgroundColor: isSaving
-                    ? Colors.grey
-                    : (_isEditing ? Colors.green : pc),
+                backgroundColor: isSaving ? Colors.grey : Colors.green,
                 icon: isSaving
                     ? const SizedBox(
                         width: 20,
@@ -456,12 +446,9 @@ class _UserDetailPageState extends State<UserDetailPage> {
                           color: Colors.white,
                         ),
                       )
-                    : Icon(
-                        _isEditing ? Icons.check_rounded : Icons.edit_rounded,
-                        color: Colors.white,
-                      ),
+                    : const Icon(Icons.check_rounded, color: Colors.white),
                 label: Text(
-                  isSaving ? "SAVING..." : (_isEditing ? "SAVE" : "EDIT"),
+                  isSaving ? "SAVING..." : "SAVE USER",
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
@@ -1053,7 +1040,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
                             children: [
                               options != null
                                   ? DropdownButtonFormField<String>(
-                                      value: options.contains(ctrl.text)
+                                      initialValue: options.contains(ctrl.text)
                                           ? ctrl.text
                                           : null,
                                       dropdownColor: Colors.white,

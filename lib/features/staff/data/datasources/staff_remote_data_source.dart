@@ -50,6 +50,14 @@ abstract class StaffRemoteDataSource {
     required String staffClass,
     required Map<String, String> fields,
   });
+
+  Future<String> addStudentRecord({
+    required String schoolCode,
+    required String staffLogin,
+    required String staffPass,
+    required String staffClass,
+    required Map<String, String> fields,
+  });
 }
 
 class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
@@ -389,14 +397,14 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         'cdiaryid': fields['cdiaryid'] ?? '',
         'modify': 'modify',
         'name': fields['name']?.trim() ?? '',
-        'transport': fields['transport'] ?? 'NA',
+        'transport': sanitize(fields['transport']),
         'lastclass': sanitize(fields['lastclass']),
         'email': sanitize(fields['email']),
-        'tcissued': fields['tcissued'] ?? 'No',
+        'tcissued': sanitize(fields['tcissued']),
         'tcissueddate': sanitize(fields['tcissueddate']),
         'pen_number': sanitize(fields['pen_number']),
         'nationality': sanitize(fields['nationality']),
-        'nccscout': fields['nccscout'] ?? 'No',
+        'nccscout': sanitize(fields['nccscout']),
         'rollno': sanitize(fields['rollno']),
         'registration': sanitize(fields['registration']),
         'schoolhouse': sanitize(fields['schoolhouse']),
@@ -408,10 +416,10 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         'newname': fields['name']?.trim() ?? '',
         'class_detail': sanitize(fields['class']),
         'section': sanitizeSection(fields['section']),
-        'doa': fields['doa'] ?? 'NA',
+        'doa': sanitize(fields['doa']),
         'religion': sanitize(fields['religion']),
-        'oldnewadmission': fields['oldnewadmission'] ?? 'Old',
-        'message': fields['message'] ?? 'NA',
+        'oldnewadmission': sanitize(fields['oldnewadmission']),
+        'message': sanitize(fields['message']),
         'secmob': sanitize(fields['alternatenumber']),
         'adhar': sanitize(fields['adhar']),
         'srnumber': sanitize(fields['srnumber']),
@@ -428,9 +436,9 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         'address': sanitize(fields['address']),
         'lastschool': sanitize(fields['lastschool']),
         'guardian': sanitize(fields['guardian']),
-        'inschool': fields['inschool'] ?? 'Yes',
+        'inschool': sanitize(fields['inschool']),
         'gender': fields['gender'] ?? 'NA',
-        'rte': fields['rte'] ?? 'No',
+        'rte': sanitize(fields['rte']),
         'category': sanitize(fields['category']),
         'profession': sanitize(fields['profession']),
       });
@@ -449,11 +457,101 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
       if (e.response?.statusCode == 200) {
         return e.response?.data?.toString() ?? 'Record updated successfully';
       }
-      throw Exception(
-        e.response?.data?.toString() ?? e.message ?? 'Connection Error',
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> addStudentRecord({
+    required String schoolCode,
+    required String staffLogin,
+    required String staffPass,
+    required String staffClass,
+    required Map<String, String> fields,
+  }) async {
+    try {
+      String sanitize(dynamic value) {
+        final val = value?.toString() ?? '';
+        if (val.trim().isEmpty ||
+            val.trim().toLowerCase() == 'null' ||
+            val.trim().toLowerCase() == 'not applicable') {
+          return 'NA';
+        }
+        return val.trim();
+      }
+
+      String sanitizeSection(dynamic value) {
+        final val = value?.toString() ?? '';
+        if (val.trim().isEmpty ||
+            val.trim().toLowerCase() == 'null' ||
+            val.trim().toLowerCase() == 'section' ||
+            val.trim().toLowerCase() == 'not applicable') {
+          return 'NA';
+        }
+        return val.trim();
+      }
+
+      final formData = FormData.fromMap({
+        'modify': 'addrecord',
+        'name': fields['name']?.trim() ?? '',
+        'unique': sanitize(fields['password']),
+        'login': staffLogin,
+        'pass': staffPass,
+        'tclass': staffClass,
+        'staffc': staffClass,
+        'session': fields['session'] ?? '',
+        'newname': '',
+        'gender': (fields['gender']?.toLowerCase() == 'male') ? 'M' : 'F',
+        'class_detail': sanitize(fields['class']),
+        'section': sanitizeSection(fields['section']),
+        'doa': sanitize(fields['doa']),
+        'enroll': sanitize(fields['enroll']),
+        'dob': sanitize(fields['dob']),
+        'guardian': sanitize(fields['guardian']),
+        'lastschool': sanitize(fields['lastschool']),
+        'mobile': fields['mobile'] ?? '',
+        'secmob': sanitize(fields['alternatenumber']),
+        'adhar': sanitize(fields['adhar']),
+        'father': sanitize(fields['father']),
+        'mother': sanitize(fields['mother']),
+        'transport': sanitize(fields['transport']),
+        'rollno': sanitize(fields['rollno']),
+        'lastclass': sanitize(fields['lastclass']),
+        'tcissued': fields['tcissued'] ?? 'No',
+        'tcissueddate': sanitize(fields['tcissueddate']),
+        'nccscout': fields['nccscout'] ?? 'No',
+        'nationality': sanitize(fields['nationality']),
+        'email': sanitize(fields['email']),
+        'registration': sanitize(fields['registration']),
+        'address': sanitize(fields['address']),
+        'inschool': fields['inschool'] ?? 'Yes',
+        'rte': fields['rte'] ?? 'No',
+        'bloodgroup': sanitize(fields['bloodgroup']),
+        'pen_number': sanitize(fields['pen_number']),
+        'family_id': sanitize(fields['family_id']),
+        'dress_size': sanitize(fields['dress_size']),
+        'shoe_size': sanitize(fields['shoe_size']),
+        'category': sanitize(fields['category']),
+        'profession': sanitize(fields['profession']),
+        'message': sanitize(fields['message']),
+        'uploaddetails': fields['uploaddetails'] ?? '',
+      });
+
+      final response = await dio.post(
+        AppUrls.updateStudentRecord(schoolCode),
+        data: formData,
+        options: Options(responseType: ResponseType.plain),
       );
-    } catch (e) {
-      throw Exception(e.toString());
+
+      if (response.statusCode == 200) {
+        return response.data?.toString() ?? 'Record added successfully';
+      }
+      throw Exception('Failed to add record: ${response.statusCode}');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 200) {
+        return e.response?.data?.toString() ?? 'Record added successfully';
+      }
+      rethrow;
     }
   }
 }
