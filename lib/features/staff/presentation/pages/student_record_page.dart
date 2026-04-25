@@ -3,6 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../injection_container.dart' as di;
 import '../../domain/entities/staff.dart';
 import '../bloc/student_record_cubit.dart';
+import '../bloc/user_detail_cubit.dart';
+import './user_detail_page.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class StudentRecordPage extends StatefulWidget {
   final Staff staff;
@@ -367,159 +371,187 @@ class _StudentRecordPageState extends State<StudentRecordPage> {
                                 border: Border.all(color: Colors.grey.shade100),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.02),
-                                    blurRadius: 8,
+                                    color: Colors.black.withValues(alpha: 0.08),
+                                    blurRadius: 12,
                                     offset: const Offset(0, 4),
+                                    spreadRadius: 1,
                                   ),
                                 ],
                               ),
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 45,
-                                          height: 45,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
+                              child: InkWell(
+                                onTap: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => BlocProvider(
+                                        create: (context) =>
+                                            di.sl<UserDetailCubit>(),
+                                        child: UserDetailPage(
+                                          student: student,
+                                          staff: widget.staff,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                  if (mounted) {
+                                    _onSearchPressed(context);
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(16),
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(12),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 45,
+                                            height: 45,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              color: Theme.of(context)
+                                                  .primaryColor
+                                                  .withValues(alpha: 0.1),
                                             ),
-                                            color: Theme.of(context)
-                                                .primaryColor
-                                                .withValues(alpha: 0.1),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: Hero(
+                                                tag:
+                                                    'avatar_${student.cdiaryId}',
+                                                child:
+                                                    student.studentImage !=
+                                                            null &&
+                                                        student
+                                                            .studentImage!
+                                                            .isNotEmpty &&
+                                                        !student.studentImage!
+                                                            .contains("None")
+                                                    ? Image.network(
+                                                        student.studentImage!,
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder:
+                                                            (c, e, s) => Icon(
+                                                              Icons.person,
+                                                              size: 24,
+                                                              color: Theme.of(
+                                                                context,
+                                                              ).primaryColor,
+                                                            ),
+                                                      )
+                                                    : Icon(
+                                                        Icons.person,
+                                                        size: 24,
+                                                        color: Theme.of(
+                                                          context,
+                                                        ).primaryColor,
+                                                      ),
+                                              ),
+                                            ),
                                           ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                            child:
-                                                student.studentImage != null &&
-                                                    student
-                                                        .studentImage!
-                                                        .isNotEmpty
-                                                ? Image.network(
-                                                    student.studentImage!,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (c, e, s) =>
-                                                        Icon(
-                                                          Icons.person,
-                                                          size: 24,
-                                                          color: Theme.of(
-                                                            context,
-                                                          ).primaryColor,
-                                                        ),
-                                                  )
-                                                : Icon(
-                                                    Icons.person,
-                                                    size: 24,
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  student.name ?? "NA",
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w900,
+                                                    fontSize: 14,
+                                                    color: Color(0xFF1A1C1E),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  "${student.className ?? ""} • ${student.section ?? ""}",
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w800,
                                                     color: Theme.of(
                                                       context,
                                                     ).primaryColor,
                                                   ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                student.name ?? "NA",
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w900,
-                                                  fontSize: 14,
-                                                  color: Color(0xFF1A1C1E),
                                                 ),
-                                              ),
-                                              Text(
-                                                "${student.className ?? ""} • ${student.section ?? ""}",
-                                                style: TextStyle(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).primaryColor,
-                                                ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                        _compactBadge(
-                                          "Enroll No: ${student.enrollNumber ?? "NA"}",
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const Divider(
-                                    height: 1,
-                                    indent: 12,
-                                    endIndent: 12,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Column(
-                                      children: [
-                                        _compactInfo(
-                                          Icons.cake_rounded,
-                                          student.dob ?? "NA",
-                                        ),
-                                        const SizedBox(height: 6),
-                                        _compactInfo(
-                                          Icons.family_restroom_rounded,
-                                          "Father: ${student.fatherName ?? "NA"}  |  Mother: ${student.motherName ?? "NA"}",
-                                        ),
-                                        const SizedBox(height: 6),
-                                        _compactInfo(
-                                          Icons.phone_rounded,
-                                          "${student.contactNumber ?? "NA"} / ${student.alternateNumber ?? "NA"}",
-                                          canCopy: true,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade50,
-                                      borderRadius: const BorderRadius.vertical(
-                                        bottom: Radius.circular(16),
+                                          _compactBadge(
+                                            "Enroll No: ${student.enrollNumber ?? "NA"}",
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.lock_person_rounded,
-                                          size: 14,
-                                          color: Colors.amber,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        const Text(
-                                          "Pass:",
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w900,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          student.password ?? "NA",
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w900,
-                                            color: Color(0xFF1A1C1E),
-                                          ),
-                                        ),
-                                      ],
+                                    const Divider(
+                                      height: 1,
+                                      indent: 12,
+                                      endIndent: 12,
                                     ),
-                                  ),
-                                ],
+                                    Padding(
+                                      padding: const EdgeInsets.all(12),
+                                      child: Column(
+                                        children: [
+                                          _compactInfo(
+                                            Icons.cake_rounded,
+                                            student.dob ?? "NA",
+                                          ),
+                                          const SizedBox(height: 6),
+                                          _compactInfo(
+                                            Icons.family_restroom_rounded,
+                                            "Father: ${student.fatherName ?? "NA"}  |  Mother: ${student.motherName ?? "NA"}",
+                                          ),
+                                          const SizedBox(height: 6),
+                                          _compactInfo(
+                                            Icons.phone_rounded,
+                                            "${student.contactNumber ?? "NA"} / ${student.alternateNumber ?? "NA"}",
+                                            canCopy: true,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade50,
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                              bottom: Radius.circular(16),
+                                            ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.lock_person_rounded,
+                                            size: 14,
+                                            color: Colors.amber,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          const Text(
+                                            "Pass:",
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w900,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            student.password ?? "NA",
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w900,
+                                              color: Color(0xFF1A1C1E),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -639,23 +671,78 @@ class _StudentRecordPageState extends State<StudentRecordPage> {
   }
 
   Widget _compactInfo(IconData icon, String value, {bool canCopy = false}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 14, color: Colors.grey.shade400),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF495057),
-              height: 1.3,
+    final bool isPhone = icon == Icons.phone_rounded;
+
+    return Builder(
+      builder: (context) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 14, color: Colors.grey.shade400),
+            const SizedBox(width: 8),
+            Expanded(
+              child: GestureDetector(
+                onTap: () async {
+                  if (isPhone && value != "NA") {
+                    final numbers = value
+                        .split('/')
+                        .map((e) => e.trim())
+                        .toList();
+                    if (numbers.length > 1) {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (context) => SafeArea(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: numbers
+                                .map(
+                                  (num) => ListTile(
+                                    leading: const Icon(Icons.call),
+                                    title: Text("Call $num"),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      launchUrl(Uri.parse('tel:$num'));
+                                    },
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      );
+                    } else if (numbers.isNotEmpty) {
+                      launchUrl(Uri.parse('tel:${numbers[0]}'));
+                    }
+                  } else if (canCopy && value != "NA") {
+                    Clipboard.setData(ClipboardData(text: value));
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text("Copied: $value")));
+                  }
+                },
+                onLongPress: () {
+                  if (value != "NA") {
+                    Clipboard.setData(ClipboardData(text: value));
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text("Copied: $value")));
+                  }
+                },
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isPhone
+                        ? Theme.of(context).primaryColor
+                        : const Color(0xFF495057),
+                    height: 1.3,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

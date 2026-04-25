@@ -95,4 +95,26 @@ class StaffRepositoryImpl implements StaffRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> updateStudentRecord({
+    required String schoolCode,
+    required String staffLogin,
+    required String staffPass,
+    required String staffClass,
+    required Map<String, String> fields,
+  }) async {
+    try {
+      final result = await remoteDataSource.updateStudentRecord(
+        schoolCode: schoolCode,
+        staffLogin: staffLogin,
+        staffPass: staffPass,
+        staffClass: staffClass,
+        fields: fields,
+      );
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

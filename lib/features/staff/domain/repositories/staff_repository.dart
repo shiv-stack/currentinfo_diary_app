@@ -37,4 +37,12 @@ abstract class StaffRepository {
     required String section,
     required String transportstatus,
   });
+
+  Future<Either<Failure, String>> updateStudentRecord({
+    required String schoolCode,
+    required String staffLogin,
+    required String staffPass,
+    required String staffClass,
+    required Map<String, String> fields,
+  });
 }

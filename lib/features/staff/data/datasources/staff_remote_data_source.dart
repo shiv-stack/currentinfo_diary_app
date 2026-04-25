@@ -42,6 +42,14 @@ abstract class StaffRemoteDataSource {
     required String section,
     required String transportstatus,
   });
+
+  Future<String> updateStudentRecord({
+    required String schoolCode,
+    required String staffLogin,
+    required String staffPass,
+    required String staffClass,
+    required Map<String, String> fields,
+  });
 }
 
 class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
@@ -344,6 +352,108 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
       throw Exception("Failed to fetch student record");
     } on DioException catch (e) {
       throw Exception(e.message ?? "Connection Error");
+    }
+  }
+
+  @override
+  Future<String> updateStudentRecord({
+    required String schoolCode,
+    required String staffLogin,
+    required String staffPass,
+    required String staffClass,
+    required Map<String, String> fields,
+  }) async {
+    try {
+      String sanitize(String? val) {
+        if (val == null ||
+            val.trim().isEmpty ||
+            val.trim().toLowerCase() == 'null' ||
+            val.trim().toLowerCase() == 'not provided' ||
+            val.trim().toLowerCase() == 'not provid') {
+          return 'NA';
+        }
+        return val.trim();
+      }
+
+      String sanitizeSection(String? val) {
+        if (val == null ||
+            val.trim().isEmpty ||
+            val.trim().toLowerCase() == 'null' ||
+            val.trim().toLowerCase() == 'not applicable') {
+          return 'NA';
+        }
+        return val.trim();
+      }
+
+      final formData = FormData.fromMap({
+        'cdiaryid': fields['cdiaryid'] ?? '',
+        'modify': 'modify',
+        'name': fields['name']?.trim() ?? '',
+        'transport': fields['transport'] ?? 'NA',
+        'lastclass': sanitize(fields['lastclass']),
+        'email': sanitize(fields['email']),
+        'tcissued': fields['tcissued'] ?? 'No',
+        'tcissueddate': sanitize(fields['tcissueddate']),
+        'pen_number': sanitize(fields['pen_number']),
+        'nationality': sanitize(fields['nationality']),
+        'nccscout': fields['nccscout'] ?? 'No',
+        'rollno': sanitize(fields['rollno']),
+        'registration': sanitize(fields['registration']),
+        'schoolhouse': sanitize(fields['schoolhouse']),
+        'busno': sanitize(fields['busno']),
+        'unique': fields['password']?.trim() ?? '',
+        'login': staffLogin,
+        'pass': staffPass,
+        'staffc': staffClass,
+        'newname': fields['name']?.trim() ?? '',
+        'class_detail': sanitize(fields['class']),
+        'section': sanitizeSection(fields['section']),
+        'doa': fields['doa'] ?? 'NA',
+        'religion': sanitize(fields['religion']),
+        'oldnewadmission': fields['oldnewadmission'] ?? 'Old',
+        'message': fields['message'] ?? 'NA',
+        'secmob': sanitize(fields['alternatenumber']),
+        'adhar': sanitize(fields['adhar']),
+        'srnumber': sanitize(fields['srnumber']),
+        'family_id': sanitize(fields['family_id']),
+        'enroll': sanitize(fields['enroll']),
+        'dob': sanitize(fields['dob']),
+        'mobile': sanitize(fields['mobile']),
+        'father': sanitize(fields['father']),
+        'rfid': sanitize(fields['rfid']),
+        'height': sanitize(fields['height']),
+        'weight': sanitize(fields['weight']),
+        'bloodgroup': sanitize(fields['bloodgroup']),
+        'mother': sanitize(fields['mother']),
+        'address': sanitize(fields['address']),
+        'lastschool': sanitize(fields['lastschool']),
+        'guardian': sanitize(fields['guardian']),
+        'inschool': fields['inschool'] ?? 'Yes',
+        'gender': fields['gender'] ?? 'NA',
+        'rte': fields['rte'] ?? 'No',
+        'category': sanitize(fields['category']),
+        'profession': sanitize(fields['profession']),
+      });
+
+      final response = await dio.post(
+        AppUrls.updateStudentRecord(schoolCode),
+        data: formData,
+        options: Options(responseType: ResponseType.plain),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data?.toString() ?? 'Record updated successfully';
+      }
+      throw Exception('Failed to update record: ${response.statusCode}');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 200) {
+        return e.response?.data?.toString() ?? 'Record updated successfully';
+      }
+      throw Exception(
+        e.response?.data?.toString() ?? e.message ?? 'Connection Error',
+      );
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 }

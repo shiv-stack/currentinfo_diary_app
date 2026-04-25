@@ -38,6 +38,10 @@ class AppUrls {
   static String sendQuery(String schoolCode) =>
       "$baseUrl/contact-to-school/sent-message-to-school/$schoolCode/";
 
+  // Update student/staff record (also used for password updates)
+  static String updateStudentRecord(String schoolCode) =>
+      "$baseUrl/student-info/update-record-school/$schoolCode/";
+
   static String updatePassword(String schoolCode) =>
       "$baseUrl/student-info/update-record-school/$schoolCode/";
 

@@ -19,8 +19,20 @@ class StudentModel {
   final String? password;
   final String? feesoftware;
   final String? doa;
-
   final String? alternateNumber;
+  
+  // New Fields
+  final String? gender;
+  final String? category;
+  final String? religion;
+  final String? nationality;
+  final String? bloodgroup;
+  final String? stream;
+  final String? adharNumber;
+  final String? rfid;
+  final String? profession;
+  final String? transport;
+  final Map<String, dynamic>? rawJson;
 
   StudentModel({
     this.studentImage,
@@ -44,6 +56,17 @@ class StudentModel {
     this.feesoftware,
     this.doa,
     this.alternateNumber,
+    this.gender,
+    this.category,
+    this.religion,
+    this.nationality,
+    this.bloodgroup,
+    this.stream,
+    this.adharNumber,
+    this.rfid,
+    this.profession,
+    this.transport,
+    this.rawJson,
   });
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
@@ -52,24 +75,34 @@ class StudentModel {
       thoughtTitle: json['thoughttitle'] as String?,
       thoughtMessage: json['thoughtmessage'] as String?,
       name: json['Name'] as String?,
-      className: json['Class'] as String?,
+      className: (json['Class'] ?? json['class']) as String?,
       dob: (json['dob'] ?? json['dateofbirth']) as String?,
-      contactNumber: json['Contact number'] as String?,
+      contactNumber: (json['Contact number'] ?? json['contact_number']) as String?,
       cdiaryId: json['cdiaryid'] as String?,
       section: json['section'] as String?,
       session: json['session'] as String?,
-      schoolName:
-          json['SchoolName'] as String?, // Keep as is if provided elsewhere
-      address: json['Address'] as String?,
+      schoolName: json['SchoolName'] as String?,
+      address: (json['Address'] ?? json['address']) as String?,
       email: json['email'] as String?,
       fatherName: json['Father'] as String?,
       motherName: json['Mother'] as String?,
       schoolCode: json['school_code'] as String?,
       enrollNumber: json['enroll_number'] as String?,
-      password: json['pass'] as String?,
+      password: (json['pass'] ?? json['password']) as String?,
       feesoftware: json['feesoftware'] as String?,
       doa: json['doa'] as String?,
       alternateNumber: json['alternatenumber'] as String?,
+      gender: json['gender'] as String?,
+      category: json['category'] as String?,
+      religion: json['religion'] as String?,
+      nationality: json['nationality'] as String?,
+      bloodgroup: json['bloodgroup'] as String?,
+      stream: json['stream'] as String?,
+      adharNumber: (json['adhar_number'] ?? json['adharcard']) as String?,
+      rfid: json['rfid'] as String?,
+      profession: json['Profession'] as String?,
+      transport: json['transport'] as String?,
+      rawJson: json,
     );
   }
 
@@ -96,6 +129,17 @@ class StudentModel {
       'feesoftware': feesoftware,
       'doa': doa,
       'alternatenumber': alternateNumber,
+      'gender': gender,
+      'category': category,
+      'religion': religion,
+      'nationality': nationality,
+      'bloodgroup': bloodgroup,
+      'stream': stream,
+      'adhar_number': adharNumber,
+      'rfid': rfid,
+      'Profession': profession,
+      'transport': transport,
+      ...?rawJson,
     };
   }
 }
