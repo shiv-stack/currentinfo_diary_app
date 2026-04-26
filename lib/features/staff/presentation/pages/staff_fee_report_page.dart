@@ -20,32 +20,43 @@ class StaffFeeReportPage extends StatefulWidget {
 
 class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
 // ... existing state fields ...
-  final List<String> reportTypes = ["Fee's Collection", "Fees Defaulters"];
-  final List<String> paymentModes = [
-    "Cash/Cheque...",
-    "CASH",
-    "UPI",
-    "Card Swap",
-    "Mobile App",
-    "Cheque",
-    "Online",
-    "Paytm",
-    "POS",
-    "Smart Hub",
-    "ECMS"
+  final List<String> reportTypes = ["Fee's Collection", "Fee's Defaulters"];
+  final List<String> days = [
+    "Date", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10",
+    "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+    "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"
   ];
-  final List<String> days = List.generate(31, (i) => (i + 1).toString());
   final List<String> months = [
-    "January", "February", "March", "April", "May", "June",
+    "Month", "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
+  final List<String> paymentModes = [
+    "Cash/Cheque...", "CASH", "UPI", "Card Swap", "Mobile App", "Cheque",
+    "Online", "Paytm", "POS", "Smart Hub", "ECMS"
+  ];
   final List<String> sessions = ["2026-2027", "2025-2026", "2024-2025"];
+  final List<String> defaulterClasses = [
+    "Please Select Class for Defaulters", "KinderGarten", "Playgroup", "Pre-Nursery",
+    "Nursery", "LKG", "UKG", "KG", "First", "Second", "Third", "Fourth", "Fifth",
+    "Sixth", "Seventh", "Eighth", "Ninth", "Tenth", "Eleventh", "Twelth"
+  ];
 
   String selectedReportType = "Fee's Collection";
   String selectedPaymentMode = "Cash/Cheque...";
-  String selectedDay = "25";
-  String selectedMonth = "April";
+  String selectedDay = "Date";
+  String selectedMonth = "Month";
   String selectedSession = "2026-2027";
+  String selectedDefaulterClass = "Please Select Class for Defaulters";
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    selectedDay = now.day.toString().padLeft(2, '0');
+    if (now.month >= 1 && now.month <= 12) {
+      selectedMonth = months[now.month];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +155,15 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
                           ),
                         ],
                       ),
+                      if (selectedReportType == "Fee's Defaulters") ...[
+                        const SizedBox(height: 16),
+                        _buildDropdown(
+                          "Class",
+                          defaulterClasses,
+                          selectedDefaulterClass,
+                          (val) => setState(() => selectedDefaulterClass = val!),
+                        ),
+                      ],
                       
                       const SizedBox(height: 32),
                       SizedBox(
@@ -196,15 +216,15 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
                 // --- Results Section ---
                 if (state is StaffFeeReportLoaded)
                   state.report.isEmpty
-                      ? const Center(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 60),
-                            child: Text(
-                              "No matching records found.",
-                              style: TextStyle(color: Colors.grey),
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 60),
+                              child: Text(
+                                "No data found",
+                                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                              ),
                             ),
-                          ),
-                        )
+                          )
                       : Column(
                           children: [
                             Padding(
@@ -232,6 +252,7 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
                               ),
                             ),
                             ListView.builder(
+                              key: ValueKey(state.timestamp),
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -250,6 +271,13 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
                         state.message,
                         style: const TextStyle(color: Colors.red),
                       ),
+                    ),
+                  )
+                else if (state is StaffFeeReportLoading)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 80),
+                      child: CircularProgressIndicator(),
                     ),
                   )
                 else
@@ -513,13 +541,20 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
       feeSoftware = "quickfeesw";
     }
 
-    // Format parameters to match Postman exactly
-    final String apiDay = selectedDay.padLeft(2, '0');
-    final String apiMonth = monthMap[selectedMonth] ?? "01";
+    // Format parameters
+    final String apiDay = selectedDay == "Date" ? "" : selectedDay.padLeft(2, '0');
+    final String apiMonth = monthMap[selectedMonth] ?? "";
     final String apiPaymentMode = selectedPaymentMode == "Cash/Cheque..." ? "" : selectedPaymentMode;
     
     String staffc = widget.staff.assignClass ?? widget.staff.designation ?? "Admin";
     if (staffc.toLowerCase().contains("admin")) staffc = "Admin";
+
+    // If Defaulters is selected, use the selected class
+    if (selectedReportType == "Fee's Defaulters") {
+      staffc = (selectedDefaulterClass == "Please Select Class for Defaulters") 
+          ? "" 
+          : selectedDefaulterClass;
+    }
 
     if (kDebugMode) {
       print('--- SENDING FEE REPORT REQUEST ---');

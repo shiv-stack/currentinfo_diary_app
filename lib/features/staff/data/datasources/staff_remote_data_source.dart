@@ -386,7 +386,12 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         'month': month,
         'session': session,
         'cashchequevalue': paymentMode,
+        'reporttype': reportType,
       });
+
+      if (kDebugMode) {
+        print('[FEE_REPORT] Request: staffc=$staffc, date=$day, month=$month, type=$reportType');
+      }
 
       if (kDebugMode) {
         print('--- Fee Report API Request Payload ---');

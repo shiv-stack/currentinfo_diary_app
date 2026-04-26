@@ -50,7 +50,7 @@ class StaffFeeReportCubit extends Cubit<StaffFeeReportState> {
           print('Calculated Total Amount: $total');
         }
 
-        emit(StaffFeeReportLoaded(report, total));
+        emit(StaffFeeReportLoaded(report, total, DateTime.now().millisecondsSinceEpoch));
       },
     );
   }
