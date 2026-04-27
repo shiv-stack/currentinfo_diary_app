@@ -11,6 +11,7 @@ class FeeReportModel {
   final String paidFor;
   final String admissionNo;
   final String contact;
+  final String feeId;
 
   FeeReportModel({
     required this.paidOn,
@@ -23,6 +24,7 @@ class FeeReportModel {
     required this.paidFor,
     required this.admissionNo,
     required this.contact,
+    required this.feeId,
   });
 
   factory FeeReportModel.fromJson(Map<String, dynamic> json) {
@@ -42,11 +44,12 @@ class FeeReportModel {
       paidFor: json['f-m-submitted']?.toString() ?? 'N/A',
       admissionNo: json['admissionno']?.toString() ?? 'N/A',
       contact: json['mobile']?.toString() ?? json['contact']?.toString() ?? 'N/A',
+      feeId: json['feeid']?.toString() ?? '',
     );
   }
 
   @override
   String toString() {
-    return 'FeeReportModel(name: $name, amount: $amount, month: $month)';
+    return 'FeeReportModel(name: $name, amount: $amount, month: $month, feeId: $feeId)';
   }
 }

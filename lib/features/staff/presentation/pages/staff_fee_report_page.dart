@@ -6,8 +6,10 @@ import '../bloc/staff_fee_report_cubit.dart';
 import '../bloc/staff_fee_report_state.dart';
 import '../../../auth/data/datasources/auth_local_data_source.dart';
 import '../../../../core/constants/app_urls.dart';
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import '../../../../widgets/webview_page.dart';
+import '../../../../core/utils/app_toast.dart';
 import '../../data/models/fee_report_model.dart';
 
 class StaffFeeReportPage extends StatefulWidget {
@@ -47,6 +49,7 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
   String selectedMonth = "Month";
   String selectedSession = "2026-2027";
   String selectedDefaulterClass = "Please Select Class for Defaulters";
+  String? _feeSoftware;
 
   @override
   void initState() {
@@ -55,6 +58,32 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
     selectedDay = now.day.toString().padLeft(2, '0');
     if (now.month >= 1 && now.month <= 12) {
       selectedMonth = months[now.month];
+    }
+    _initFeeSoftware();
+  }
+
+  void _initFeeSoftware() async {
+    final authLocal = di.sl<AuthLocalDataSource>();
+    final feeSoftware = await authLocal.getCachedFeeSoftware() ?? "";
+    if (mounted) {
+      setState(() {
+        _feeSoftware = feeSoftware;
+      });
+    }
+  }
+
+  void _openUrl(String title, String urlString) {
+    debugPrint("URL: $urlString");
+    if (urlString.isNotEmpty && urlString != "NA") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WebViewPage(title: title, url: urlString),
+        ),
+      );
+    } else {
+      AppToast.show(context, "$title is Coming Soon");
+      HapticFeedback.lightImpact();
     }
   }
 
@@ -479,7 +508,23 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
                     ),
                     TextButton(
                       onPressed: () {
-                        // View Slip placeholder
+                        if (item.feeId.isEmpty) {
+                          AppToast.show(context, "Fee ID not found");
+                          return;
+                        }
+
+                        String urlValue = "";
+                        final String schoolCode = widget.staff.schoolCode ?? "";
+                        
+                        if (_feeSoftware?.toLowerCase() == "quicksw") {
+                          urlValue =
+                              "https://www.currentdiary.com/feemanage/fee-quicksw-app-api/$schoolCode/?getcdiaryid=${item.feeId}&getsession=$selectedSession&getfeereceiptno=${item.receiptNo}&getdatevalue=${item.paidOn}";
+                        } else {
+                          urlValue =
+                              "https://www.currentdiary.com/feemanage/fee-quick-app-api/$schoolCode/?getcdiaryid=${item.feeId}&getsession=$selectedSession&getfeereceiptno=${item.receiptNo}&getdatevalue=${item.paidOn}";
+                        }
+
+                        _openUrl("Fee Slip", urlValue);
                       },
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
