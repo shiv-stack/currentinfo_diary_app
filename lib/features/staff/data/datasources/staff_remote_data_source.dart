@@ -379,14 +379,14 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
       // EXACT same form-data field names as Postman
       final formData = FormData.fromMap({
         'login': login,
-        'password': password,
+        'password': password, // Back to 'password' as per Postman
         'staffc': staffc,
-        'date': day,
+        'date': day,         // Lowercase as per Postman
         'studentfeesoftware': studentFeeSoftware,
-        'month': month,
+        'month': month,      // Lowercase
         'session': session,
-        'cashchequevalue': paymentMode,
-        'reporttype': reportType,
+        'cashchequevalue': paymentMode, // Lowercase
+        'reporttype': reportType,        // Lowercase
       });
 
       if (kDebugMode) {

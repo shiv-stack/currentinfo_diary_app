@@ -586,6 +586,9 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
       feeSoftware = "quickfeesw";
     }
 
+    // Normalize Report Type for API
+    final String apiReportType = selectedReportType == "Fee's Collection" ? "Collection" : "Defaulter";
+
     // Format parameters
     final String apiDay = selectedDay == "Date" ? "" : selectedDay.padLeft(2, '0');
     final String apiMonth = monthMap[selectedMonth] ?? "";
@@ -599,19 +602,23 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
       staffc = (selectedDefaulterClass == "Please Select Class for Defaulters") 
           ? "" 
           : selectedDefaulterClass;
+      
+      // Mirror Student Record pattern: normalize "Twelfth" to "Twelth"
+      if (staffc == "Twelfth") staffc = "Twelth";
     }
 
     if (kDebugMode) {
-      print('--- SENDING FEE REPORT REQUEST ---');
+      print('--- SENDING FEE REPORT REQUEST (Postman Match) ---');
       print('URL: ${AppUrls.getFees(widget.staff.schoolCode ?? "")}');
-      print('Login: ${widget.staff.name}');
-      print('Password: ${widget.staff.password}');
-      print('StaffC: $staffc');
-      print('Day/Date: $apiDay');
-      print('Month: $apiMonth');
-      print('Session: $selectedSession');
-      print('PaymentMode: $apiPaymentMode');
-      print('FeeSoftware: $feeSoftware');
+      print('login: ${widget.staff.name}');
+      print('password: ${widget.staff.password}'); // Using 'password' key
+      print('staffc: $staffc');
+      print('date: $apiDay');
+      print('month: $apiMonth');
+      print('session: $selectedSession');
+      print('cashchequevalue: $apiPaymentMode');
+      print('studentfeesoftware: $feeSoftware');
+      print('reporttype: $apiReportType');
     }
 
     if (context.mounted) {
@@ -620,7 +627,7 @@ class _StaffFeeReportPageState extends State<StaffFeeReportPage> {
         login: widget.staff.name ?? "", // Match Postman login field
         password: widget.staff.password ?? "", // Match Postman password field
         session: selectedSession,
-        reportType: selectedReportType,
+        reportType: apiReportType, // Use normalized value
         paymentMode: apiPaymentMode,
         day: apiDay,
         month: apiMonth,
