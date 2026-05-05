@@ -57,5 +57,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library to let you upload and save photos for your entries and profile.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires access to your camera to let you take photos directly for your  entries and profile.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires access to your microphone to let you record audio for your entries.</string>
 </dict>
 </plist>
